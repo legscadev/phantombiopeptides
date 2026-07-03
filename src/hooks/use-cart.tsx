@@ -75,7 +75,6 @@ export function CartProvider({
           addToCartAction(productId, quantity, variation),
         );
         toast.success("Added to cart");
-        setIsDrawerOpen(true);
       },
       updateItem: async (key, quantity) => {
         await withLoading(() => updateCartItemAction(key, quantity));
