@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { CategoriesService } from "@/services/categories";
 import { ProductsService } from "@/services/products";
@@ -6,10 +7,11 @@ import { ProductSort } from "@/components/product/product-sort";
 import { ProductFilters } from "@/components/product/product-filters";
 import { Pagination } from "@/components/product/pagination";
 import { Breadcrumb } from "@/components/common/breadcrumb";
+import { Skeleton } from "@/components/ui/skeleton";
 import { buildMetadata } from "@/lib/seo";
 import { parseProductSearchParams } from "@/lib/parse-search";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -38,15 +40,11 @@ export async function generateMetadata({ params }: Props) {
 }
 
 export default async function CategoryPage({ params, searchParams }: Props) {
-  const [{ slug }, sp] = await Promise.all([params, searchParams]);
-  const parsed = parseProductSearchParams(sp);
+  const { slug } = await params;
   const category = await CategoriesService.getBySlug(slug);
   if (!category) notFound();
 
-  const [{ data, totalPages, totalItems, page }, categories] = await Promise.all([
-    ProductsService.list({ ...parsed, category: category.slug }),
-    CategoriesService.list(),
-  ]);
+  const categories = await CategoriesService.list();
 
   return (
     <div className="container-page py-10 md:py-14">
@@ -67,7 +65,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
             {category.name}
           </h1>
           <p className="mt-2 max-w-2xl text-muted-foreground">
-            {category.description || `${totalItems} compounds available.`}
+            {category.description || `${category.count ?? 0} compounds available.`}
           </p>
         </div>
         <ProductSort />
@@ -80,12 +78,52 @@ export default async function CategoryPage({ params, searchParams }: Props) {
           className="hidden lg:block"
         />
         <div>
-          <ProductGrid products={data} priorityCount={4} />
-          <div className="mt-12">
-            <Pagination page={page} totalPages={totalPages} />
-          </div>
+          <Suspense fallback={<GridSkeleton />}>
+            <FilteredProducts
+              categorySlug={category.slug}
+              searchParams={searchParams}
+            />
+          </Suspense>
         </div>
       </div>
+    </div>
+  );
+}
+
+async function FilteredProducts({
+  categorySlug,
+  searchParams,
+}: {
+  categorySlug: string;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const sp = await searchParams;
+  const parsed = parseProductSearchParams(sp);
+  const { data, totalPages, page } = await ProductsService.list({
+    ...parsed,
+    category: categorySlug,
+  });
+
+  return (
+    <>
+      <ProductGrid products={data} priorityCount={4} />
+      <div className="mt-12">
+        <Pagination page={page} totalPages={totalPages} />
+      </div>
+    </>
+  );
+}
+
+function GridSkeleton() {
+  return (
+    <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      {Array.from({ length: 8 }).map((_, i) => (
+        <div key={i} className="space-y-3">
+          <Skeleton className="aspect-square" />
+          <Skeleton className="h-4 w-2/3" />
+          <Skeleton className="h-4 w-1/3" />
+        </div>
+      ))}
     </div>
   );
 }
