@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { Logo } from "./logo";
-import { NewsletterForm } from "@/components/marketing/newsletter-form";
 import type { WCCategory } from "@/types";
 
 interface FooterProps {
@@ -55,7 +54,6 @@ export function Footer({ categories = [] }: FooterProps) {
               Premium research peptides delivered with third-party testing and
               reliable fulfillment. For laboratory research use only.
             </p>
-            <NewsletterForm variant="footer" />
           </div>
           {columns.map((col) => (
             <div key={col.title}>
