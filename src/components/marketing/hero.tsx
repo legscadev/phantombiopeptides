@@ -126,31 +126,31 @@ export function Hero() {
           </dl>
         </motion.div>
 
-        {/* RIGHT — overlapping hero vials */}
+        {/* RIGHT — two overlapping hero vials, angled */}
         <motion.div
           initial={{ opacity: 0, scale: 0.96 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 1.2, delay: 0.25, ease: EASE }}
-          className="relative hidden lg:block lg:min-h-[560px]"
+          className="relative mx-auto hidden aspect-square w-full max-w-[560px] lg:block"
         >
-          {/* Glow halo behind the vials */}
+          {/* Glow halo behind the vial pair */}
           <div
-            className="absolute inset-0 -m-10 blur-[120px] opacity-60"
+            className="absolute inset-0 -m-8 blur-[110px] opacity-65"
             style={{
               background:
-                "radial-gradient(circle at 55% 45%, hsl(264 100% 55%) 0%, transparent 65%)",
+                "radial-gradient(circle at 50% 55%, hsl(264 100% 55%) 0%, transparent 65%)",
             }}
             aria-hidden
           />
 
-          {/* Back vial */}
+          {/* Back vial — Tirzepatide, tilted right, upper-right */}
           <motion.div
-            initial={{ opacity: 0, y: 30, rotate: 12 }}
-            animate={{ opacity: 1, y: 0, rotate: 12 }}
+            initial={{ opacity: 0, y: 30, rotate: 8 }}
+            animate={{ opacity: 1, y: 0, rotate: 8 }}
             transition={{ duration: 1, delay: 0.4, ease: EASE }}
-            className="animate-float absolute right-[8%] top-[4%] w-[52%]"
+            className="animate-float absolute right-[4%] top-[2%] w-[70%]"
             style={{
-              animationDelay: "1s",
+              animationDelay: "1.2s",
               animationDuration: "9s",
             }}
           >
@@ -160,21 +160,19 @@ export function Hero() {
                 alt={HERO_VIALS[0].alt}
                 fill
                 priority
-                sizes="(min-width: 1280px) 320px, 260px"
-                className="object-contain drop-shadow-[0_30px_50px_rgba(0,0,0,0.55)]"
+                sizes="(min-width: 1280px) 380px, 300px"
+                className="object-contain drop-shadow-[0_30px_50px_rgba(0,0,0,0.6)]"
               />
             </div>
           </motion.div>
 
-          {/* Front vial */}
+          {/* Front vial — GLP-3, tilted left, lower-left, larger */}
           <motion.div
-            initial={{ opacity: 0, y: 40, rotate: -8 }}
-            animate={{ opacity: 1, y: 0, rotate: -8 }}
+            initial={{ opacity: 0, y: 50, rotate: -14 }}
+            animate={{ opacity: 1, y: 0, rotate: -14 }}
             transition={{ duration: 1, delay: 0.55, ease: EASE }}
-            className="animate-float absolute left-[6%] bottom-[2%] w-[62%]"
-            style={{
-              animationDuration: "8s",
-            }}
+            className="animate-float absolute bottom-[2%] left-[2%] w-[78%]"
+            style={{ animationDuration: "8s" }}
           >
             <div className="relative aspect-square">
               <Image
@@ -182,8 +180,8 @@ export function Hero() {
                 alt={HERO_VIALS[1].alt}
                 fill
                 priority
-                sizes="(min-width: 1280px) 400px, 320px"
-                className="object-contain drop-shadow-[0_40px_60px_rgba(0,0,0,0.6)]"
+                sizes="(min-width: 1280px) 440px, 340px"
+                className="object-contain drop-shadow-[0_45px_60px_rgba(0,0,0,0.7)]"
               />
             </div>
           </motion.div>
