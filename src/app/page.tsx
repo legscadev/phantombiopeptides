@@ -39,12 +39,13 @@ export default async function HomePage() {
     ProductsService.list({
       orderby: "popularity",
       order: "desc",
-      per_page: 4,
+      per_page: 8,
     }).catch(() => emptyList),
     CategoriesService.list().catch(() => []),
   ]);
   const popular = popularResult.data;
-  const heroVials = (featured.length > 0 ? featured : popular).slice(0, 6);
+  const bestsellers = featured.length > 0 ? featured : popular;
+  const heroVials = bestsellers.slice(0, 6);
 
   return (
     <>
@@ -62,7 +63,7 @@ export default async function HomePage() {
           </Button>
         }
       >
-        <ProductGrid products={featured.slice(0, 8)} priorityCount={4} />
+        <ProductGrid products={bestsellers.slice(0, 8)} priorityCount={4} />
       </Section>
 
       <Guarantee />
