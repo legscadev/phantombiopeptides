@@ -34,8 +34,14 @@ export const CategoriesService = {
     return arraySchema.parse(data)[0] ?? null;
   },
 
+  /**
+   * Slugs to pre-render at build time. Only includes categories with
+   * at least one product — empty categories fall through to on-demand
+   * rendering so the build doesn't fire many parallel Woo fetches
+   * (which trips WordPress.com's 429 rate limit).
+   */
   async getAllSlugs(): Promise<string[]> {
     const list = await this.list();
-    return list.map((c) => c.slug);
+    return list.filter((c) => (c.count ?? 0) > 0).map((c) => c.slug);
   },
 };

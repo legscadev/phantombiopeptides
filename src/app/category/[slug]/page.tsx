@@ -42,10 +42,10 @@ export async function generateMetadata({ params }: Props) {
 
 export default async function CategoryPage({ params, searchParams }: Props) {
   const { slug } = await params;
-  const category = await CategoriesService.getBySlug(slug);
+  const category = await CategoriesService.getBySlug(slug).catch(() => null);
   if (!category) notFound();
 
-  const categories = await CategoriesService.list();
+  const categories = await CategoriesService.list().catch(() => []);
 
   return (
     <div className="container-page py-16 md:py-24">
