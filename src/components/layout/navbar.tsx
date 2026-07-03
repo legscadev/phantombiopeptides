@@ -20,6 +20,7 @@ import type { WCCategory } from "@/types";
 
 interface NavbarProps {
   categories?: WCCategory[];
+  isSignedIn?: boolean;
 }
 
 const STATIC_NAV = [
@@ -30,7 +31,7 @@ const STATIC_NAV = [
   { href: "/faq", label: "FAQ" },
 ];
 
-export function Navbar({ categories = [] }: NavbarProps) {
+export function Navbar({ categories = [], isSignedIn = false }: NavbarProps) {
   const pathname = usePathname();
   const { itemCount, openDrawer } = useCart();
   const [scrolled, setScrolled] = React.useState(false);
@@ -102,10 +103,10 @@ export function Navbar({ categories = [] }: NavbarProps) {
               variant="ghost"
               size="icon"
               className="hidden md:inline-flex"
-              aria-label="Account"
+              aria-label={isSignedIn ? "Account" : "Sign in"}
               asChild
             >
-              <Link href="/account">
+              <Link href={isSignedIn ? "/account" : "/login"}>
                 <User2 className="h-4 w-4" />
               </Link>
             </Button>
