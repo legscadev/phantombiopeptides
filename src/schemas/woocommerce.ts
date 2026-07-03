@@ -32,7 +32,9 @@ export const wcAttributeSchema = z.object({
 
 export const wcMetaSchema = z.object({
   key: z.string(),
-  value: z.union([z.string(), z.number(), z.boolean(), z.null()]).optional(),
+  // Woo meta values are user-defined and can be strings, numbers,
+  // booleans, arrays, or nested objects — accept anything.
+  value: z.unknown(),
 });
 
 export const wcProductSchema = z.object({
