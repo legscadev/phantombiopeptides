@@ -6,11 +6,9 @@ import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { currentPromo } from "@/lib/promo";
-import type { WCProduct } from "@/types";
 
-interface HeroProps {
-  vials: WCProduct[];
-}
+const HERO_VIAL_SRC =
+  "https://i0.wp.com/kickbackai-pkjdo.wpcomstaging.com/wp-content/uploads/2026/06/28.png?w=1600&ssl=1";
 
 const BADGES = [
   { n: "99%", label: "Purity" },
@@ -21,21 +19,7 @@ const BADGES = [
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
-// Right-column vial positions (from front-most, slightly angled, floating).
-const VIAL_POSITIONS = [
-  { top: "8%", right: "26%", w: "58%", rotate: -6, delay: 0.35, dur: 8 },
-  { top: "0%", right: "-2%", w: "60%", rotate: 8, delay: 0.5, dur: 9 },
-];
-
-export function Hero({ vials }: HeroProps) {
-  const heroVials = vials
-    .slice(0, 4)
-    .map((v) => ({ id: v.id, image: v.images[0] }))
-    .filter((v): v is { id: number; image: NonNullable<typeof v.image> } =>
-      Boolean(v.image),
-    )
-    .slice(0, 2);
-
+export function Hero() {
   return (
     <section className="relative overflow-hidden bg-[#07040e] text-white">
       {/* Background: layered violet glow + faint grid */}
@@ -70,7 +54,7 @@ export function Hero({ vials }: HeroProps) {
         </svg>
       </div>
 
-      <div className="container-page relative z-10 grid gap-12 py-16 md:py-24 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 lg:py-32">
+      <div className="container-page relative z-10 grid gap-12 py-16 md:py-24 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16 lg:py-32">
         {/* LEFT — copy */}
         <motion.div
           initial={{ opacity: 0, y: 24 }}
@@ -132,88 +116,38 @@ export function Hero({ vials }: HeroProps) {
           </dl>
         </motion.div>
 
-        {/* RIGHT — angled vials */}
+        {/* RIGHT — hero vial */}
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1.2, delay: 0.3, ease: EASE }}
-          className="relative hidden min-h-[520px] lg:block"
+          initial={{ opacity: 0, scale: 0.96 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 1.2, delay: 0.25, ease: EASE }}
+          className="relative hidden lg:flex lg:items-center lg:justify-center"
         >
-          {/* Glow halo */}
+          {/* Glow halo behind the vial */}
           <div
-            className="absolute inset-0 blur-[110px] opacity-45"
+            className="absolute inset-0 -m-10 blur-[110px] opacity-55"
             style={{
               background:
-                "radial-gradient(circle at 60% 50%, hsl(264 100% 55%) 0%, transparent 65%)",
+                "radial-gradient(circle at 50% 50%, hsl(264 100% 55%) 0%, transparent 65%)",
             }}
             aria-hidden
           />
-
-          {heroVials.length === 0 ? null : heroVials.length === 1 ? (
-            <SingleVial image={heroVials[0].image} />
-          ) : (
-            <>
-              {heroVials.map((v, i) => {
-                const cfg = VIAL_POSITIONS[i] ?? VIAL_POSITIONS[0];
-                return (
-                  <motion.div
-                    key={v.id}
-                    initial={{ opacity: 0, y: 40, rotate: cfg.rotate }}
-                    animate={{ opacity: 1, y: 0, rotate: cfg.rotate }}
-                    transition={{
-                      duration: 1,
-                      delay: cfg.delay,
-                      ease: EASE,
-                    }}
-                    className="animate-float absolute"
-                    style={{
-                      top: cfg.top,
-                      right: cfg.right,
-                      width: cfg.w,
-                      animationDelay: `${cfg.delay * 2}s`,
-                      animationDuration: `${cfg.dur}s`,
-                    }}
-                  >
-                    <div className="relative aspect-[3/4]">
-                      <Image
-                        src={v.image.src}
-                        alt=""
-                        fill
-                        priority={i === 0}
-                        sizes="(min-width: 1280px) 420px, 320px"
-                        className="object-contain drop-shadow-[0_40px_60px_rgba(0,0,0,0.55)]"
-                      />
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </>
-          )}
+          <motion.div
+            animate={{ y: [0, -18, 0] }}
+            transition={{ duration: 7, ease: "easeInOut", repeat: Infinity }}
+            className="relative aspect-square w-full max-w-[520px]"
+          >
+            <Image
+              src={HERO_VIAL_SRC}
+              alt="GLP-3 (Rt) 20 mg — Phantom Bio Labs"
+              fill
+              priority
+              sizes="(min-width: 1280px) 520px, 400px"
+              className="object-contain drop-shadow-[0_40px_60px_rgba(0,0,0,0.55)]"
+            />
+          </motion.div>
         </motion.div>
       </div>
     </section>
-  );
-}
-
-function SingleVial({
-  image,
-}: {
-  image: { src: string; alt: string };
-}) {
-  return (
-    <motion.div
-      animate={{ y: [0, -18, 0] }}
-      transition={{ duration: 7, ease: "easeInOut", repeat: Infinity }}
-      className="relative mx-auto aspect-[3/4] w-full max-w-md"
-    >
-      <Image
-        src={image.src}
-        alt={image.alt || ""}
-        fill
-        priority
-        sizes="(min-width: 1280px) 480px, 360px"
-        className="object-contain drop-shadow-[0_40px_60px_rgba(0,0,0,0.55)]"
-      />
-    </motion.div>
   );
 }

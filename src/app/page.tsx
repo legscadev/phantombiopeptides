@@ -46,11 +46,10 @@ export default async function HomePage() {
   ]);
   const popular = popularResult.data;
   const bestsellers = featured.length > 0 ? featured : popular;
-  const heroVials = bestsellers.slice(0, 6);
 
   return (
     <>
-      <Hero vials={heroVials} />
+      <Hero />
 
       <Reveal>
         <Section
