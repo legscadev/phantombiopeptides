@@ -58,8 +58,13 @@ function normalizeCartPrices(cart: WCCart): WCCart {
  */
 
 const CART_COOKIE = "pl_cart_token";
+const NONCE_COOKIE = "pl_cart_nonce";
+const NONCE_TS_COOKIE = "pl_cart_nonce_ts";
 const MOCK_CART_COOKIE = "pl_mock_cart";
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 30;
+// Woo's Store API nonce is good for roughly 12h. Refresh a little
+// before that to leave headroom for the request in flight.
+const NONCE_MAX_AGE_SECONDS = 10 * 60 * 60;
 
 interface MockCartItem {
   id: number;
@@ -139,26 +144,94 @@ async function readMockItems(): Promise<MockCartItem[]> {
 }
 
 /**
- * Store API is unauthenticated but session-bound: the server issues a
- * `Cart-Token` on the first response, and each subsequent request must
- * echo it in the `Cart-Token` request header. We persist the current
- * token in an httpOnly cookie so the guest session survives requests.
+ * Store API is session-bound: the server issues a `Cart-Token` on the
+ * first response, and each subsequent request echoes it back in the
+ * `Cart-Token` request header. State-changing endpoints (POST/PUT/DELETE)
+ * additionally require a `Nonce` header for CSRF protection — Woo emits
+ * a fresh nonce on every response, so we capture it in a cookie and
+ * echo it on the next call.
+ *
+ * The nonce is only issued on requests that reach the Store API, so the
+ * bootstrap flow for a brand-new guest is:
+ *   1. GET /cart  → sets Cart-Token + Nonce cookies
+ *   2. POST /cart/add-item with both headers → succeeds
+ * `ensureNonce` transparently handles step 1 when a write is attempted
+ * with no valid nonce cached.
  */
+async function persistCartCookies(
+  res: Response,
+  currentToken: string | undefined,
+) {
+  const store = await cookies();
+  const cookieOpts = {
+    httpOnly: true,
+    sameSite: "lax" as const,
+    path: "/",
+    secure: process.env.NODE_ENV === "production",
+  };
+  const newToken =
+    res.headers.get("cart-token") ?? res.headers.get("Cart-Token");
+  if (newToken && newToken !== currentToken) {
+    store.set(CART_COOKIE, newToken, { ...cookieOpts, maxAge: COOKIE_MAX_AGE });
+  }
+  const nonce = res.headers.get("nonce") ?? res.headers.get("Nonce");
+  const nonceTs =
+    res.headers.get("nonce-timestamp") ?? res.headers.get("Nonce-Timestamp");
+  if (nonce) {
+    store.set(NONCE_COOKIE, nonce, {
+      ...cookieOpts,
+      maxAge: NONCE_MAX_AGE_SECONDS,
+    });
+    if (nonceTs) {
+      store.set(NONCE_TS_COOKIE, nonceTs, {
+        ...cookieOpts,
+        maxAge: NONCE_MAX_AGE_SECONDS,
+      });
+    }
+  }
+}
+
+function isWriteMethod(method?: string) {
+  const m = (method ?? "GET").toUpperCase();
+  return m === "POST" || m === "PUT" || m === "PATCH" || m === "DELETE";
+}
+
 async function storeApiCall<T>(
   path: string,
-  init: RequestInit & { revalidate?: false } = {},
+  init: RequestInit & { revalidate?: false; _retried?: boolean } = {},
 ): Promise<T> {
   if (!env.WC_STORE_URL) {
     throw new WooError("WC_STORE_URL is not configured.", 500);
   }
   const store = await cookies();
+
+  // For write requests, make sure we have a nonce first. If we don't,
+  // do a lightweight preflight GET /cart to bootstrap the session.
+  if (isWriteMethod(init.method) && path !== "/cart") {
+    const cachedNonce = store.get(NONCE_COOKIE)?.value;
+    const cachedTs = parseInt(
+      store.get(NONCE_TS_COOKIE)?.value ?? "0",
+      10,
+    );
+    const now = Math.floor(Date.now() / 1000);
+    const nonceExpired =
+      !cachedNonce ||
+      !cachedTs ||
+      now - cachedTs >= NONCE_MAX_AGE_SECONDS;
+    if (nonceExpired) {
+      await storeApiCall<unknown>("/cart", { method: "GET" });
+    }
+  }
+
   const token = store.get(CART_COOKIE)?.value;
+  const nonce = store.get(NONCE_COOKIE)?.value;
   const headers: Record<string, string> = {
     Accept: "application/json",
     "Content-Type": "application/json",
     ...(init.headers as Record<string, string> | undefined),
   };
   if (token) headers["Cart-Token"] = token;
+  if (nonce) headers["Nonce"] = nonce;
 
   const url = `${env.WC_STORE_URL.replace(/\/$/, "")}/wp-json/${env.WC_STORE_API_VERSION}${path}`;
   const res = await fetch(url, {
@@ -167,23 +240,20 @@ async function storeApiCall<T>(
     cache: "no-store",
   });
 
-  const newToken = res.headers.get("cart-token") ?? res.headers.get("Cart-Token");
-  if (newToken && newToken !== token) {
-    store.set(CART_COOKIE, newToken, {
-      httpOnly: true,
-      sameSite: "lax",
-      path: "/",
-      maxAge: COOKIE_MAX_AGE,
-      secure: process.env.NODE_ENV === "production",
-    });
-  }
+  await persistCartCookies(res, token);
 
   if (!res.ok) {
-    let detail = "";
-    try {
-      detail = await res.text();
-    } catch {
-      /* ignore */
+    const detail = await res.text().catch(() => "");
+    // If a write failed because the nonce is stale, refresh it and
+    // retry exactly once.
+    if (
+      res.status === 401 &&
+      !init._retried &&
+      isWriteMethod(init.method) &&
+      /nonce/i.test(detail)
+    ) {
+      await storeApiCall<unknown>("/cart", { method: "GET" });
+      return storeApiCall<T>(path, { ...init, _retried: true });
     }
     throw new WooError(
       `Store API ${path} failed: ${res.status} ${res.statusText}`,
