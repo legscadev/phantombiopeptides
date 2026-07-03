@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ShoppingBag, Star } from "lucide-react";
+import { ShoppingBag, Star, ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useCart } from "@/hooks/use-cart";
 import { calculateDiscount, cn, formatPrice } from "@/lib/utils";
@@ -116,20 +116,34 @@ export function ProductCard({ product, priority, className }: ProductCardProps) 
               </span>
             )}
           </div>
-          <button
-            type="button"
-            disabled={outOfStock || isLoading}
-            onClick={() => addItem(product.id, 1)}
-            className={cn(
-              "inline-flex h-9 items-center justify-center gap-1.5 rounded-md bg-primary px-3 text-xs font-semibold uppercase tracking-wider text-primary-foreground transition-all",
-              "hover:brightness-110",
-              "disabled:opacity-40",
-            )}
-            aria-label={`Add ${product.name} to cart`}
-          >
-            <ShoppingBag className="h-3.5 w-3.5" />
-            Add
-          </button>
+          {product.type === "variable" ? (
+            <Link
+              href={`/product/${product.slug}`}
+              className={cn(
+                "inline-flex h-9 items-center justify-center gap-1.5 rounded-md bg-primary px-3 text-xs font-semibold uppercase tracking-wider text-primary-foreground transition-all",
+                "hover:brightness-110",
+              )}
+              aria-label={`Choose options for ${product.name}`}
+            >
+              Options
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          ) : (
+            <button
+              type="button"
+              disabled={outOfStock || isLoading}
+              onClick={() => addItem(product.id, 1)}
+              className={cn(
+                "inline-flex h-9 items-center justify-center gap-1.5 rounded-md bg-primary px-3 text-xs font-semibold uppercase tracking-wider text-primary-foreground transition-all",
+                "hover:brightness-110",
+                "disabled:opacity-40",
+              )}
+              aria-label={`Add ${product.name} to cart`}
+            >
+              <ShoppingBag className="h-3.5 w-3.5" />
+              Add
+            </button>
+          )}
         </div>
       </div>
     </motion.article>

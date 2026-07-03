@@ -271,7 +271,11 @@ export const CartService = {
     return normalizeCartPrices(wcCartSchema.parse(data));
   },
 
-  async addItem(productId: number, quantity = 1): Promise<WCCart> {
+  async addItem(
+    productId: number,
+    quantity = 1,
+    variation?: Array<{ attribute: string; value: string }>,
+  ): Promise<WCCart> {
     if (shouldUseMocks()) {
       const items = await readMockItems();
       const existing = items.find((i) => i.id === productId);
@@ -280,9 +284,11 @@ export const CartService = {
       await writeMockCart(items);
       return readMockCart();
     }
+    const payload: Record<string, unknown> = { id: productId, quantity };
+    if (variation && variation.length > 0) payload.variation = variation;
     const data = await storeApiCall<unknown>("/cart/add-item", {
       method: "POST",
-      body: JSON.stringify({ id: productId, quantity }),
+      body: JSON.stringify(payload),
     });
     return normalizeCartPrices(wcCartSchema.parse(data));
   },

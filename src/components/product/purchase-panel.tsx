@@ -17,6 +17,18 @@ export function PurchasePanel({ product }: { product: WCProduct }) {
   const [dose, setDose] = React.useState(doses[0] ?? "");
 
   const outOfStock = product.stock_status === "outofstock";
+  const isVariable = product.type === "variable";
+  // Variable products need the customer's variation selection; block the
+  // button until they've picked one.
+  const missingDose = isVariable && doses.length > 1 && !dose;
+
+  const handleAdd = () => {
+    const variation =
+      isVariable && doseAttr && dose
+        ? [{ attribute: doseAttr.name, value: dose }]
+        : undefined;
+    return addItem(product.id, 1, variation);
+  };
 
   return (
     <div className="space-y-6">
@@ -32,8 +44,8 @@ export function PurchasePanel({ product }: { product: WCProduct }) {
       <div className="flex items-center gap-2">
         <Button
           size="lg"
-          disabled={outOfStock || isLoading}
-          onClick={() => addItem(product.id, 1)}
+          disabled={outOfStock || isLoading || missingDose}
+          onClick={handleAdd}
           className="flex-1"
         >
           {isLoading ? (

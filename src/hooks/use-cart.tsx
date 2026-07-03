@@ -20,7 +20,11 @@ interface CartContextValue {
   openDrawer: () => void;
   closeDrawer: () => void;
   refresh: () => Promise<void>;
-  addItem: (productId: number, quantity?: number) => Promise<void>;
+  addItem: (
+    productId: number,
+    quantity?: number,
+    variation?: Array<{ attribute: string; value: string }>,
+  ) => Promise<void>;
   updateItem: (key: string, quantity: number) => Promise<void>;
   removeItem: (key: string) => Promise<void>;
   applyCoupon: (code: string) => Promise<void>;
@@ -66,8 +70,10 @@ export function CartProvider({
           const next = await getCartAction();
           return next;
         }),
-      addItem: async (productId, quantity = 1) => {
-        await withLoading(() => addToCartAction(productId, quantity));
+      addItem: async (productId, quantity = 1, variation) => {
+        await withLoading(() =>
+          addToCartAction(productId, quantity, variation),
+        );
         toast.success("Added to cart");
         setIsDrawerOpen(true);
       },

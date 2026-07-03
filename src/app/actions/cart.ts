@@ -7,8 +7,9 @@ import type { WCCart } from "@/types";
 export async function addToCartAction(
   productId: number,
   quantity = 1,
+  variation?: Array<{ attribute: string; value: string }>,
 ): Promise<WCCart> {
-  const cart = await CartService.addItem(productId, quantity);
+  const cart = await CartService.addItem(productId, quantity, variation);
   revalidatePath("/cart");
   return cart;
 }
