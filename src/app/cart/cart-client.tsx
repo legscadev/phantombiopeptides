@@ -1,19 +1,16 @@
 "use client";
 
-import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Minus, Plus, Trash2, Tag, ArrowRight, Loader2 } from "lucide-react";
+import { Minus, Plus, Trash2, ArrowRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { useCart } from "@/hooks/use-cart";
 import { formatPrice } from "@/lib/utils";
 import type { WCCart } from "@/types";
 
 export function CartPageClient({ initialCart }: { initialCart: WCCart }) {
-  const { cart, updateItem, removeItem, applyCoupon, isLoading } = useCart();
-  const [coupon, setCoupon] = React.useState("");
+  const { cart, updateItem, removeItem, isLoading } = useCart();
   const current = cart ?? initialCart;
   const currency = current.totals.currency_code;
 
@@ -114,34 +111,6 @@ export function CartPageClient({ initialCart }: { initialCart: WCCart }) {
           <div className="flex justify-between text-base font-semibold text-foreground">
             <span>Total</span>
             <span>{formatPrice(current.totals.total_price, currency)}</span>
-          </div>
-        </div>
-
-        <div className="mt-6">
-          <label
-            htmlFor="coupon"
-            className="mb-2 flex items-center gap-2 text-xs uppercase tracking-widest text-muted-foreground"
-          >
-            <Tag className="h-3 w-3" />
-            Discount code
-          </label>
-          <div className="flex gap-2">
-            <Input
-              id="coupon"
-              placeholder="Enter code"
-              value={coupon}
-              onChange={(e) => setCoupon(e.target.value)}
-            />
-            <Button
-              variant="secondary"
-              disabled={!coupon.trim() || isLoading}
-              onClick={() => {
-                applyCoupon(coupon.trim());
-                setCoupon("");
-              }}
-            >
-              Apply
-            </Button>
           </div>
         </div>
 
