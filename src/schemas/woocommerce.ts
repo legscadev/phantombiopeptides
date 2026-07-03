@@ -1,22 +1,34 @@
 import { z } from "zod";
+import { decodeHtmlEntities } from "@/lib/utils";
 
 /**
  * Zod schemas mirroring WooCommerce REST v3 + Store API v1.
  * Kept loose (nullable/optional) where Woo's own responses vary.
+ *
+ * WooCommerce REST returns HTML-encoded strings for titles/descriptions
+ * (e.g. "Cognitive &amp; Mood"). We decode entities at parse time so
+ * downstream React rendering doesn't double-encode them into "&amp;amp;".
  */
+
+const decodedString = z.string().transform(decodeHtmlEntities);
+const decodedStringOptional = z
+  .string()
+  .optional()
+  .default("")
+  .transform((s) => decodeHtmlEntities(s ?? ""));
 
 export const wcImageSchema = z.object({
   id: z.number().optional(),
   src: z.string(),
-  name: z.string().optional().default(""),
-  alt: z.string().optional().default(""),
+  name: decodedStringOptional,
+  alt: decodedStringOptional,
 });
 
 export const wcCategorySchema = z.object({
   id: z.number(),
-  name: z.string(),
+  name: decodedString,
   slug: z.string(),
-  description: z.string().optional().default(""),
+  description: decodedStringOptional,
   count: z.number().optional().default(0),
   image: wcImageSchema.nullable().optional(),
   parent: z.number().optional().default(0),
@@ -39,7 +51,7 @@ export const wcMetaSchema = z.object({
 
 export const wcProductSchema = z.object({
   id: z.number(),
-  name: z.string(),
+  name: decodedString,
   slug: z.string(),
   permalink: z.string().optional().default(""),
   type: z
@@ -47,8 +59,14 @@ export const wcProductSchema = z.object({
     .default("simple"),
   status: z.string().default("publish"),
   featured: z.boolean().default(false),
-  description: z.string().default(""),
-  short_description: z.string().default(""),
+  description: z
+    .string()
+    .default("")
+    .transform((s) => decodeHtmlEntities(s ?? "")),
+  short_description: z
+    .string()
+    .default("")
+    .transform((s) => decodeHtmlEntities(s ?? "")),
   sku: z.string().optional().default(""),
   price: z.string().default("0"),
   regular_price: z.string().default("0"),
@@ -63,8 +81,11 @@ export const wcProductSchema = z.object({
     .array(
       z.object({
         id: z.number(),
-        name: z.string(),
+        name: decodedString,
         slug: z.string(),
+        // Inner category descriptions aren't rendered anywhere on the
+        // frontend, so leave as an optional plain string to avoid
+        // widening the required-field surface via zod transform.
         description: z.string().optional(),
         count: z.number().optional(),
         parent: z.number().optional(),
@@ -73,7 +94,7 @@ export const wcProductSchema = z.object({
     )
     .default([]),
   tags: z
-    .array(z.object({ id: z.number(), name: z.string(), slug: z.string() }))
+    .array(z.object({ id: z.number(), name: decodedString, slug: z.string() }))
     .default([]),
   images: z.array(wcImageSchema).default([]),
   attributes: z.array(wcAttributeSchema).default([]),

@@ -11,11 +11,15 @@ export const CategoriesService = {
   async list(): Promise<WCCategory[]> {
     if (shouldUseMocks()) return mockCategories;
     const data = await wc<WCCategory[]>("/products/categories", {
-      query: { per_page: 100, hide_empty: true },
+      query: { per_page: 100, hide_empty: false },
       revalidate: 600,
       tags: ["categories:all"],
     });
-    return arraySchema.parse(data);
+    // Drop Woo's default "Uncategorized" bucket — it exists on every
+    // store but isn't something a customer should ever click.
+    return arraySchema
+      .parse(data)
+      .filter((c) => c.slug !== "uncategorized");
   },
 
   async getBySlug(slug: string): Promise<WCCategory | null> {
