@@ -10,6 +10,7 @@ const nextConfig: NextConfig = {
       // WooCommerce media on the origin & Jetpack Photon CDN
       { protocol: "https", hostname: "phantombiopeptides.com" },
       { protocol: "https", hostname: "admin.phantombiopeptides.com" },
+      { protocol: "https", hostname: "kickbackai-pkjdo.wpcomstaging.com" },
       { protocol: "https", hostname: "i0.wp.com" },
       { protocol: "https", hostname: "i1.wp.com" },
       { protocol: "https", hostname: "i2.wp.com" },
