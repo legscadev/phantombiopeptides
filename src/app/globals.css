@@ -58,15 +58,19 @@
     --surface-light: 0 0% 100%;
     --surface-light-fg: 0 0% 10%;
 
-    /* Stat card variants (dark + violet alternating) */
-    --pastel-mint: 264 100% 30%;
-    --pastel-mint-fg: 0 0% 100%;
-    --pastel-blue: 0 0% 6%;
-    --pastel-blue-fg: 0 0% 100%;
-    --pastel-pink: 264 100% 30%;
-    --pastel-pink-fg: 0 0% 100%;
-    --pastel-gold: 0 0% 6%;
-    --pastel-gold-fg: 0 0% 100%;
+    /* Violet-family accent surfaces — replaces EVO's mint/pink/blue
+       pastels with variants in Phantom Bio's palette so the site keeps
+       the same visual variety without leaving the brand. */
+    --tint-violet: 264 100% 30%;         /* solid violet #42009b */
+    --tint-violet-fg: 0 0% 100%;
+    --tint-violet-deep: 262 80% 16%;     /* deep #1e0339 */
+    --tint-violet-deep-fg: 264 80% 88%;
+    --tint-violet-muted: 262 30% 12%;    /* muted #1a0f24 */
+    --tint-violet-muted-fg: 264 60% 92%;
+    --tint-magenta: 300 66% 26%;         /* magenta violet */
+    --tint-magenta-fg: 0 0% 100%;
+    --tint-indigo: 245 66% 24%;          /* cool indigo */
+    --tint-indigo-fg: 0 0% 100%;
 
     --card: 0 0% 6%;
     --card-foreground: 0 0% 98%;
@@ -108,14 +112,16 @@
   --color-surface-light: hsl(var(--surface-light));
   --color-surface-light-fg: hsl(var(--surface-light-fg));
 
-  --color-pastel-mint: hsl(var(--pastel-mint));
-  --color-pastel-mint-fg: hsl(var(--pastel-mint-fg));
-  --color-pastel-blue: hsl(var(--pastel-blue));
-  --color-pastel-blue-fg: hsl(var(--pastel-blue-fg));
-  --color-pastel-pink: hsl(var(--pastel-pink));
-  --color-pastel-pink-fg: hsl(var(--pastel-pink-fg));
-  --color-pastel-gold: hsl(var(--pastel-gold));
-  --color-pastel-gold-fg: hsl(var(--pastel-gold-fg));
+  --color-tint-violet: hsl(var(--tint-violet));
+  --color-tint-violet-fg: hsl(var(--tint-violet-fg));
+  --color-tint-violet-deep: hsl(var(--tint-violet-deep));
+  --color-tint-violet-deep-fg: hsl(var(--tint-violet-deep-fg));
+  --color-tint-violet-muted: hsl(var(--tint-violet-muted));
+  --color-tint-violet-muted-fg: hsl(var(--tint-violet-muted-fg));
+  --color-tint-magenta: hsl(var(--tint-magenta));
+  --color-tint-magenta-fg: hsl(var(--tint-magenta-fg));
+  --color-tint-indigo: hsl(var(--tint-indigo));
+  --color-tint-indigo-fg: hsl(var(--tint-indigo-fg));
 }
 
 @layer base {

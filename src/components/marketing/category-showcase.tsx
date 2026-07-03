@@ -27,8 +27,9 @@ export function CategoryShowcase({ categories }: { categories: WCCategory[] }) {
             <li key={cat.id} className="w-[260px] shrink-0 sm:w-[300px]">
               <Link
                 href={`/category/${cat.slug}`}
-                className="group flex h-full flex-col overflow-hidden rounded-md border border-border bg-card transition-colors hover:border-primary/40"
+                className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card transition-all hover:border-primary/50 hover:shadow-[0_20px_50px_-15px_hsl(264_100%_40%/0.35)]"
               >
+                <span className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-primary via-fuchsia-500 to-primary" />
                 <div className="relative aspect-[4/5] overflow-hidden bg-background-muted">
                   {cat.image?.src && (
                     <Image
@@ -51,7 +52,13 @@ export function CategoryShowcase({ categories }: { categories: WCCategory[] }) {
                   <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
                     {cat.description || "Research compounds in this category."}
                   </p>
-                  <span className="mt-4 inline-flex w-fit items-center gap-1 rounded-md bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-wider text-primary-foreground">
+                  <span
+                    className="mt-4 inline-flex w-fit items-center gap-1 rounded-md px-4 py-2 text-xs font-semibold uppercase tracking-wider text-white"
+                    style={{
+                      background:
+                        "linear-gradient(135deg, hsl(264 100% 40%) 0%, hsl(280 100% 34%) 100%)",
+                    }}
+                  >
                     View <ArrowUpRight className="h-3 w-3" />
                   </span>
                 </div>

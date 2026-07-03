@@ -4,15 +4,35 @@ import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/common/reveal";
 
 /**
- * "Commitment" — mirrors Phantom's live "Never Sell a Batch Without Proof"
- * layout: pull-quote on the left, 2×2 grid of alternating violet + dark
- * stat cards on the right.
+ * "Never Sell a Batch Without Proof" — pull-quote left, 2×2 grid of
+ * violet-family stat squares right. Mirrors EVO Labs' colored stat
+ * grid using Phantom Bio violet variants.
  */
 const STATS = [
-  { n: "99%+", label: "Avg. purity", tone: "violet" },
-  { n: "100%", label: "Batches tested", tone: "dark" },
-  { n: "Same Day", label: "Fulfilment", tone: "dark" },
-  { n: "Free", label: "Shipping $250+", tone: "violet" },
+  {
+    n: "99%+",
+    label: "Avg. purity",
+    bg: "radial-gradient(120% 100% at 30% 0%, hsl(264 100% 44%) 0%, hsl(264 100% 28%) 100%)",
+    border: "border-primary/50",
+  },
+  {
+    n: "100%",
+    label: "Batches tested",
+    bg: "radial-gradient(120% 100% at 70% 0%, hsl(245 66% 32%) 0%, hsl(245 66% 18%) 100%)",
+    border: "border-indigo-500/40",
+  },
+  {
+    n: "Same Day",
+    label: "Fulfilment",
+    bg: "radial-gradient(120% 100% at 30% 100%, hsl(300 66% 34%) 0%, hsl(300 66% 20%) 100%)",
+    border: "border-fuchsia-500/40",
+  },
+  {
+    n: "Free",
+    label: "Shipping $250+",
+    bg: "radial-gradient(120% 100% at 70% 100%, hsl(280 100% 40%) 0%, hsl(280 90% 24%) 100%)",
+    border: "border-violet-500/40",
+  },
 ];
 
 export function Commitment() {
@@ -48,17 +68,17 @@ export function Commitment() {
               {STATS.map((s) => (
                 <div
                   key={s.label}
-                  className={
-                    s.tone === "violet"
-                      ? "rounded-md bg-primary p-8 text-primary-foreground"
-                      : "rounded-md border border-border bg-card p-8 text-foreground"
-                  }
+                  className={`relative overflow-hidden rounded-2xl border p-8 text-white ${s.border}`}
+                  style={{ background: s.bg }}
                 >
-                  <div className="font-display text-4xl font-bold tracking-tight">
-                    {s.n}
-                  </div>
-                  <div className="mt-2 text-xs uppercase tracking-widest opacity-80">
-                    {s.label}
+                  <div className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
+                  <div className="relative">
+                    <div className="font-display text-4xl font-bold tracking-tight">
+                      {s.n}
+                    </div>
+                    <div className="mt-2 text-xs uppercase tracking-widest opacity-85">
+                      {s.label}
+                    </div>
                   </div>
                 </div>
               ))}

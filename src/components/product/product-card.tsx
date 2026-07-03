@@ -29,7 +29,7 @@ export function ProductCard({ product, priority, className }: ProductCardProps) 
       whileHover={{ y: -4 }}
       transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
       className={cn(
-        "group relative flex flex-col overflow-hidden rounded-md border border-border bg-card transition-colors hover:border-primary/40",
+        "group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card transition-all hover:border-primary/50 hover:shadow-[0_20px_50px_-15px_hsl(264_100%_40%/0.4)]",
         className,
       )}
     >
@@ -105,8 +105,12 @@ export function ProductCard({ product, priority, className }: ProductCardProps) 
             type="button"
             disabled={outOfStock || isLoading}
             onClick={() => addItem(product.id, 1)}
+            style={{
+              background:
+                "linear-gradient(135deg, hsl(264 100% 40%) 0%, hsl(280 100% 34%) 100%)",
+            }}
             className={cn(
-              "inline-flex h-9 items-center justify-center gap-1.5 rounded-md bg-primary px-3 text-xs font-semibold uppercase tracking-wider text-primary-foreground transition-all",
+              "inline-flex h-9 items-center justify-center gap-1.5 rounded-md px-3 text-xs font-semibold uppercase tracking-wider text-white transition-all",
               "hover:brightness-110",
               "disabled:opacity-40",
             )}
