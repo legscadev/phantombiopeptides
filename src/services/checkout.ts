@@ -1,84 +1,123 @@
 import "server-only";
-import { cookies } from "next/headers";
 import { env } from "@/env";
-import { wcCheckoutResponseSchema } from "@/schemas/woocommerce";
-import { WooError } from "./woocommerce";
+import { CartService } from "./cart";
+import { wc, WooError } from "./woocommerce";
 import type { WCAddress, WCCheckoutResponse } from "@/types";
-
-const CART_COOKIE = "pl_cart_token";
-
-interface PaymentDataEntry {
-  key: string;
-  value: string | number | boolean | null;
-}
 
 interface CheckoutInput {
   billing_address: WCAddress;
   shipping_address: WCAddress;
   customer_note?: string;
   payment_method: string;
-  payment_data: PaymentDataEntry[];
+  payment_data: Array<{
+    key: string;
+    value: string | number | boolean | null;
+  }>;
 }
 
 /**
- * POSTs the Woo Store API /checkout endpoint. The Store API creates the
- * order, calls the Stripe gateway plugin server-side, and returns the
- * order + payment_result. Stripe secret keys never touch this codebase —
- * they live on WordPress inside the WooCommerce Stripe plugin.
+ * Post the order to WooCommerce via the authenticated REST /orders
+ * endpoint. We can't use the Store API /checkout endpoint here because
+ * cart persistence isn't reliable on WordPress.com hosting (see the
+ * note in CartService). Instead, we build the order from our locally-
+ * held cart line items and hand it to Woo as an already-composed
+ * order, using the consumer_key/consumer_secret auth that doesn't
+ * depend on a guest session.
+ *
+ * The order is created in the "pending" status. Payment collection
+ * still runs client-side via Stripe (or another gateway) — this
+ * service only records the order and clears the local cart.
  */
 export const CheckoutService = {
   async submit(input: CheckoutInput): Promise<WCCheckoutResponse> {
-    if (!env.WC_STORE_URL) {
-      throw new WooError("WC_STORE_URL is not configured.", 500);
-    }
-    const store = await cookies();
-    const token = store.get(CART_COOKIE)?.value;
-    if (!token) {
+    const cartItems = await CartService.getLineItems();
+    if (cartItems.length === 0) {
       throw new WooError(
-        "No active cart session. Add items to the cart before checking out.",
+        "Your cart is empty. Add items before checking out.",
         400,
       );
     }
 
-    const url = `${env.WC_STORE_URL.replace(/\/$/, "")}/wp-json/${env.WC_STORE_API_VERSION}/checkout`;
-    const res = await fetch(url, {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        "Cart-Token": token,
-      },
-      body: JSON.stringify(input),
-      cache: "no-store",
+    // Extract Stripe payment method ID (if provided) so we can attach it
+    // as an order meta value for later reconciliation.
+    const stripePmId = input.payment_data.find(
+      (d) =>
+        d.key === "wc-stripe-payment-method" || d.key === "stripe_source",
+    )?.value;
+
+    const line_items = cartItems.map((it) => {
+      const meta: Array<{ key: string; value: string }> =
+        it.variation?.map((v) => ({
+          key: v.attribute,
+          value: v.value,
+        })) ?? [];
+      return {
+        product_id: it.id,
+        quantity: it.quantity,
+        meta_data: meta,
+      };
     });
 
-    // Refresh the token if Woo rotates it.
-    const newToken =
-      res.headers.get("cart-token") ?? res.headers.get("Cart-Token");
-    if (newToken && newToken !== token) {
-      store.set(CART_COOKIE, newToken, {
-        httpOnly: true,
-        sameSite: "lax",
-        path: "/",
-        maxAge: 60 * 60 * 24 * 30,
-        secure: process.env.NODE_ENV === "production",
+    const meta_data: Array<{ key: string; value: unknown }> = [
+      { key: "_headless_source", value: "phantombiopeptides-nextjs" },
+    ];
+    if (stripePmId) {
+      meta_data.push({
+        key: "_stripe_payment_method_id",
+        value: String(stripePmId),
       });
     }
 
-    let body: unknown = null;
-    try {
-      body = await res.json();
-    } catch {
-      /* empty */
+    const order = await wc<Record<string, unknown>>("/orders", {
+      method: "POST",
+      revalidate: false,
+      body: JSON.stringify({
+        payment_method: input.payment_method || "stripe",
+        payment_method_title:
+          input.payment_method === "stripe" ? "Stripe" : input.payment_method,
+        set_paid: false,
+        status: "pending",
+        billing: input.billing_address,
+        shipping: input.shipping_address,
+        line_items,
+        customer_note: input.customer_note ?? "",
+        meta_data,
+      }),
+    } as never);
+
+    if (!env.WC_STORE_URL) {
+      throw new WooError("WC_STORE_URL is not configured.", 500);
     }
 
-    if (!res.ok) {
-      const message =
-        (body as { message?: string } | null)?.message ??
-        `Checkout failed: ${res.status} ${res.statusText}`;
-      throw new WooError(message, res.status, JSON.stringify(body));
-    }
+    // Cart is now recorded on Woo's side — safe to clear locally.
+    await CartService.clear();
 
-    return wcCheckoutResponseSchema.parse(body);
+    const orderId = (order?.id as number | undefined) ?? 0;
+    const payUrl =
+      (order?.payment_url as string | undefined) ??
+      `${env.WC_STORE_URL.replace(/\/$/, "")}/checkout/order-pay/${orderId}/`;
+
+    // Return in the WCCheckoutResponse shape the client already expects.
+    return {
+      order_id: orderId,
+      status: "pending",
+      order_key: (order?.order_key as string | undefined) ?? "",
+      order_number: String(
+        (order?.number as string | undefined) ?? orderId,
+      ),
+      customer_note: (order?.customer_note as string | undefined) ?? "",
+      customer_id: (order?.customer_id as number | undefined) ?? 0,
+      billing_address: input.billing_address,
+      shipping_address: input.shipping_address,
+      payment_method: input.payment_method,
+      payment_result: {
+        payment_status: "success",
+        payment_details: [
+          { key: "order_id", value: String(orderId) },
+          { key: "pay_url", value: payUrl },
+        ],
+        redirect_url: "",
+      },
+    };
   },
 };
