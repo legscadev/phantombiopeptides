@@ -1,16 +1,16 @@
 import { Suspense } from "react";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CategoriesService } from "@/services/categories";
 import { ProductsService } from "@/services/products";
 import { ProductGrid } from "@/components/product/product-grid";
 import { ProductSort } from "@/components/product/product-sort";
-import { ProductFilters } from "@/components/product/product-filters";
 import { Pagination } from "@/components/product/pagination";
-import { Breadcrumb } from "@/components/common/breadcrumb";
 import { Reveal } from "@/components/common/reveal";
 import { Skeleton } from "@/components/ui/skeleton";
 import { buildMetadata } from "@/lib/seo";
 import { parseProductSearchParams } from "@/lib/parse-search";
+import { cn } from "@/lib/utils";
 
 export const revalidate = 300;
 
@@ -48,51 +48,68 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   const categories = await CategoriesService.list();
 
   return (
-    <div className="container-page py-10 md:py-14">
+    <div className="container-page py-16 md:py-24">
       <Reveal>
-        <>
-          <Breadcrumb
-            crumbs={[
-              { label: "Home", href: "/" },
-              { label: "Shop", href: "/shop" },
-              { label: category.name },
-            ]}
-          />
-
-          <div className="mt-6 flex flex-col gap-3 border-b border-border pb-8 md:flex-row md:items-end md:justify-between">
-            <div>
-              <p className="text-[11px] uppercase tracking-[0.22em] text-primary">
-                Category
-              </p>
-              <h1 className="mt-2 text-4xl font-semibold tracking-tight sm:text-5xl">
-                {category.name}
-              </h1>
-              <p className="mt-2 max-w-2xl text-muted-foreground">
-                {category.description || `${category.count ?? 0} compounds available.`}
-              </p>
-            </div>
-            <ProductSort />
-          </div>
-        </>
+        <div className="max-w-3xl">
+          <p className="text-[10px] uppercase tracking-[0.32em] text-primary">
+            Category · {category.count ?? 0} compounds
+          </p>
+          <h1 className="mt-5 font-display text-5xl font-extrabold tracking-tight sm:text-6xl lg:text-7xl">
+            {category.name}.
+          </h1>
+          {category.description && (
+            <p className="mt-5 max-w-2xl text-base leading-relaxed text-muted-foreground">
+              {category.description}
+            </p>
+          )}
+        </div>
       </Reveal>
 
-      <div className="mt-10 grid gap-10 lg:grid-cols-[240px_1fr]">
-        <ProductFilters
-          categories={categories}
-          activeCategorySlug={category.slug}
-          className="hidden lg:block"
-        />
-        <Reveal delay={0.08}>
-          <div>
-            <Suspense fallback={<GridSkeleton />}>
-              <FilteredProducts
-                categoryId={category.id}
-                searchParams={searchParams}
-              />
-            </Suspense>
+      {/* Filter + sort bar */}
+      <Reveal delay={0.08}>
+        <div className="mt-12 flex flex-col gap-6 border-t border-border pt-8 md:flex-row md:items-center md:justify-between">
+          <div className="no-scrollbar -mx-2 flex items-center gap-2 overflow-x-auto px-2 pb-1 md:flex-wrap md:overflow-visible">
+            <Link
+              href="/shop/all"
+              className={cn(
+                "shrink-0 rounded-full border border-border bg-background-elevated px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-foreground/70 transition-all",
+                "hover:border-border-strong hover:bg-background-muted hover:text-foreground",
+              )}
+            >
+              All
+            </Link>
+            {categories.map((c) => {
+              const active = c.slug === category.slug;
+              return (
+                <Link
+                  key={c.id}
+                  href={`/category/${c.slug}`}
+                  className={cn(
+                    "shrink-0 rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] transition-all",
+                    active
+                      ? "bg-foreground text-background shadow-[0_10px_30px_-10px_hsl(var(--foreground)/0.4)]"
+                      : "border border-border bg-background-elevated text-foreground/70 hover:border-border-strong hover:bg-background-muted hover:text-foreground",
+                  )}
+                >
+                  {c.name}
+                </Link>
+              );
+            })}
           </div>
-        </Reveal>
-      </div>
+          <ProductSort />
+        </div>
+      </Reveal>
+
+      <Reveal delay={0.16}>
+        <div className="mt-12">
+          <Suspense fallback={<GridSkeleton />}>
+            <FilteredProducts
+              categoryId={category.id}
+              searchParams={searchParams}
+            />
+          </Suspense>
+        </div>
+      </Reveal>
     </div>
   );
 }
@@ -114,7 +131,7 @@ async function FilteredProducts({
   return (
     <>
       <ProductGrid products={data} priorityCount={4} />
-      <div className="mt-12">
+      <div className="mt-16">
         <Pagination page={page} totalPages={totalPages} />
       </div>
     </>
