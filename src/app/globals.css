@@ -2,11 +2,9 @@
 
 /* ============================================================
    Phantom Bio Peptides — Design Tokens
-   Palette sampled from the live phantombiopeptides.com:
-   - Near-black surface (#060606)
-   - Near-white text (#fbfbfb)
-   - Deep-violet primary (#42009b → #4900ad)
-   - Roboto sans body
+   Light-mode base with rich accent surfaces, modelled after
+   EVO Labs' visual rhythm. Brand primary is Phantom's deep
+   violet (#42009b).
    ============================================================ */
 
 @theme {
@@ -19,12 +17,12 @@
   --font-display:
     var(--font-roboto), ui-sans-serif, system-ui, sans-serif;
 
-  --radius-xs: 0;
-  --radius-sm: 0;
-  --radius-md: 2px;
-  --radius-lg: 4px;
-  --radius-xl: 6px;
-  --radius-2xl: 8px;
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 20px;
+  --radius-2xl: 28px;
 
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in-out-cubic: cubic-bezier(0.65, 0, 0.35, 1);
@@ -32,54 +30,54 @@
 
 @layer base {
   :root {
-    --background: 0 0% 2.4%;              /* #060606 */
-    --background-elevated: 0 0% 6%;
-    --background-muted: 0 0% 8%;
-    --foreground: 0 0% 98%;               /* #fbfbfb */
-    --muted: 0 0% 62%;
-    --muted-foreground: 0 0% 68%;
-    --border: 0 0% 14%;
-    --border-strong: 0 0% 22%;
-    --input: 0 0% 8%;
+    /* Light surface tokens */
+    --background: 0 0% 100%;                /* #ffffff */
+    --background-elevated: 220 14% 98%;     /* #f7f8fa */
+    --background-muted: 220 14% 96%;        /* #f0f2f5 */
+    --foreground: 224 47% 10%;              /* #0e1523 near-navy */
+    --muted: 220 10% 45%;
+    --muted-foreground: 220 10% 40%;
+    --border: 220 14% 90%;
+    --border-strong: 220 14% 82%;
+    --input: 220 14% 96%;
     --ring: 264 100% 34%;
 
-    /* Brand — deep violet primary */
-    --primary: 264 100% 30%;              /* #42009b */
+    /* Brand — Phantom deep violet */
+    --primary: 264 100% 30%;                /* #42009b */
     --primary-foreground: 0 0% 100%;
-    --primary-soft: 264 100% 12%;         /* dark violet card wash */
-    --accent: 264 100% 40%;               /* #4900ad — brighter hover */
+    --primary-soft: 264 100% 96%;           /* faint violet tint */
+    --accent: 264 100% 40%;                 /* #4900ad brighter */
     --accent-foreground: 0 0% 100%;
-    --success: 142 71% 45%;
+
+    /* Dark accent surfaces (hero card, CTA banner, footer) */
+    --surface-dark: 224 47% 8%;             /* deep navy */
+    --surface-dark-fg: 0 0% 100%;
+
+    /* Pastel cards — EVO-style variety, tinted toward violet family */
+    --pastel-mint: 150 60% 92%;             /* soft mint */
+    --pastel-mint-fg: 160 60% 22%;
+    --pastel-blue: 220 100% 96%;            /* soft periwinkle */
+    --pastel-blue-fg: 224 47% 20%;
+    --pastel-violet: 264 100% 96%;          /* soft lavender */
+    --pastel-violet-fg: 264 60% 24%;
+    --pastel-gold: 42 100% 92%;             /* warm cream */
+    --pastel-gold-fg: 32 80% 28%;
+    --pastel-coral: 12 100% 94%;            /* soft coral */
+    --pastel-coral-fg: 8 70% 32%;
+
+    --success: 142 71% 42%;
     --warning: 38 92% 55%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 98%;
 
-    /* Light surface used for the comparison table only */
-    --surface-light: 0 0% 100%;
-    --surface-light-fg: 0 0% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 224 47% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 224 47% 10%;
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 224 47% 10%;
 
-    /* Violet-family accent surfaces — replaces EVO's mint/pink/blue
-       pastels with variants in Phantom Bio's palette so the site keeps
-       the same visual variety without leaving the brand. */
-    --tint-violet: 264 100% 30%;         /* solid violet #42009b */
-    --tint-violet-fg: 0 0% 100%;
-    --tint-violet-deep: 262 80% 16%;     /* deep #1e0339 */
-    --tint-violet-deep-fg: 264 80% 88%;
-    --tint-violet-muted: 262 30% 12%;    /* muted #1a0f24 */
-    --tint-violet-muted-fg: 264 60% 92%;
-    --tint-magenta: 300 66% 26%;         /* magenta violet */
-    --tint-magenta-fg: 0 0% 100%;
-    --tint-indigo: 245 66% 24%;          /* cool indigo */
-    --tint-indigo-fg: 0 0% 100%;
-
-    --card: 0 0% 6%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 6%;
-    --popover-foreground: 0 0% 98%;
-    --secondary: 0 0% 10%;
-    --secondary-foreground: 0 0% 98%;
-
-    color-scheme: dark;
+    color-scheme: light;
   }
 }
 
@@ -99,6 +97,8 @@
   --color-primary-soft: hsl(var(--primary-soft));
   --color-accent: hsl(var(--accent));
   --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-surface-dark: hsl(var(--surface-dark));
+  --color-surface-dark-fg: hsl(var(--surface-dark-fg));
   --color-success: hsl(var(--success));
   --color-warning: hsl(var(--warning));
   --color-destructive: hsl(var(--destructive));
@@ -109,19 +109,17 @@
   --color-popover-foreground: hsl(var(--popover-foreground));
   --color-secondary: hsl(var(--secondary));
   --color-secondary-foreground: hsl(var(--secondary-foreground));
-  --color-surface-light: hsl(var(--surface-light));
-  --color-surface-light-fg: hsl(var(--surface-light-fg));
 
-  --color-tint-violet: hsl(var(--tint-violet));
-  --color-tint-violet-fg: hsl(var(--tint-violet-fg));
-  --color-tint-violet-deep: hsl(var(--tint-violet-deep));
-  --color-tint-violet-deep-fg: hsl(var(--tint-violet-deep-fg));
-  --color-tint-violet-muted: hsl(var(--tint-violet-muted));
-  --color-tint-violet-muted-fg: hsl(var(--tint-violet-muted-fg));
-  --color-tint-magenta: hsl(var(--tint-magenta));
-  --color-tint-magenta-fg: hsl(var(--tint-magenta-fg));
-  --color-tint-indigo: hsl(var(--tint-indigo));
-  --color-tint-indigo-fg: hsl(var(--tint-indigo-fg));
+  --color-pastel-mint: hsl(var(--pastel-mint));
+  --color-pastel-mint-fg: hsl(var(--pastel-mint-fg));
+  --color-pastel-blue: hsl(var(--pastel-blue));
+  --color-pastel-blue-fg: hsl(var(--pastel-blue-fg));
+  --color-pastel-violet: hsl(var(--pastel-violet));
+  --color-pastel-violet-fg: hsl(var(--pastel-violet-fg));
+  --color-pastel-gold: hsl(var(--pastel-gold));
+  --color-pastel-gold-fg: hsl(var(--pastel-gold-fg));
+  --color-pastel-coral: hsl(var(--pastel-coral));
+  --color-pastel-coral-fg: hsl(var(--pastel-coral-fg));
 }
 
 @layer base {
@@ -142,7 +140,7 @@
   }
 
   ::selection {
-    background: hsl(var(--primary) / 0.4);
+    background: hsl(var(--primary) / 0.15);
     color: hsl(var(--foreground));
   }
 
@@ -156,8 +154,8 @@
 
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
-    letter-spacing: -0.01em;
-    font-weight: 700;
+    letter-spacing: -0.015em;
+    font-weight: 800;
   }
 
   :focus-visible {
@@ -167,15 +165,15 @@
 }
 
 @layer utilities {
+  /* Full-width dark accent section */
   .surface-dark {
-    background: hsl(var(--background));
-    color: hsl(var(--foreground));
+    background: hsl(var(--surface-dark));
+    color: hsl(var(--surface-dark-fg));
   }
-  .surface-light {
-    background: hsl(var(--surface-light));
-    color: hsl(var(--surface-light-fg));
+  .surface-dark *:not(.no-invert) {
+    /* Ensure inner heading elements pick up the dark surface color */
+    color: inherit;
   }
-  .surface-light * { color: inherit; }
 
   .gradient-text {
     background: linear-gradient(

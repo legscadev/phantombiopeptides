@@ -4,35 +4,15 @@ import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/common/reveal";
 
 /**
- * "Never Sell a Batch Without Proof" — pull-quote left, 2×2 grid of
- * violet-family stat squares right. Mirrors EVO Labs' colored stat
- * grid using Phantom Bio violet variants.
+ * "Never Sell a Batch Without Proof" — pull-quote on the left, 2×2 grid
+ * of colored stat squares on the right. Mirrors EVO's colorful stat
+ * grid, with pastels chosen to complement Phantom's violet primary.
  */
 const STATS = [
-  {
-    n: "99%+",
-    label: "Avg. purity",
-    bg: "radial-gradient(120% 100% at 30% 0%, hsl(264 100% 44%) 0%, hsl(264 100% 28%) 100%)",
-    border: "border-primary/50",
-  },
-  {
-    n: "100%",
-    label: "Batches tested",
-    bg: "radial-gradient(120% 100% at 70% 0%, hsl(245 66% 32%) 0%, hsl(245 66% 18%) 100%)",
-    border: "border-indigo-500/40",
-  },
-  {
-    n: "Same Day",
-    label: "Fulfilment",
-    bg: "radial-gradient(120% 100% at 30% 100%, hsl(300 66% 34%) 0%, hsl(300 66% 20%) 100%)",
-    border: "border-fuchsia-500/40",
-  },
-  {
-    n: "Free",
-    label: "Shipping $250+",
-    bg: "radial-gradient(120% 100% at 70% 100%, hsl(280 100% 40%) 0%, hsl(280 90% 24%) 100%)",
-    border: "border-violet-500/40",
-  },
+  { n: "99%+", label: "Avg. purity", bg: "bg-pastel-gold", fg: "text-pastel-gold-fg" },
+  { n: "100%", label: "Batches tested", bg: "bg-pastel-mint", fg: "text-pastel-mint-fg" },
+  { n: "Same Day", label: "Fulfilment", bg: "bg-pastel-violet", fg: "text-pastel-violet-fg" },
+  { n: "Free", label: "Shipping $250+", bg: "bg-pastel-coral", fg: "text-pastel-coral-fg" },
 ];
 
 export function Commitment() {
@@ -56,11 +36,11 @@ export function Commitment() {
               <div className="mt-8 flex flex-col gap-2 sm:flex-row">
                 <Button asChild>
                   <Link href="/coa">
-                    View COA library <ArrowRight className="h-4 w-4" />
+                    View COA Library <ArrowRight className="h-4 w-4" />
                   </Link>
                 </Button>
                 <Button variant="outline" asChild>
-                  <Link href="/about">Our story</Link>
+                  <Link href="/about">Our Story</Link>
                 </Button>
               </div>
             </div>
@@ -68,17 +48,17 @@ export function Commitment() {
               {STATS.map((s) => (
                 <div
                   key={s.label}
-                  className={`relative overflow-hidden rounded-2xl border p-8 text-white ${s.border}`}
-                  style={{ background: s.bg }}
+                  className={`rounded-2xl border border-black/5 p-8 shadow-sm ${s.bg}`}
                 >
-                  <div className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
-                  <div className="relative">
-                    <div className="font-display text-4xl font-bold tracking-tight">
-                      {s.n}
-                    </div>
-                    <div className="mt-2 text-xs uppercase tracking-widest opacity-85">
-                      {s.label}
-                    </div>
+                  <div
+                    className={`font-display text-4xl font-bold tracking-tight ${s.fg}`}
+                  >
+                    {s.n}
+                  </div>
+                  <div
+                    className={`mt-2 text-xs uppercase tracking-widest ${s.fg} opacity-80`}
+                  >
+                    {s.label}
                   </div>
                 </div>
               ))}

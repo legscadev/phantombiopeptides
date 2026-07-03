@@ -24,7 +24,7 @@ const mono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 export const metadata: Metadata = buildMetadata({});
 
 export const viewport: Viewport = {
-  themeColor: "#060606",
+  themeColor: "#ffffff",
   width: "device-width",
   initialScale: 1,
 };

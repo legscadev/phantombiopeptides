@@ -15,6 +15,11 @@ interface ProductCardProps {
   className?: string;
 }
 
+/**
+ * Product card — dark-navy media plinth so the product vial pops against
+ * the light page background (EVO Labs pattern). Info block below is on
+ * white so it stays readable at a glance.
+ */
 export function ProductCard({ product, priority, className }: ProductCardProps) {
   const { addItem, isLoading } = useCart();
   const discount = product.on_sale
@@ -29,13 +34,17 @@ export function ProductCard({ product, priority, className }: ProductCardProps) 
       whileHover={{ y: -4 }}
       transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
       className={cn(
-        "group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card transition-all hover:border-primary/50 hover:shadow-[0_20px_50px_-15px_hsl(264_100%_40%/0.4)]",
+        "group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card transition-all hover:border-primary/50 hover:shadow-[0_24px_50px_-20px_hsl(224_47%_10%/0.35)]",
         className,
       )}
     >
       <Link
         href={`/product/${product.slug}`}
-        className="relative block aspect-[4/5] overflow-hidden bg-background-muted"
+        className="relative block aspect-[4/5] overflow-hidden"
+        style={{
+          background:
+            "radial-gradient(80% 60% at 50% 20%, hsl(264 100% 20%) 0%, hsl(224 47% 8%) 70%)",
+        }}
       >
         {primary && (
           <>
@@ -64,13 +73,17 @@ export function ProductCard({ product, priority, className }: ProductCardProps) 
           {product.tags.some((t) => t.slug === "new") && (
             <Badge variant="accent">New</Badge>
           )}
-          {outOfStock && <Badge variant="outline">Sold out</Badge>}
+          {outOfStock && (
+            <span className="rounded-md bg-white/90 px-2 py-1 text-[10px] font-semibold uppercase tracking-widest text-foreground backdrop-blur">
+              Sold out
+            </span>
+          )}
         </div>
 
         {product.rating_count > 0 && (
-          <div className="absolute right-3 top-3 flex items-center gap-1 rounded-md bg-background/80 px-2 py-1 text-[11px] backdrop-blur">
+          <div className="absolute right-3 top-3 flex items-center gap-1 rounded-md bg-white/90 px-2 py-1 text-[11px] text-foreground backdrop-blur">
             <Star className="h-3 w-3 fill-warning text-warning" />
-            <span className="text-foreground/90">{product.average_rating}</span>
+            <span>{product.average_rating}</span>
           </div>
         )}
       </Link>
@@ -83,7 +96,7 @@ export function ProductCard({ product, priority, className }: ProductCardProps) 
         )}
         <Link
           href={`/product/${product.slug}`}
-          className="text-base font-bold leading-snug hover:text-primary transition-colors"
+          className="font-display text-base font-bold leading-snug hover:text-primary transition-colors"
         >
           {product.name}
         </Link>
@@ -105,12 +118,8 @@ export function ProductCard({ product, priority, className }: ProductCardProps) 
             type="button"
             disabled={outOfStock || isLoading}
             onClick={() => addItem(product.id, 1)}
-            style={{
-              background:
-                "linear-gradient(135deg, hsl(264 100% 40%) 0%, hsl(280 100% 34%) 100%)",
-            }}
             className={cn(
-              "inline-flex h-9 items-center justify-center gap-1.5 rounded-md px-3 text-xs font-semibold uppercase tracking-wider text-white transition-all",
+              "inline-flex h-9 items-center justify-center gap-1.5 rounded-md bg-primary px-3 text-xs font-semibold uppercase tracking-wider text-primary-foreground transition-all",
               "hover:brightness-110",
               "disabled:opacity-40",
             )}
