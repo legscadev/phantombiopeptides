@@ -26,7 +26,7 @@ const pillars = [
   {
     icon: FileCheck,
     title: "Certificate of Analysis Included",
-    body: "A lot-specific ISL Labs COA ships in every box and appears in our public library before you buy.",
+    body: "A lot-specific ISL Labs Certificate of Analysis ships in every box.",
     bg: "bg-pastel-violet",
     fg: "text-pastel-violet-fg",
   },

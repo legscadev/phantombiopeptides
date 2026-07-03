@@ -30,17 +30,14 @@ export function Commitment() {
               </h2>
               <p className="mt-5 max-w-md text-muted-foreground leading-relaxed">
                 Every product is independently tested by ISL Labs before it
-                leaves our facility. COAs are published to our library the
-                same day the batch is released — before you place your order.
+                leaves our facility. A lot-specific Certificate of Analysis
+                ships in every box.
               </p>
               <div className="mt-8 flex flex-col gap-2 sm:flex-row">
                 <Button asChild>
-                  <Link href="/coa">
-                    View COA Library <ArrowRight className="h-4 w-4" />
+                  <Link href="/about">
+                    Our Story <ArrowRight className="h-4 w-4" />
                   </Link>
-                </Button>
-                <Button variant="outline" asChild>
-                  <Link href="/about">Our Story</Link>
                 </Button>
               </div>
             </div>

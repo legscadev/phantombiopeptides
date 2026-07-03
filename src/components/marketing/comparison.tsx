@@ -107,9 +107,6 @@ export function Comparison() {
               Shop Phantom Bio <ArrowRight className="h-4 w-4" />
             </Link>
           </Button>
-          <Button size="lg" variant="outline" asChild>
-            <Link href="/coa">See our COA library</Link>
-          </Button>
         </div>
       </div>
     </section>

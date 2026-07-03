@@ -5,7 +5,6 @@ import { Star, Truck, ShieldCheck, RotateCcw, Package } from "lucide-react";
 import { ProductsService } from "@/services/products";
 import { ProductGallery } from "@/components/product/product-gallery";
 import { PurchasePanel } from "@/components/product/purchase-panel";
-import { CoaBlock } from "@/components/product/coa-block";
 import { PaymentBadges } from "@/components/product/payment-badges";
 import { ProductTabs } from "@/components/product/product-tabs";
 import {
@@ -230,7 +229,6 @@ export default async function ProductPage({ params }: Props) {
             </div>
 
             <div className="mt-6 space-y-4">
-              <CoaBlock productSlug={product.slug} />
               <PaymentBadges />
             </div>
 

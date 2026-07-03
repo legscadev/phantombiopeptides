@@ -198,14 +198,6 @@ export function Hero({ vials }: HeroProps) {
                   Shop All Peptides <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                asChild
-                className="border-white/30 bg-white/5 text-white hover:border-white hover:bg-white/10 hover:text-white"
-              >
-                <Link href="/coa">View COA Library</Link>
-              </Button>
             </div>
 
             <div className="mt-10 flex flex-wrap items-center justify-center gap-x-8 gap-y-2">

@@ -94,7 +94,7 @@ export default function AboutPage() {
             },
             {
               t: "03 · ISL Labs verification",
-              b: "ISL Labs confirms mass, purity, and identity. Their COA is what ships with your order and appears in our public library.",
+              b: "ISL Labs confirms mass, purity, and identity. Their Certificate of Analysis is what ships with your order.",
             },
             {
               t: "04 · Lyophilization",

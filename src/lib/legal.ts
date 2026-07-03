@@ -188,7 +188,7 @@ export const LEGAL_DOCS: Record<string, LegalDoc> = {
       {
         heading: "Documentation",
         body: [
-          "Every lot ships with a Certificate of Analysis. COAs are published to our public library before the batch is released for sale — see /coa.",
+          "Every lot ships with a Certificate of Analysis from an independent third-party lab.",
         ],
       },
       {
