@@ -1,6 +1,6 @@
 import "server-only";
 import { z } from "zod";
-import { wc, shouldUseMocks } from "./woocommerce";
+import { wc, wcWithMeta, shouldUseMocks } from "./woocommerce";
 import { wcProductSchema, wcReviewSchema } from "@/schemas/woocommerce";
 import { mockProducts, mockReviewsByProduct } from "@/mocks/products";
 import type { ProductQueryParams, WCProduct, WCReview } from "@/types";
@@ -98,16 +98,19 @@ export const ProductsService = {
       include: params.include?.join(","),
       exclude: params.exclude?.join(","),
     };
-    const data = await wc<WCProduct[]>("/products", {
-      query,
-      revalidate: CACHE.revalidate,
-      tags: [CACHE.tag("list")],
-    });
+    const { data, total, totalPages } = await wcWithMeta<WCProduct[]>(
+      "/products",
+      {
+        query,
+        revalidate: CACHE.revalidate,
+        tags: [CACHE.tag("list")],
+      },
+    );
     const parsed = productsArraySchema.parse(data);
     return {
       data: parsed,
-      totalItems: parsed.length,
-      totalPages: 1,
+      totalItems: total || parsed.length,
+      totalPages: totalPages || 1,
       page: params.page ?? 1,
       perPage: params.per_page ?? 12,
     };

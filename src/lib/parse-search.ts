@@ -13,7 +13,7 @@ export function parseProductSearchParams(
   };
 
   const page = Math.max(1, parseInt(one("page") ?? "1", 10) || 1);
-  const perPage = Math.min(48, parseInt(one("per_page") ?? "12", 10) || 12);
+  const perPage = Math.min(48, parseInt(one("per_page") ?? "24", 10) || 24);
   const sort = one("sort") ?? "date-desc";
   const [orderby, order] = sort.split("-") as [
     ProductQueryParams["orderby"],

@@ -41,7 +41,7 @@ function buildQuery(
   return s ? `?${s}` : "";
 }
 
-async function request<T>(url: string, options: WCFetchOptions): Promise<T> {
+async function rawFetch(url: string, options: WCFetchOptions): Promise<Response> {
   const { query, body, revalidate, tags, headers, ...rest } = options;
   const finalUrl = `${url}${buildQuery(query)}`;
   const res = await fetch(finalUrl, {
@@ -57,21 +57,31 @@ async function request<T>(url: string, options: WCFetchOptions): Promise<T> {
         ? { revalidate: 0 }
         : { revalidate: revalidate ?? 60, tags },
   });
-
   if (!res.ok) {
-    let detail = "";
-    try {
-      detail = await res.text();
-    } catch {
-      /* ignore */
-    }
+    const detail = await res.text().catch(() => "");
     throw new WooError(
       `WooCommerce request failed: ${res.status} ${res.statusText}`,
       res.status,
       detail,
     );
   }
+  return res;
+}
+
+async function request<T>(url: string, options: WCFetchOptions): Promise<T> {
+  const res = await rawFetch(url, options);
   return (await res.json()) as T;
+}
+
+function authedQuery(options: WCFetchOptions): WCFetchOptions {
+  return {
+    ...options,
+    query: {
+      ...(options.query ?? {}),
+      consumer_key: env.WC_CONSUMER_KEY,
+      consumer_secret: env.WC_CONSUMER_SECRET,
+    },
+  };
 }
 
 export async function wc<T>(path: string, options: WCFetchOptions = {}) {
@@ -81,14 +91,25 @@ export async function wc<T>(path: string, options: WCFetchOptions = {}) {
       500,
     );
   }
-  return request<T>(`${REST_BASE()}${path}`, {
-    ...options,
-    query: {
-      ...(options.query ?? {}),
-      consumer_key: env.WC_CONSUMER_KEY,
-      consumer_secret: env.WC_CONSUMER_SECRET,
-    },
-  });
+  return request<T>(`${REST_BASE()}${path}`, authedQuery(options));
+}
+
+/** Same as `wc` but also returns pagination metadata from Woo's X-WP-* headers. */
+export async function wcWithMeta<T>(
+  path: string,
+  options: WCFetchOptions = {},
+): Promise<{ data: T; total: number; totalPages: number }> {
+  if (!env.WC_STORE_URL || !env.WC_CONSUMER_KEY || !env.WC_CONSUMER_SECRET) {
+    throw new WooError(
+      "WooCommerce credentials are not configured. Set WC_STORE_URL, WC_CONSUMER_KEY, WC_CONSUMER_SECRET or run with NEXT_PUBLIC_USE_MOCKS=true.",
+      500,
+    );
+  }
+  const res = await rawFetch(`${REST_BASE()}${path}`, authedQuery(options));
+  const total = parseInt(res.headers.get("x-wp-total") ?? "0", 10) || 0;
+  const totalPages =
+    parseInt(res.headers.get("x-wp-totalpages") ?? "1", 10) || 1;
+  return { data: (await res.json()) as T, total, totalPages };
 }
 
 export async function wcStore<T>(path: string, options: WCFetchOptions = {}) {
