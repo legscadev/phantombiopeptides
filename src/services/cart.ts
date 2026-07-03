@@ -267,21 +267,7 @@ async function storeApiCall<T>(
 export const CartService = {
   async get(): Promise<WCCart> {
     if (shouldUseMocks()) return readMockCart();
-    const store = await cookies();
-    const t = store.get(CART_COOKIE)?.value;
-    const n = store.get(NONCE_COOKIE)?.value;
-    console.log("[CartService.get] cookies", {
-      hasToken: Boolean(t),
-      tokenPrefix: t?.slice(0, 24),
-      hasNonce: Boolean(n),
-    });
     const data = await storeApiCall<unknown>("/cart");
-    const asRecord = data as Record<string, unknown>;
-    const items = Array.isArray(asRecord.items) ? asRecord.items : [];
-    console.log("[CartService.get] raw", {
-      itemsLen: items.length,
-      items_count: asRecord.items_count,
-    });
     return normalizeCartPrices(wcCartSchema.parse(data));
   },
 
