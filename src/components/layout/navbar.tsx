@@ -20,7 +20,7 @@ interface NavbarProps {
 }
 
 const STATIC_NAV = [
-  { href: "/shop", label: "Shop" },
+  { href: "/shop", label: "Products" },
   { href: "/about", label: "About" },
   { href: "/faq", label: "FAQ" },
 ];
@@ -55,7 +55,7 @@ export function Navbar({ isSignedIn = false }: NavbarProps) {
         <div className="flex h-16 items-center gap-4 lg:h-20 lg:gap-8">
           <Logo />
 
-          <nav className="hidden flex-1 items-center gap-1 lg:flex">
+          <nav className="hidden flex-1 items-center justify-center gap-1 lg:flex">
             {nav.map((item) => {
               const active =
                 pathname === item.href ||
