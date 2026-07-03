@@ -18,8 +18,8 @@ export function Logo({ className }: { className?: string }) {
         width={1500}
         height={600}
         priority
-        sizes="(min-width: 1024px) 160px, 128px"
-        className="h-8 w-auto lg:h-10"
+        sizes="(min-width: 1024px) 240px, 180px"
+        className="h-12 w-auto lg:h-14"
       />
     </Link>
   );
