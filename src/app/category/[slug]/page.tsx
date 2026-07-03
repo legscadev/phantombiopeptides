@@ -7,6 +7,7 @@ import { ProductSort } from "@/components/product/product-sort";
 import { ProductFilters } from "@/components/product/product-filters";
 import { Pagination } from "@/components/product/pagination";
 import { Breadcrumb } from "@/components/common/breadcrumb";
+import { Reveal } from "@/components/common/reveal";
 import { Skeleton } from "@/components/ui/skeleton";
 import { buildMetadata } from "@/lib/seo";
 import { parseProductSearchParams } from "@/lib/parse-search";
@@ -48,28 +49,32 @@ export default async function CategoryPage({ params, searchParams }: Props) {
 
   return (
     <div className="container-page py-10 md:py-14">
-      <Breadcrumb
-        crumbs={[
-          { label: "Home", href: "/" },
-          { label: "Shop", href: "/shop" },
-          { label: category.name },
-        ]}
-      />
+      <Reveal>
+        <>
+          <Breadcrumb
+            crumbs={[
+              { label: "Home", href: "/" },
+              { label: "Shop", href: "/shop" },
+              { label: category.name },
+            ]}
+          />
 
-      <div className="mt-6 flex flex-col gap-3 border-b border-border pb-8 md:flex-row md:items-end md:justify-between">
-        <div>
-          <p className="text-[11px] uppercase tracking-[0.22em] text-primary">
-            Category
-          </p>
-          <h1 className="mt-2 text-4xl font-semibold tracking-tight sm:text-5xl">
-            {category.name}
-          </h1>
-          <p className="mt-2 max-w-2xl text-muted-foreground">
-            {category.description || `${category.count ?? 0} compounds available.`}
-          </p>
-        </div>
-        <ProductSort />
-      </div>
+          <div className="mt-6 flex flex-col gap-3 border-b border-border pb-8 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="text-[11px] uppercase tracking-[0.22em] text-primary">
+                Category
+              </p>
+              <h1 className="mt-2 text-4xl font-semibold tracking-tight sm:text-5xl">
+                {category.name}
+              </h1>
+              <p className="mt-2 max-w-2xl text-muted-foreground">
+                {category.description || `${category.count ?? 0} compounds available.`}
+              </p>
+            </div>
+            <ProductSort />
+          </div>
+        </>
+      </Reveal>
 
       <div className="mt-10 grid gap-10 lg:grid-cols-[240px_1fr]">
         <ProductFilters
@@ -77,14 +82,16 @@ export default async function CategoryPage({ params, searchParams }: Props) {
           activeCategorySlug={category.slug}
           className="hidden lg:block"
         />
-        <div>
-          <Suspense fallback={<GridSkeleton />}>
-            <FilteredProducts
-              categoryId={category.id}
-              searchParams={searchParams}
-            />
-          </Suspense>
-        </div>
+        <Reveal delay={0.08}>
+          <div>
+            <Suspense fallback={<GridSkeleton />}>
+              <FilteredProducts
+                categoryId={category.id}
+                searchParams={searchParams}
+              />
+            </Suspense>
+          </div>
+        </Reveal>
       </div>
     </div>
   );

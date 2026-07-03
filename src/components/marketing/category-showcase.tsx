@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { Section } from "@/components/common/section";
+import { Reveal } from "@/components/common/reveal";
 import { Button } from "@/components/ui/button";
 import type { WCCategory } from "@/types";
 
@@ -28,8 +29,9 @@ export function CategoryShowcase({ categories }: { categories: WCCategory[] }) {
     >
       <div className="-mx-4 overflow-x-auto pb-2 no-scrollbar sm:mx-0">
         <ul className="flex gap-4 px-4 sm:px-0">
-          {items.map((cat) => (
+          {items.map((cat, idx) => (
             <li key={cat.id} className="w-[260px] shrink-0 sm:w-[300px]">
+              <Reveal delay={Math.min(idx * 0.08, 0.3)}>
               <Link
                 href={`/category/${cat.slug}`}
                 className="group flex h-full flex-col overflow-hidden rounded-2xl border border-transparent bg-surface-dark text-surface-dark-fg transition-all hover:border-primary/50"
@@ -75,6 +77,7 @@ export function CategoryShowcase({ categories }: { categories: WCCategory[] }) {
                   </span>
                 </div>
               </Link>
+              </Reveal>
             </li>
           ))}
         </ul>

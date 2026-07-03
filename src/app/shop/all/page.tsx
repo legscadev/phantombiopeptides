@@ -6,6 +6,7 @@ import { ProductSort } from "@/components/product/product-sort";
 import { ProductFilters } from "@/components/product/product-filters";
 import { Pagination } from "@/components/product/pagination";
 import { Breadcrumb } from "@/components/common/breadcrumb";
+import { Reveal } from "@/components/common/reveal";
 import { Skeleton } from "@/components/ui/skeleton";
 import { buildMetadata } from "@/lib/seo";
 import { parseProductSearchParams } from "@/lib/parse-search";
@@ -37,38 +38,46 @@ export default async function ShopAllPage({ searchParams }: Props) {
 
   return (
     <div className="container-page py-10 md:py-14">
-      <Breadcrumb
-        crumbs={[
-          { label: "Home", href: "/" },
-          { label: "Shop", href: "/shop" },
-          { label: "All products" },
-        ]}
-      />
+      <Reveal>
+        <>
+          <Breadcrumb
+            crumbs={[
+              { label: "Home", href: "/" },
+              { label: "Shop", href: "/shop" },
+              { label: "All products" },
+            ]}
+          />
 
-      <div className="mt-6 flex flex-col gap-3 border-b border-border pb-8 md:flex-row md:items-end md:justify-between">
-        <div>
-          <h1 className="font-display text-4xl font-extrabold tracking-tight sm:text-5xl">
-            All products
-          </h1>
-          <p className="mt-2 text-muted-foreground">
-            {totalItems} compounds · HPLC-verified · Third-party tested
-          </p>
-        </div>
-        <ProductSort />
-      </div>
+          <div className="mt-6 flex flex-col gap-3 border-b border-border pb-8 md:flex-row md:items-end md:justify-between">
+            <div>
+              <h1 className="font-display text-4xl font-extrabold tracking-tight sm:text-5xl">
+                All products
+              </h1>
+              <p className="mt-2 text-muted-foreground">
+                {totalItems} compounds · HPLC-verified · Third-party tested
+              </p>
+            </div>
+            <ProductSort />
+          </div>
+        </>
+      </Reveal>
 
       <div className="mt-10 grid gap-10 lg:grid-cols-[240px_1fr]">
-        <ProductFilters categories={categories} className="hidden lg:block" />
+        <Reveal delay={0.08}>
+          <ProductFilters categories={categories} className="hidden lg:block" />
+        </Reveal>
 
-        <div>
-          <Suspense fallback={<GridSkeleton />}>
-            <ProductGrid products={data} priorityCount={4} />
-          </Suspense>
+        <Reveal delay={0.16}>
+          <div>
+            <Suspense fallback={<GridSkeleton />}>
+              <ProductGrid products={data} priorityCount={4} />
+            </Suspense>
 
-          <div className="mt-12">
-            <Pagination page={page} totalPages={totalPages} />
+            <div className="mt-12">
+              <Pagination page={page} totalPages={totalPages} />
+            </div>
           </div>
-        </div>
+        </Reveal>
       </div>
     </div>
   );

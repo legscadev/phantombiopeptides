@@ -8,6 +8,7 @@ import {
   AccordionTrigger,
   AccordionContent,
 } from "@/components/ui/accordion";
+import { Reveal } from "@/components/common/reveal";
 import { cn } from "@/lib/utils";
 
 export interface FAQItem {
@@ -56,14 +57,16 @@ export function FAQAccordion({
           No questions match &quot;{query}&quot;.
         </p>
       ) : (
-        <Accordion type="single" collapsible className="rounded-2xl border border-border bg-card px-6">
-          {filtered.map((item, i) => (
-            <AccordionItem key={i} value={`item-${i}`}>
-              <AccordionTrigger>{item.q}</AccordionTrigger>
-              <AccordionContent>{item.a}</AccordionContent>
-            </AccordionItem>
-          ))}
-        </Accordion>
+        <Reveal>
+          <Accordion type="single" collapsible className="rounded-2xl border border-border bg-card px-6">
+            {filtered.map((item, i) => (
+              <AccordionItem key={i} value={`item-${i}`}>
+                <AccordionTrigger>{item.q}</AccordionTrigger>
+                <AccordionContent>{item.a}</AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </Reveal>
       )}
     </div>
   );

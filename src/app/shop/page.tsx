@@ -4,6 +4,7 @@ import { ArrowUpRight, Sparkles } from "lucide-react";
 import { CategoriesService } from "@/services/categories";
 import { ProductsService } from "@/services/products";
 import { Breadcrumb } from "@/components/common/breadcrumb";
+import { Reveal } from "@/components/common/reveal";
 import { Button } from "@/components/ui/button";
 import { buildMetadata } from "@/lib/seo";
 
@@ -32,28 +33,33 @@ export default async function ShopPage() {
 
   return (
     <div className="container-page py-10 md:py-14">
-      <Breadcrumb crumbs={[{ label: "Home", href: "/" }, { label: "Shop" }]} />
+      <Reveal>
+        <>
+          <Breadcrumb crumbs={[{ label: "Home", href: "/" }, { label: "Shop" }]} />
 
-      <div className="mt-6 flex flex-col gap-4 border-b border-border pb-8 md:flex-row md:items-end md:justify-between">
-        <div>
-          <p className="text-[11px] uppercase tracking-[0.22em] text-primary">
-            The catalog
-          </p>
-          <h1 className="mt-2 font-display text-4xl font-extrabold tracking-tight sm:text-5xl">
-            All peptides &amp; compounds
-          </h1>
-          <p className="mt-2 max-w-xl text-sm text-muted-foreground">
-            {totalCount} compounds. Every one independently tested. COAs are
-            published before you can buy.
-          </p>
-        </div>
-        <Button variant="outline" asChild>
-          <Link href="/shop/all">
-            Browse the flat list <ArrowUpRight className="h-3.5 w-3.5" />
-          </Link>
-        </Button>
-      </div>
+          <div className="mt-6 flex flex-col gap-4 border-b border-border pb-8 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="text-[11px] uppercase tracking-[0.22em] text-primary">
+                The catalog
+              </p>
+              <h1 className="mt-2 font-display text-4xl font-extrabold tracking-tight sm:text-5xl">
+                All peptides &amp; compounds
+              </h1>
+              <p className="mt-2 max-w-xl text-sm text-muted-foreground">
+                {totalCount} compounds. Every one independently tested. COAs are
+                published before you can buy.
+              </p>
+            </div>
+            <Button variant="outline" asChild>
+              <Link href="/shop/all">
+                Browse the flat list <ArrowUpRight className="h-3.5 w-3.5" />
+              </Link>
+            </Button>
+          </div>
+        </>
+      </Reveal>
 
+      <Reveal delay={0.08}>
       {categories.length === 0 ? (
         <div className="mt-16 rounded-2xl border border-dashed border-border p-16 text-center">
           <Sparkles className="mx-auto h-6 w-6 text-muted-foreground" />
@@ -104,6 +110,7 @@ export default async function ShopPage() {
           ))}
         </ul>
       )}
+      </Reveal>
     </div>
   );
 }

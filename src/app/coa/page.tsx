@@ -3,6 +3,7 @@ import Link from "next/link";
 import { FileText, ExternalLink, ShieldCheck, Search } from "lucide-react";
 import { CoasService } from "@/services/coas";
 import { Breadcrumb } from "@/components/common/breadcrumb";
+import { Reveal } from "@/components/common/reveal";
 import { Badge } from "@/components/ui/badge";
 import { buildMetadata } from "@/lib/seo";
 
@@ -21,6 +22,8 @@ export default function CoaLibraryPage() {
 
   return (
     <div className="container-page py-10 md:py-14">
+      <Reveal>
+        <>
       <Breadcrumb
         crumbs={[{ label: "Home", href: "/" }, { label: "COA Library" }]}
       />
@@ -51,7 +54,10 @@ export default function CoaLibraryPage() {
           </div>
         </div>
       </div>
+        </>
+      </Reveal>
 
+      <Reveal delay={0.08}>
       {batches.length === 0 ? (
         <div className="mt-16 rounded-2xl border border-dashed border-border p-16 text-center">
           <p className="text-lg font-medium">No COAs published yet</p>
@@ -137,7 +143,9 @@ export default function CoaLibraryPage() {
           ))}
         </div>
       )}
+      </Reveal>
 
+      <Reveal delay={0.16}>
       <div className="mt-16 flex flex-col items-center gap-3 rounded-2xl border border-border bg-card p-8 text-center">
         <Search className="h-5 w-5 text-primary" />
         <h3 className="text-lg font-semibold">
@@ -162,6 +170,7 @@ export default function CoaLibraryPage() {
           </Link>
         </div>
       </div>
+      </Reveal>
     </div>
   );
 }

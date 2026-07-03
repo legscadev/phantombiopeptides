@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Reveal } from "@/components/common/reveal";
 
 export function CtaSection() {
   return (
     <section className="py-20 md:py-24">
       <div className="container-page">
+        <Reveal>
         <div
           className="surface-dark relative overflow-hidden rounded-2xl px-8 py-14 text-center md:px-16 md:py-20"
           style={{
@@ -49,6 +51,7 @@ export function CtaSection() {
             </div>
           </div>
         </div>
+        </Reveal>
       </div>
     </section>
   );

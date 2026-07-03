@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Newspaper, ArrowRight } from "lucide-react";
 import { PostsService } from "@/services/posts";
 import { Breadcrumb } from "@/components/common/breadcrumb";
+import { Reveal } from "@/components/common/reveal";
 import { buildMetadata } from "@/lib/seo";
 import { stripHtml, truncate } from "@/lib/utils";
 
@@ -20,20 +21,25 @@ export default async function BlogIndexPage() {
 
   return (
     <div className="container-page py-10 md:py-14">
-      <Breadcrumb crumbs={[{ label: "Home", href: "/" }, { label: "Blog" }]} />
-      <div className="mt-6 flex flex-col gap-3 border-b border-border pb-8">
-        <p className="text-[11px] uppercase tracking-[0.22em] text-primary">
-          Research journal
-        </p>
-        <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
-          Notes from the lab.
-        </h1>
-        <p className="max-w-2xl text-muted-foreground">
-          Protocol notes, batch reports, and observations from our research
-          team. Written for people who use these compounds professionally.
-        </p>
-      </div>
+      <Reveal>
+        <>
+          <Breadcrumb crumbs={[{ label: "Home", href: "/" }, { label: "Blog" }]} />
+          <div className="mt-6 flex flex-col gap-3 border-b border-border pb-8">
+            <p className="text-[11px] uppercase tracking-[0.22em] text-primary">
+              Research journal
+            </p>
+            <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
+              Notes from the lab.
+            </h1>
+            <p className="max-w-2xl text-muted-foreground">
+              Protocol notes, batch reports, and observations from our research
+              team. Written for people who use these compounds professionally.
+            </p>
+          </div>
+        </>
+      </Reveal>
 
+      <Reveal delay={0.08}>
       {posts.length === 0 ? (
         <div className="mt-16 rounded-2xl border border-dashed border-border p-16 text-center">
           <Newspaper className="mx-auto h-6 w-6 text-muted-foreground" />
@@ -92,6 +98,7 @@ export default async function BlogIndexPage() {
           })}
         </ul>
       )}
+      </Reveal>
     </div>
   );
 }

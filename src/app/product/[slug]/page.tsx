@@ -15,6 +15,7 @@ import {
 import { StickyAddToCart } from "@/components/product/sticky-atc";
 import { ProductGrid } from "@/components/product/product-grid";
 import { Section } from "@/components/common/section";
+import { Reveal } from "@/components/common/reveal";
 import { Breadcrumb } from "@/components/common/breadcrumb";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -147,6 +148,7 @@ export default async function ProductPage({ params }: Props) {
           ]}
         />
 
+        <Reveal>
         <div className="mt-8 grid gap-10 lg:grid-cols-2 lg:gap-16">
           <ProductGallery images={product.images} name={product.name} />
 
@@ -264,19 +266,26 @@ export default async function ProductPage({ params }: Props) {
             )}
           </div>
         </div>
+        </Reveal>
 
-        <div className="mt-16">
-          <ProductTabs product={product} reviews={reviews} />
-        </div>
+        <Reveal>
+          <div className="mt-16">
+            <ProductTabs product={product} reviews={reviews} />
+          </div>
+        </Reveal>
       </div>
 
       {related.length > 0 && (
-        <Section eyebrow="Related" title="You may also like">
-          <ProductGrid products={related} />
-        </Section>
+        <Reveal>
+          <Section eyebrow="Related" title="You may also like">
+            <ProductGrid products={related} />
+          </Section>
+        </Reveal>
       )}
 
-      <RecentlyViewed excludeId={product.id} />
+      <Reveal>
+        <RecentlyViewed excludeId={product.id} />
+      </Reveal>
 
       <StickyAddToCart product={product} />
     </>

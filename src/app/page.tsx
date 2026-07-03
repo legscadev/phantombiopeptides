@@ -13,6 +13,7 @@ import { Testimonials } from "@/components/marketing/testimonials";
 import { CtaSection } from "@/components/marketing/cta-section";
 import { FAQAccordion } from "@/components/marketing/faq-accordion";
 import { Section } from "@/components/common/section";
+import { Reveal } from "@/components/common/reveal";
 import { ProductGrid } from "@/components/product/product-grid";
 import { Button } from "@/components/ui/button";
 import { FAQS } from "@/lib/faqs";
@@ -51,20 +52,22 @@ export default async function HomePage() {
     <>
       <Hero vials={heroVials} />
 
-      <Section
-        eyebrow="Bestsellers"
-        title="Popular in research this month."
-        description="Our most-ordered compounds, verified batch-by-batch."
-        actions={
-          <Button variant="outline" asChild>
-            <Link href="/shop">
-              Shop all <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
-          </Button>
-        }
-      >
-        <ProductGrid products={bestsellers.slice(0, 8)} priorityCount={4} />
-      </Section>
+      <Reveal>
+        <Section
+          eyebrow="Bestsellers"
+          title="Popular in research this month."
+          description="Our most-ordered compounds, verified batch-by-batch."
+          actions={
+            <Button variant="outline" asChild>
+              <Link href="/shop">
+                Shop all <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </Button>
+          }
+        >
+          <ProductGrid products={bestsellers.slice(0, 8)} priorityCount={4} />
+        </Section>
+      </Reveal>
 
       <Guarantee />
 
@@ -80,18 +83,20 @@ export default async function HomePage() {
 
       <Testimonials />
 
-      <Section eyebrow="FAQ" title="Answers, before you ask.">
-        <div className="mx-auto max-w-3xl">
-          <FAQAccordion items={FAQS.slice(0, 5)} />
-          <div className="mt-6 text-center">
-            <Button variant="ghost" asChild>
-              <Link href="/faq">
-                See all questions <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
-            </Button>
+      <Reveal>
+        <Section eyebrow="FAQ" title="Answers, before you ask.">
+          <div className="mx-auto max-w-3xl">
+            <FAQAccordion items={FAQS.slice(0, 5)} />
+            <div className="mt-6 text-center">
+              <Button variant="ghost" asChild>
+                <Link href="/faq">
+                  See all questions <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              </Button>
+            </div>
           </div>
-        </div>
-      </Section>
+        </Section>
+      </Reveal>
 
       <CtaSection />
     </>
