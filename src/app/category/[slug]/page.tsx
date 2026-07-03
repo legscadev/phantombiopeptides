@@ -9,7 +9,7 @@ import { Breadcrumb } from "@/components/common/breadcrumb";
 import { buildMetadata } from "@/lib/seo";
 import { parseProductSearchParams } from "@/lib/parse-search";
 
-export const revalidate = 300;
+export const dynamic = "force-dynamic";
 
 interface Props {
   params: Promise<{ slug: string }>;
