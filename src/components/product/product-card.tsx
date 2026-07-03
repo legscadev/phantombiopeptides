@@ -68,8 +68,7 @@ export function ProductCard({ product, priority, className }: ProductCardProps) 
           </>
         )}
 
-        <div className="absolute left-3 top-3 flex flex-col gap-1.5">
-          {discount > 0 && <Badge variant="sale">-{discount}%</Badge>}
+        <div className="absolute left-3 top-3 flex flex-col items-start gap-1.5">
           {product.tags.some((t) => t.slug === "new") && (
             <Badge variant="accent">New</Badge>
           )}
@@ -80,12 +79,15 @@ export function ProductCard({ product, priority, className }: ProductCardProps) 
           )}
         </div>
 
-        {product.rating_count > 0 && (
-          <div className="absolute right-3 top-3 flex items-center gap-1 rounded-md bg-white/90 px-2 py-1 text-[11px] text-foreground backdrop-blur">
-            <Star className="h-3 w-3 fill-warning text-warning" />
-            <span>{product.average_rating}</span>
-          </div>
-        )}
+        <div className="absolute right-3 top-3 flex flex-col items-end gap-1.5">
+          {discount > 0 && <Badge variant="sale">-{discount}%</Badge>}
+          {product.rating_count > 0 && (
+            <div className="flex items-center gap-1 rounded-md bg-white/90 px-2 py-1 text-[11px] text-foreground backdrop-blur">
+              <Star className="h-3 w-3 fill-warning text-warning" />
+              <span>{product.average_rating}</span>
+            </div>
+          )}
+        </div>
       </Link>
 
       <div className="flex flex-1 flex-col gap-2 p-4">
