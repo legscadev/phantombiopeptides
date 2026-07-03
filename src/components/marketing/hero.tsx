@@ -7,8 +7,18 @@ import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { currentPromo } from "@/lib/promo";
 
-const HERO_VIAL_SRC =
-  "https://i0.wp.com/kickbackai-pkjdo.wpcomstaging.com/wp-content/uploads/2026/06/28.png?w=1600&ssl=1";
+const HERO_VIALS = [
+  {
+    // Back vial — Tirzepatide 10mg
+    src: "https://i0.wp.com/kickbackai-pkjdo.wpcomstaging.com/wp-content/uploads/2026/06/27.png?w=1600&ssl=1",
+    alt: "Tirzepatide 10 mg — Phantom Bio Labs",
+  },
+  {
+    // Front vial — GLP-3 (Rt) 20mg
+    src: "https://i0.wp.com/kickbackai-pkjdo.wpcomstaging.com/wp-content/uploads/2026/06/28.png?w=1600&ssl=1",
+    alt: "GLP-3 (Rt) 20 mg — Phantom Bio Labs",
+  },
+];
 
 const BADGES = [
   { n: "99%", label: "Purity" },
@@ -116,35 +126,66 @@ export function Hero() {
           </dl>
         </motion.div>
 
-        {/* RIGHT — hero vial */}
+        {/* RIGHT — overlapping hero vials */}
         <motion.div
           initial={{ opacity: 0, scale: 0.96 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 1.2, delay: 0.25, ease: EASE }}
-          className="relative hidden lg:flex lg:items-center lg:justify-center"
+          className="relative hidden lg:block lg:min-h-[560px]"
         >
-          {/* Glow halo behind the vial */}
+          {/* Glow halo behind the vials */}
           <div
-            className="absolute inset-0 -m-10 blur-[110px] opacity-55"
+            className="absolute inset-0 -m-10 blur-[120px] opacity-60"
             style={{
               background:
-                "radial-gradient(circle at 50% 50%, hsl(264 100% 55%) 0%, transparent 65%)",
+                "radial-gradient(circle at 55% 45%, hsl(264 100% 55%) 0%, transparent 65%)",
             }}
             aria-hidden
           />
+
+          {/* Back vial */}
           <motion.div
-            animate={{ y: [0, -18, 0] }}
-            transition={{ duration: 7, ease: "easeInOut", repeat: Infinity }}
-            className="relative aspect-square w-full max-w-[520px]"
+            initial={{ opacity: 0, y: 30, rotate: 12 }}
+            animate={{ opacity: 1, y: 0, rotate: 12 }}
+            transition={{ duration: 1, delay: 0.4, ease: EASE }}
+            className="animate-float absolute right-[8%] top-[4%] w-[52%]"
+            style={{
+              animationDelay: "1s",
+              animationDuration: "9s",
+            }}
           >
-            <Image
-              src={HERO_VIAL_SRC}
-              alt="GLP-3 (Rt) 20 mg — Phantom Bio Labs"
-              fill
-              priority
-              sizes="(min-width: 1280px) 520px, 400px"
-              className="object-contain drop-shadow-[0_40px_60px_rgba(0,0,0,0.55)]"
-            />
+            <div className="relative aspect-square">
+              <Image
+                src={HERO_VIALS[0].src}
+                alt={HERO_VIALS[0].alt}
+                fill
+                priority
+                sizes="(min-width: 1280px) 320px, 260px"
+                className="object-contain drop-shadow-[0_30px_50px_rgba(0,0,0,0.55)]"
+              />
+            </div>
+          </motion.div>
+
+          {/* Front vial */}
+          <motion.div
+            initial={{ opacity: 0, y: 40, rotate: -8 }}
+            animate={{ opacity: 1, y: 0, rotate: -8 }}
+            transition={{ duration: 1, delay: 0.55, ease: EASE }}
+            className="animate-float absolute left-[6%] bottom-[2%] w-[62%]"
+            style={{
+              animationDuration: "8s",
+            }}
+          >
+            <div className="relative aspect-square">
+              <Image
+                src={HERO_VIALS[1].src}
+                alt={HERO_VIALS[1].alt}
+                fill
+                priority
+                sizes="(min-width: 1280px) 400px, 320px"
+                className="object-contain drop-shadow-[0_40px_60px_rgba(0,0,0,0.6)]"
+              />
+            </div>
           </motion.div>
         </motion.div>
       </div>
