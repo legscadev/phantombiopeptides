@@ -1,7 +1,6 @@
 import Script from "next/script";
-import { Breadcrumb } from "@/components/common/breadcrumb";
 import { Reveal } from "@/components/common/reveal";
-import { FAQAccordion } from "@/components/marketing/faq-accordion";
+import { FAQBrowser } from "@/components/marketing/faq-browser";
 import { FAQS } from "@/lib/faqs";
 import { buildMetadata, faqJsonLd } from "@/lib/seo";
 
@@ -22,28 +21,26 @@ export default function FAQPage() {
           __html: JSON.stringify(faqJsonLd(FAQS.map((f) => ({ q: f.q, a: f.a })))),
         }}
       />
-      <div className="container-page py-10 md:py-14">
+      <div className="container-page py-16 md:py-24">
         <Reveal>
-          <>
-            <Breadcrumb
-              crumbs={[{ label: "Home", href: "/" }, { label: "FAQ" }]}
-            />
-            <div className="mt-8 max-w-3xl">
-              <p className="text-[11px] uppercase tracking-[0.22em] text-primary">
-                FAQ
-              </p>
-              <h1 className="mt-3 text-4xl font-semibold tracking-tight sm:text-5xl">
-                Frequently asked.
-              </h1>
-              <p className="mt-3 text-muted-foreground">
-                Search the knowledge base or browse below.
-              </p>
-            </div>
-          </>
+          <div className="max-w-3xl">
+            <p className="text-[10px] uppercase tracking-[0.32em] text-primary">
+              Support · {FAQS.length} questions
+            </p>
+            <h1 className="mt-5 font-display text-5xl font-extrabold tracking-tight sm:text-6xl lg:text-7xl">
+              Frequently asked.
+            </h1>
+            <p className="mt-5 text-base leading-relaxed text-muted-foreground">
+              Search the knowledge base or filter by topic. If you can&apos;t
+              find an answer, our support team responds within one business
+              day.
+            </p>
+          </div>
         </Reveal>
+
         <Reveal delay={0.08}>
-          <div className="mt-10 max-w-3xl">
-            <FAQAccordion items={FAQS} searchable />
+          <div className="mt-14 border-t border-border pt-10">
+            <FAQBrowser items={FAQS} />
           </div>
         </Reveal>
       </div>
