@@ -80,7 +80,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
         <div>
           <Suspense fallback={<GridSkeleton />}>
             <FilteredProducts
-              categorySlug={category.slug}
+              categoryId={category.id}
               searchParams={searchParams}
             />
           </Suspense>
@@ -91,17 +91,17 @@ export default async function CategoryPage({ params, searchParams }: Props) {
 }
 
 async function FilteredProducts({
-  categorySlug,
+  categoryId,
   searchParams,
 }: {
-  categorySlug: string;
+  categoryId: number;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const sp = await searchParams;
   const parsed = parseProductSearchParams(sp);
   const { data, totalPages, page } = await ProductsService.list({
     ...parsed,
-    category: categorySlug,
+    category: String(categoryId),
   });
 
   return (

@@ -15,10 +15,7 @@ import {
 } from "@/components/ui/sheet";
 import { useCart } from "@/hooks/use-cart";
 import { cn } from "@/lib/utils";
-import type { WCCategory } from "@/types";
-
 interface NavbarProps {
-  categories?: WCCategory[];
   isSignedIn?: boolean;
 }
 
@@ -28,7 +25,7 @@ const STATIC_NAV = [
   { href: "/faq", label: "FAQ" },
 ];
 
-export function Navbar({ categories = [], isSignedIn = false }: NavbarProps) {
+export function Navbar({ isSignedIn = false }: NavbarProps) {
   const pathname = usePathname();
   const { itemCount, openDrawer } = useCart();
   const [scrolled, setScrolled] = React.useState(false);
@@ -43,15 +40,7 @@ export function Navbar({ categories = [], isSignedIn = false }: NavbarProps) {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Show up to two live category links inline, alongside the static routes.
-  const nav = [
-    ...STATIC_NAV.slice(0, 1),
-    ...categories.slice(0, 1).map((c) => ({
-      href: `/category/${c.slug}`,
-      label: c.name,
-    })),
-    ...STATIC_NAV.slice(1),
-  ];
+  const nav = STATIC_NAV;
 
   return (
     <header

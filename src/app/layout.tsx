@@ -57,7 +57,7 @@ export default async function RootLayout({
           <AgeGate />
           <PromoModal />
           <AnnouncementBar />
-          <Navbar categories={categories} isSignedIn={isSignedIn} />
+          <Navbar isSignedIn={isSignedIn} />
           <CartDrawer />
           <main className="flex-1">{children}</main>
           <Footer categories={categories} />
