@@ -3,51 +3,37 @@ import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/common/reveal";
 
+/**
+ * "Commitment" — mirrors Phantom's live "Never Sell a Batch Without Proof"
+ * layout: pull-quote on the left, 2×2 grid of alternating violet + dark
+ * stat cards on the right.
+ */
 const STATS = [
-  { n: "99.4%", label: "Avg. purity" },
-  { n: "100%", label: "Batches tested" },
-  { n: "Same-day", label: "Fulfillment" },
-  { n: "$150+", label: "Free shipping" },
+  { n: "99%+", label: "Avg. purity", tone: "violet" },
+  { n: "100%", label: "Batches tested", tone: "dark" },
+  { n: "Same Day", label: "Fulfilment", tone: "dark" },
+  { n: "Free", label: "Shipping $250+", tone: "violet" },
 ];
 
 export function Commitment() {
   return (
-    <section className="py-24">
+    <section className="py-16 md:py-24">
       <div className="container-page">
         <Reveal>
-          <div className="relative overflow-hidden rounded-3xl border border-border bg-card p-10 md:p-16">
-            <div className="pointer-events-none absolute inset-0">
-              <div className="absolute -left-24 -top-24 h-80 w-80 rounded-full bg-primary/25 blur-[100px]" />
-              <div className="absolute -right-24 -bottom-24 h-80 w-80 rounded-full bg-accent/15 blur-[100px]" />
-            </div>
-            <div className="relative">
+          <div className="grid gap-10 lg:grid-cols-[1fr_1fr] lg:items-center">
+            <div>
               <p className="text-[11px] uppercase tracking-[0.22em] text-primary">
                 Our commitment
               </p>
-              <h2 className="mt-3 max-w-3xl text-balance text-4xl font-semibold tracking-tight sm:text-5xl">
-                We never sell research compounds without proof of purity.
+              <h2 className="mt-3 max-w-lg text-balance font-display text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
+                Phantom Bio never ships a batch without proof of purity.
               </h2>
-              <p className="mt-5 max-w-2xl text-muted-foreground leading-relaxed">
-                Every product is independently tested before it leaves our
-                facility. COAs are published to our library on the same day
-                the batch is released — before you place your order. If we
-                can&apos;t verify it, we don&apos;t sell it.
+              <p className="mt-5 max-w-md text-muted-foreground leading-relaxed">
+                Every product is independently tested by ISL Labs before it
+                leaves our facility. COAs are published to our library the
+                same day the batch is released — before you place your order.
               </p>
-
-              <div className="mt-10 grid grid-cols-2 gap-6 md:grid-cols-4">
-                {STATS.map((s) => (
-                  <div key={s.label}>
-                    <div className="font-mono text-3xl font-semibold tracking-tight text-foreground">
-                      {s.n}
-                    </div>
-                    <div className="mt-1 text-xs uppercase tracking-[0.14em] text-muted-foreground">
-                      {s.label}
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="mt-10 flex flex-col gap-2 sm:flex-row">
+              <div className="mt-8 flex flex-col gap-2 sm:flex-row">
                 <Button asChild>
                   <Link href="/coa">
                     View COA library <ArrowRight className="h-4 w-4" />
@@ -57,6 +43,25 @@ export function Commitment() {
                   <Link href="/about">Our story</Link>
                 </Button>
               </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              {STATS.map((s) => (
+                <div
+                  key={s.label}
+                  className={
+                    s.tone === "violet"
+                      ? "rounded-md bg-primary p-8 text-primary-foreground"
+                      : "rounded-md border border-border bg-card p-8 text-foreground"
+                  }
+                >
+                  <div className="font-display text-4xl font-bold tracking-tight">
+                    {s.n}
+                  </div>
+                  <div className="mt-2 text-xs uppercase tracking-widest opacity-80">
+                    {s.label}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </Reveal>

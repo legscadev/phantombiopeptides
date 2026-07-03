@@ -2,16 +2,17 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { Section } from "@/components/common/section";
-import { Reveal } from "@/components/common/reveal";
 import { Button } from "@/components/ui/button";
 import type { WCCategory } from "@/types";
 
 export function CategoryShowcase({ categories }: { categories: WCCategory[] }) {
+  const items = categories.slice(0, 8);
+  if (items.length === 0) return null;
   return (
     <Section
-      eyebrow="Categories"
+      eyebrow="Shop by category"
       title="Curated by research area."
-      description="Filter our catalog by the outcome you're studying — recovery, longevity, metabolic, cognitive, and more."
+      description="Filter our catalog by the outcome you're studying."
       actions={
         <Button variant="outline" asChild>
           <Link href="/shop">
@@ -20,40 +21,44 @@ export function CategoryShowcase({ categories }: { categories: WCCategory[] }) {
         </Button>
       }
     >
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {categories.slice(0, 6).map((cat, i) => (
-          <Reveal key={cat.id} delay={i * 0.05}>
-            <Link
-              href={`/category/${cat.slug}`}
-              className="group relative flex aspect-[4/3] flex-col justify-end overflow-hidden rounded-2xl border border-border bg-card"
-            >
-              {cat.image?.src && (
-                <Image
-                  src={cat.image.src}
-                  alt={cat.image.alt || cat.name}
-                  fill
-                  sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                  className="object-cover opacity-40 transition-all duration-700 group-hover:opacity-60 group-hover:scale-[1.04]"
-                />
-              )}
-              <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-background/20" />
-              <div className="relative flex items-end justify-between p-6">
-                <div>
-                  <h3 className="text-xl font-semibold">{cat.name}</h3>
-                  <p className="mt-1 text-sm text-muted-foreground line-clamp-2">
-                    {cat.description}
+      <div className="-mx-4 overflow-x-auto pb-2 no-scrollbar sm:mx-0">
+        <ul className="flex gap-4 px-4 sm:px-0">
+          {items.map((cat) => (
+            <li key={cat.id} className="w-[260px] shrink-0 sm:w-[300px]">
+              <Link
+                href={`/category/${cat.slug}`}
+                className="group flex h-full flex-col overflow-hidden rounded-md border border-border bg-card transition-colors hover:border-primary/40"
+              >
+                <div className="relative aspect-[4/5] overflow-hidden bg-background-muted">
+                  {cat.image?.src && (
+                    <Image
+                      src={cat.image.src}
+                      alt={cat.image.alt || cat.name}
+                      fill
+                      sizes="300px"
+                      className="object-cover transition-transform duration-700 group-hover:scale-[1.05]"
+                    />
+                  )}
+                  <div className="absolute left-3 top-3 rounded-md bg-background/80 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-widest text-foreground backdrop-blur">
+                    {cat.count ?? 0} items
+                  </div>
+                </div>
+                <div className="flex flex-1 flex-col p-5">
+                  <p className="text-[10px] uppercase tracking-[0.18em] text-primary">
+                    {cat.name}
                   </p>
-                  <span className="mt-3 inline-block text-[11px] uppercase tracking-[0.16em] text-primary">
-                    {cat.count} products
+                  <h3 className="mt-2 text-lg font-bold">{cat.name}</h3>
+                  <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
+                    {cat.description || "Research compounds in this category."}
+                  </p>
+                  <span className="mt-4 inline-flex w-fit items-center gap-1 rounded-md bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-wider text-primary-foreground">
+                    View <ArrowUpRight className="h-3 w-3" />
                   </span>
                 </div>
-                <div className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-border-strong bg-background-elevated transition-all group-hover:border-primary group-hover:bg-primary group-hover:text-primary-foreground">
-                  <ArrowUpRight className="h-4 w-4" />
-                </div>
-              </div>
-            </Link>
-          </Reveal>
-        ))}
+              </Link>
+            </li>
+          ))}
+        </ul>
       </div>
     </Section>
   );

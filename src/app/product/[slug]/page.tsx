@@ -6,6 +6,7 @@ import { ProductsService } from "@/services/products";
 import { ProductGallery } from "@/components/product/product-gallery";
 import { PurchasePanel } from "@/components/product/purchase-panel";
 import { CoaBlock } from "@/components/product/coa-block";
+import { PaymentBadges } from "@/components/product/payment-badges";
 import { ProductTabs } from "@/components/product/product-tabs";
 import {
   RecentlyViewed,
@@ -226,8 +227,9 @@ export default async function ProductPage({ params }: Props) {
               <PurchasePanel product={product} />
             </div>
 
-            <div className="mt-6">
+            <div className="mt-6 space-y-4">
               <CoaBlock productSlug={product.slug} />
+              <PaymentBadges />
             </div>
 
             <div className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-4">

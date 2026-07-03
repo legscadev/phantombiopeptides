@@ -57,8 +57,8 @@ export function NewsletterForm({ variant = "footer" }: Props) {
         type="submit"
         disabled={isSubmitting || submitted}
         className={cn(
-          "inline-flex h-9 items-center gap-2 rounded-full bg-gradient-to-b from-[hsl(178_78%_58%)] to-[hsl(178_78%_46%)] px-4 text-xs font-medium text-primary-foreground shadow-lg shadow-primary/30 transition-all",
-          "hover:brightness-110 disabled:opacity-70",
+          "inline-flex h-9 items-center gap-2 rounded-full bg-primary px-4 text-xs font-semibold text-primary-foreground shadow-md shadow-primary/25 transition-all",
+          "hover:brightness-105 disabled:opacity-70",
         )}
       >
         {isSubmitting ? (

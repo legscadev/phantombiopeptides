@@ -14,8 +14,8 @@ export interface Promo {
 
 export const currentPromo: Promo = {
   enabled: true,
-  message: "Independence Week — Buy 2, Get 1 FREE on eligible vials.",
-  cta_label: "Shop now",
-  cta_href: "/shop?on_sale=true",
-  ends_at: "2026-07-11T23:59:59-04:00",
+  message: "Free shipping on US orders over $250.",
+  cta_label: "Shop peptides",
+  cta_href: "/shop",
+  ends_at: null,
 };

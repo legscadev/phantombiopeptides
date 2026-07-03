@@ -3,8 +3,8 @@
     {
       "batch": "PB-2607-A",
       "issued_at": "2026-07-01",
-      "lab": "Janoshik Analytical",
-      "verification_url": "https://janoshik.com",
+      "lab": "ISL Labs",
+      "verification_url": "https://isl-labs.com",
       "coas": [
         {
           "id": "kpv-5mg-pb2607a",
@@ -38,8 +38,8 @@
     {
       "batch": "PB-2605-B",
       "issued_at": "2026-05-14",
-      "lab": "Kovera Labs",
-      "verification_url": "https://koveralabs.com",
+      "lab": "ISL Labs",
+      "verification_url": "https://isl-labs.com",
       "coas": [
         {
           "id": "bpc-157-5mg-pb2605b",
@@ -82,8 +82,8 @@
     {
       "batch": "PB-2604-A",
       "issued_at": "2026-04-02",
-      "lab": "Janoshik Analytical",
-      "verification_url": "https://janoshik.com",
+      "lab": "ISL Labs",
+      "verification_url": "https://isl-labs.com",
       "coas": [
         {
           "id": "semaglutide-5mg-pb2604a",

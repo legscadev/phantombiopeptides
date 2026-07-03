@@ -29,13 +29,13 @@ export function ProductCard({ product, priority, className }: ProductCardProps) 
       whileHover={{ y: -4 }}
       transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
       className={cn(
-        "group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card transition-colors hover:border-border-strong",
+        "group relative flex flex-col overflow-hidden rounded-md border border-border bg-card transition-colors hover:border-primary/40",
         className,
       )}
     >
       <Link
         href={`/product/${product.slug}`}
-        className="relative block aspect-square overflow-hidden bg-background"
+        className="relative block aspect-[4/5] overflow-hidden bg-background-muted"
       >
         {primary && (
           <>
@@ -59,20 +59,16 @@ export function ProductCard({ product, priority, className }: ProductCardProps) 
           </>
         )}
 
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/40 via-transparent to-transparent opacity-60" />
-
         <div className="absolute left-3 top-3 flex flex-col gap-1.5">
-          {discount > 0 && (
-            <Badge variant="sale">-{discount}%</Badge>
-          )}
+          {discount > 0 && <Badge variant="sale">-{discount}%</Badge>}
           {product.tags.some((t) => t.slug === "new") && (
             <Badge variant="accent">New</Badge>
           )}
-          {outOfStock && <Badge variant="outline">Out of stock</Badge>}
+          {outOfStock && <Badge variant="outline">Sold out</Badge>}
         </div>
 
         {product.rating_count > 0 && (
-          <div className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-background/80 px-2 py-1 text-[11px] backdrop-blur">
+          <div className="absolute right-3 top-3 flex items-center gap-1 rounded-md bg-background/80 px-2 py-1 text-[11px] backdrop-blur">
             <Star className="h-3 w-3 fill-warning text-warning" />
             <span className="text-foreground/90">{product.average_rating}</span>
           </div>
@@ -81,13 +77,13 @@ export function ProductCard({ product, priority, className }: ProductCardProps) 
 
       <div className="flex flex-1 flex-col gap-2 p-4">
         {product.categories[0] && (
-          <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+          <p className="text-[10px] uppercase tracking-[0.14em] text-primary">
             {product.categories[0].name}
           </p>
         )}
         <Link
           href={`/product/${product.slug}`}
-          className="text-base font-medium leading-snug hover:text-primary transition-colors"
+          className="text-base font-bold leading-snug hover:text-primary transition-colors"
         >
           {product.name}
         </Link>
@@ -96,7 +92,7 @@ export function ProductCard({ product, priority, className }: ProductCardProps) 
         </p>
         <div className="mt-auto flex items-end justify-between pt-3">
           <div className="flex items-baseline gap-2">
-            <span className="text-lg font-semibold">
+            <span className="font-display text-lg font-bold text-foreground">
               {formatPrice(product.price)}
             </span>
             {product.on_sale && (
@@ -110,18 +106,17 @@ export function ProductCard({ product, priority, className }: ProductCardProps) 
             disabled={outOfStock || isLoading}
             onClick={() => addItem(product.id, 1)}
             className={cn(
-              "inline-flex h-9 w-9 items-center justify-center rounded-full border border-border-strong bg-background-elevated transition-all",
-              "hover:border-primary/60 hover:bg-primary hover:text-primary-foreground",
-              "disabled:opacity-40 disabled:hover:bg-background-elevated disabled:hover:text-foreground",
+              "inline-flex h-9 items-center justify-center gap-1.5 rounded-md bg-primary px-3 text-xs font-semibold uppercase tracking-wider text-primary-foreground transition-all",
+              "hover:brightness-110",
+              "disabled:opacity-40",
             )}
             aria-label={`Add ${product.name} to cart`}
           >
-            <ShoppingBag className="h-4 w-4" />
+            <ShoppingBag className="h-3.5 w-3.5" />
+            Add
           </button>
         </div>
       </div>
-
-      <span className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 shadow-[0_20px_60px_-20px_hsl(258_90%_50%/0.5)] transition-opacity duration-500 group-hover:opacity-100" />
     </motion.article>
   );
 }

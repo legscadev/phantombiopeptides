@@ -103,7 +103,7 @@ export const LEGAL_DOCS: Record<string, LegalDoc> = {
       {
         heading: "Free shipping",
         body: [
-          "Orders over $150 ship free within the United States.",
+          "Orders over $250 ship free within the United States.",
         ],
       },
       {
@@ -182,7 +182,7 @@ export const LEGAL_DOCS: Record<string, LegalDoc> = {
       {
         heading: "Purification & purity",
         body: [
-          "Reverse-phase HPLC purification. Minimum 99% purity target on every batch, verified by an independent third-party lab (Janoshik Analytical or equivalent).",
+          "Reverse-phase HPLC purification. Minimum 99% purity target on every batch, verified by an independent third-party lab (ISL Labs).",
         ],
       },
       {
