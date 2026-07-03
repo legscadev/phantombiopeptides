@@ -5,7 +5,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, ShoppingBag, User2 } from "lucide-react";
 import { Logo } from "./logo";
-import { SearchCommand } from "./search-command";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -25,8 +24,6 @@ interface NavbarProps {
 
 const STATIC_NAV = [
   { href: "/shop", label: "Shop" },
-  { href: "/coa", label: "COA" },
-  { href: "/blog", label: "Blog" },
   { href: "/about", label: "About" },
   { href: "/faq", label: "FAQ" },
 ];
@@ -94,10 +91,6 @@ export function Navbar({ categories = [], isSignedIn = false }: NavbarProps) {
             })}
           </nav>
 
-          <div className="hidden flex-1 justify-end lg:flex">
-            <SearchCommand />
-          </div>
-
           <div className="ml-auto flex items-center gap-2 lg:ml-2">
             <Button
               variant="ghost"
@@ -142,10 +135,7 @@ export function Navbar({ categories = [], isSignedIn = false }: NavbarProps) {
                     <Logo />
                   </SheetTitle>
                 </SheetHeader>
-                <div className="p-6">
-                  <SearchCommand />
-                </div>
-                <nav className="flex flex-col px-2 pb-8">
+                <nav className="flex flex-col px-2 pb-8 pt-4">
                   {nav.map((item) => (
                     <Link
                       key={item.href}
