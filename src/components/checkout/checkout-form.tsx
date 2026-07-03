@@ -56,7 +56,7 @@ export function CheckoutForm({ cart }: { cart: WCCart }) {
     appearance: {
       theme: "night",
       variables: {
-        colorPrimary: "hsl(258 90% 66%)",
+        colorPrimary: "hsl(178 78% 52%)",
         colorBackground: "hsl(224 40% 7%)",
         colorText: "hsl(210 40% 98%)",
         colorDanger: "hsl(0 85% 60%)",

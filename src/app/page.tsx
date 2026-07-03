@@ -4,6 +4,9 @@ import { ProductsService } from "@/services/products";
 import { CategoriesService } from "@/services/categories";
 import { Hero } from "@/components/marketing/hero";
 import { Benefits } from "@/components/marketing/benefits";
+import { Guarantee } from "@/components/marketing/guarantee";
+import { Comparison } from "@/components/marketing/comparison";
+import { Commitment } from "@/components/marketing/commitment";
 import { HowItWorks } from "@/components/marketing/how-it-works";
 import { CategoryShowcase } from "@/components/marketing/category-showcase";
 import { Testimonials } from "@/components/marketing/testimonials";
@@ -16,15 +19,21 @@ import { FAQS } from "@/lib/faqs";
 import { buildMetadata } from "@/lib/seo";
 
 export const metadata = buildMetadata({
-  title: "Research-grade peptides, engineered for clarity",
+  title: "Research-grade peptides, zero compromise",
   description:
-    "HPLC-verified research peptides with third-party COAs, cold-chain shipping, and full lot traceability.",
+    "99%+ purity research peptides, independently HPLC tested. Same-day dispatch, discreet shipping.",
 });
 
 export const revalidate = 300;
 
 export default async function HomePage() {
-  const emptyList = { data: [], totalItems: 0, totalPages: 1, page: 1, perPage: 0 };
+  const emptyList = {
+    data: [],
+    totalItems: 0,
+    totalPages: 1,
+    page: 1,
+    perPage: 0,
+  };
   const [featured, popularResult, categories] = await Promise.all([
     ProductsService.getFeatured(8).catch(() => []),
     ProductsService.list({
@@ -35,13 +44,14 @@ export default async function HomePage() {
     CategoriesService.list().catch(() => []),
   ]);
   const popular = popularResult.data;
+  const heroVials = (featured.length > 0 ? featured : popular).slice(0, 6);
 
   return (
     <>
-      <Hero />
+      <Hero vials={heroVials} />
 
       <Section
-        eyebrow="Featured"
+        eyebrow="Bestsellers"
         title="Popular in research this month."
         description="Our most-ordered compounds, verified batch-by-batch."
         actions={
@@ -55,15 +65,17 @@ export default async function HomePage() {
         <ProductGrid products={featured.slice(0, 8)} priorityCount={4} />
       </Section>
 
-      <Benefits />
+      <Guarantee />
 
       <CategoryShowcase categories={categories} />
 
-      <HowItWorks />
+      <Benefits />
 
-      <Section eyebrow="Bestsellers" title="Reordered most often.">
-        <ProductGrid products={popular} />
-      </Section>
+      <Comparison />
+
+      <Commitment />
+
+      <HowItWorks />
 
       <Testimonials />
 

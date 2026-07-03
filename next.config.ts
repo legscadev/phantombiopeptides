@@ -19,6 +19,17 @@ const nextConfig: NextConfig = {
     ],
     formats: ["image/avif", "image/webp"],
   },
+  async rewrites() {
+    return [
+      // Short legal URLs → /legal/<slug>
+      { source: "/terms", destination: "/legal/terms" },
+      { source: "/privacy", destination: "/legal/privacy" },
+      { source: "/shipping", destination: "/legal/shipping" },
+      { source: "/returns", destination: "/legal/returns" },
+      { source: "/research-use", destination: "/legal/research-use" },
+      { source: "/quality", destination: "/legal/quality" },
+    ];
+  },
   async headers() {
     return [
       {

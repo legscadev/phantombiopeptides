@@ -24,9 +24,10 @@ interface NavbarProps {
 
 const STATIC_NAV = [
   { href: "/shop", label: "Shop" },
+  { href: "/coa", label: "COA" },
+  { href: "/blog", label: "Blog" },
   { href: "/about", label: "About" },
   { href: "/faq", label: "FAQ" },
-  { href: "/contact", label: "Contact" },
 ];
 
 export function Navbar({ categories = [] }: NavbarProps) {
@@ -47,7 +48,7 @@ export function Navbar({ categories = [] }: NavbarProps) {
   // Show up to two live category links inline, alongside the static routes.
   const nav = [
     ...STATIC_NAV.slice(0, 1),
-    ...categories.slice(0, 2).map((c) => ({
+    ...categories.slice(0, 1).map((c) => ({
       href: `/category/${c.slug}`,
       label: c.name,
     })),

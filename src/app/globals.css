@@ -2,9 +2,9 @@
 
 /* ============================================================
    Phantom Labs — Design Tokens
-   Dark-first biotech aesthetic. Deep navy canvas, electric
-   violet + cyan accents, glass surfaces, subtle noise, soft
-   shadows.
+   Dark-first biotech aesthetic. Deep navy canvas, teal + cyan
+   accents (matches Phantom Bio brand), glass surfaces, subtle
+   noise, soft shadows.
    ============================================================ */
 
 @theme {
@@ -39,13 +39,14 @@
     --border: 224 25% 14%;
     --border-strong: 224 25% 20%;
     --input: 224 30% 10%;
-    --ring: 258 90% 66%;
+    --ring: 178 78% 52%;
 
-    /* Brand accents */
-    --primary: 258 90% 66%;         /* electric violet */
-    --primary-foreground: 210 40% 98%;
-    --accent: 190 95% 55%;          /* cyan */
+    /* Brand accents — Phantom Bio teal + cyan */
+    --primary: 178 78% 52%;         /* teal */
+    --primary-foreground: 224 47% 4%;
+    --accent: 190 95% 60%;          /* cyan */
     --accent-foreground: 224 47% 4%;
+    --gold: 42 92% 62%;             /* highlight badges */
     --success: 152 76% 46%;
     --warning: 38 92% 55%;
     --destructive: 0 85% 60%;
@@ -70,9 +71,9 @@
     --border: 220 15% 90%;
     --border-strong: 220 15% 82%;
     --input: 220 20% 96%;
-    --ring: 258 90% 60%;
+    --ring: 178 78% 60%;
 
-    --primary: 258 90% 60%;
+    --primary: 178 78% 60%;
     --primary-foreground: 210 40% 98%;
     --accent: 190 95% 45%;
     --accent-foreground: 210 40% 98%;
@@ -142,7 +143,7 @@
     background:
       radial-gradient(
         ellipse 80% 50% at 50% -10%,
-        hsl(258 90% 55% / 0.15),
+        hsl(178 78% 55% / 0.15),
         transparent 60%
       ),
       radial-gradient(

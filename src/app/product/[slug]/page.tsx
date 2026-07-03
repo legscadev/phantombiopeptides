@@ -4,7 +4,8 @@ import Link from "next/link";
 import { Star, Truck, ShieldCheck, RotateCcw, Package } from "lucide-react";
 import { ProductsService } from "@/services/products";
 import { ProductGallery } from "@/components/product/product-gallery";
-import { AddToCart } from "@/components/product/add-to-cart";
+import { PurchasePanel } from "@/components/product/purchase-panel";
+import { CoaBlock } from "@/components/product/coa-block";
 import { ProductTabs } from "@/components/product/product-tabs";
 import {
   RecentlyViewed,
@@ -222,7 +223,11 @@ export default async function ProductPage({ params }: Props) {
             </div>
 
             <div className="mt-8">
-              <AddToCart product={product} />
+              <PurchasePanel product={product} />
+            </div>
+
+            <div className="mt-6">
+              <CoaBlock productSlug={product.slug} />
             </div>
 
             <div className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-4">

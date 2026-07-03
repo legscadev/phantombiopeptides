@@ -1,0 +1,127 @@
+{
+  "batches": [
+    {
+      "batch": "PB-2607-A",
+      "issued_at": "2026-07-01",
+      "lab": "Janoshik Analytical",
+      "verification_url": "https://janoshik.com",
+      "coas": [
+        {
+          "id": "kpv-5mg-pb2607a",
+          "product_slug": "kpv-2",
+          "product_name": "KPV",
+          "dose": "5 mg",
+          "purity": 99.4,
+          "pdf_url": "/coa/kpv-5mg-PB2607A.pdf",
+          "thumb_url": "https://picsum.photos/seed/coa-kpv/800/800"
+        },
+        {
+          "id": "kisspeptin-10mg-pb2607a",
+          "product_slug": "kisspeptin",
+          "product_name": "Kisspeptin",
+          "dose": "10 mg",
+          "purity": 99.2,
+          "pdf_url": "/coa/kisspeptin-10mg-PB2607A.pdf",
+          "thumb_url": "https://picsum.photos/seed/coa-kiss/800/800"
+        },
+        {
+          "id": "hcg-5000-pb2607a",
+          "product_slug": "hcg",
+          "product_name": "HCG",
+          "dose": "5000 IU",
+          "purity": 99.6,
+          "pdf_url": "/coa/hcg-5000-PB2607A.pdf",
+          "thumb_url": "https://picsum.photos/seed/coa-hcg/800/800"
+        }
+      ]
+    },
+    {
+      "batch": "PB-2605-B",
+      "issued_at": "2026-05-14",
+      "lab": "Kovera Labs",
+      "verification_url": "https://koveralabs.com",
+      "coas": [
+        {
+          "id": "bpc-157-5mg-pb2605b",
+          "product_slug": "bpc-157",
+          "product_name": "BPC-157",
+          "dose": "5 mg",
+          "purity": 99.5,
+          "pdf_url": "/coa/bpc-157-5mg-PB2605B.pdf",
+          "thumb_url": "https://picsum.photos/seed/coa-bpc/800/800"
+        },
+        {
+          "id": "tb-500-5mg-pb2605b",
+          "product_slug": "tb-500",
+          "product_name": "TB-500",
+          "dose": "5 mg",
+          "purity": 99.1,
+          "pdf_url": "/coa/tb-500-5mg-PB2605B.pdf",
+          "thumb_url": "https://picsum.photos/seed/coa-tb500/800/800"
+        },
+        {
+          "id": "ghrp-6-5mg-pb2605b",
+          "product_slug": "ghrp-6",
+          "product_name": "GHRP-6",
+          "dose": "5 mg",
+          "purity": 99.3,
+          "pdf_url": "/coa/ghrp-6-5mg-PB2605B.pdf",
+          "thumb_url": "https://picsum.photos/seed/coa-ghrp6/800/800"
+        },
+        {
+          "id": "ghrp-2-5mg-pb2605b",
+          "product_slug": "ghrp-2",
+          "product_name": "GHRP-2",
+          "dose": "5 mg",
+          "purity": 99.2,
+          "pdf_url": "/coa/ghrp-2-5mg-PB2605B.pdf",
+          "thumb_url": "https://picsum.photos/seed/coa-ghrp2/800/800"
+        }
+      ]
+    },
+    {
+      "batch": "PB-2604-A",
+      "issued_at": "2026-04-02",
+      "lab": "Janoshik Analytical",
+      "verification_url": "https://janoshik.com",
+      "coas": [
+        {
+          "id": "semaglutide-5mg-pb2604a",
+          "product_slug": "semaglutide",
+          "product_name": "Semaglutide",
+          "dose": "5 mg",
+          "purity": 99.7,
+          "pdf_url": "/coa/semaglutide-5mg-PB2604A.pdf",
+          "thumb_url": "https://picsum.photos/seed/coa-sema/800/800"
+        },
+        {
+          "id": "tirzepatide-10mg-pb2604a",
+          "product_slug": "tirzepatide",
+          "product_name": "Tirzepatide",
+          "dose": "10 mg",
+          "purity": 99.4,
+          "pdf_url": "/coa/tirzepatide-10mg-PB2604A.pdf",
+          "thumb_url": "https://picsum.photos/seed/coa-tirz/800/800"
+        },
+        {
+          "id": "mots-c-10mg-pb2604a",
+          "product_slug": "mots-c",
+          "product_name": "MOTS-c",
+          "dose": "10 mg",
+          "purity": 99.3,
+          "pdf_url": "/coa/mots-c-10mg-PB2604A.pdf",
+          "thumb_url": "https://picsum.photos/seed/coa-mots/800/800"
+        },
+        {
+          "id": "ipamorelin-5mg-pb2604a",
+          "product_slug": "ipamorelin",
+          "product_name": "Ipamorelin",
+          "dose": "5 mg",
+          "purity": 99.0,
+          "pdf_url": "/coa/ipamorelin-5mg-PB2604A.pdf",
+          "thumb_url": "https://picsum.photos/seed/coa-ipa/800/800"
+        }
+      ]
+    }
+  ]
+}
