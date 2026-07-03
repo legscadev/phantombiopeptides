@@ -32,9 +32,16 @@ export default async function ShopAllPage({ searchParams }: Props) {
     perPage: 0,
   };
   const [{ data, totalPages, totalItems, page }, categories] = await Promise.all([
-    ProductsService.list(params).catch(() => emptyList),
+    ProductsService.list(params).catch((err) => {
+      console.error("[shop/all] ProductsService.list failed", {
+        params,
+        message: err instanceof Error ? err.message : String(err),
+      });
+      return emptyList;
+    }),
     CategoriesService.list().catch(() => []),
   ]);
+  console.log("[shop/all] rendered", { params, dataLen: data.length, page, totalPages, totalItems });
 
   return (
     <div className="container-page py-10 md:py-14">

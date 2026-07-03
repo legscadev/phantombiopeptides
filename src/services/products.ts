@@ -106,6 +106,12 @@ export const ProductsService = {
         tags: [CACHE.tag("list")],
       },
     );
+    console.log("[ProductsService.list]", {
+      query,
+      returnedCount: Array.isArray(data) ? data.length : "not-array",
+      total,
+      totalPages,
+    });
     const parsed = productsArraySchema.parse(data);
     return {
       data: parsed,
