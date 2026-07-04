@@ -115,23 +115,11 @@ export function Footer({ categories = [] }: FooterProps) {
           diagnostic applications.
         </div>
 
-        {/* Bottom bar — copyright + payment methods */}
-        <div className="mt-8 flex flex-col gap-4 border-t border-white/10 pt-8 text-[11px] uppercase tracking-[0.22em] text-white/50 md:flex-row md:items-center md:justify-between">
+        {/* Bottom bar */}
+        <div className="mt-8 border-t border-white/10 pt-8 text-[11px] uppercase tracking-[0.22em] text-white/50">
           <p>
             © {new Date().getFullYear()} {SITE_NAME}. All rights reserved.
           </p>
-          <ul className="flex flex-wrap items-center gap-2">
-            {["Visa", "Mastercard", "Amex", "Discover", "Apple Pay", "Google Pay", "Link"].map(
-              (label) => (
-                <li
-                  key={label}
-                  className="glass-dark rounded-md px-2.5 py-1 text-[10px] font-semibold tracking-wide text-white/70"
-                >
-                  {label}
-                </li>
-              ),
-            )}
-          </ul>
         </div>
       </div>
     </footer>
