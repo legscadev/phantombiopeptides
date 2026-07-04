@@ -9,7 +9,6 @@ import { Comparison } from "@/components/marketing/comparison";
 import { Commitment } from "@/components/marketing/commitment";
 import { HowItWorks } from "@/components/marketing/how-it-works";
 import { CategoryShowcase } from "@/components/marketing/category-showcase";
-import { Testimonials } from "@/components/marketing/testimonials";
 import { CtaSection } from "@/components/marketing/cta-section";
 import { FAQAccordion } from "@/components/marketing/faq-accordion";
 import { Section } from "@/components/common/section";
@@ -107,10 +106,7 @@ export default async function HomePage() {
       {/* 8 — HOW IT WORKS (light) */}
       <HowItWorks />
 
-      {/* 9 — TESTIMONIALS (light) */}
-      <Testimonials />
-
-      {/* 10 — FAQ preview (light) */}
+      {/* 9 — FAQ preview (light) */}
       <Reveal>
         <Section eyebrow="FAQ" title="Answers, before you ask.">
           <div className="mx-auto max-w-3xl">
