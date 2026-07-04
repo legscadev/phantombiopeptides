@@ -35,8 +35,11 @@ export function CheckoutRedirect({
   wpBase: string;
 }) {
   const primary = items[0];
+  // Target /checkout/ directly with the add-to-cart param — WooCommerce
+  // processes the query on any page load, so this lands the customer
+  // on the payment step in a single top-level navigation.
   const target = primary
-    ? `${wpBase.replace(/\/$/, "")}/?add-to-cart=${primary.productId}&quantity=${primary.quantity}`
+    ? `${wpBase.replace(/\/$/, "")}/checkout/?add-to-cart=${primary.productId}&quantity=${primary.quantity}`
     : `${wpBase.replace(/\/$/, "")}/checkout/`;
 
   React.useEffect(() => {
