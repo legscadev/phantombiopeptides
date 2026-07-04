@@ -2,12 +2,17 @@
 
 import * as React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { AddToCart } from "./add-to-cart";
+import { ShoppingBag, Loader2, ArrowUp } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useCart } from "@/hooks/use-cart";
 import { formatPrice } from "@/lib/utils";
 import type { WCProduct } from "@/types";
 
 export function StickyAddToCart({ product }: { product: WCProduct }) {
+  const { addItem, isLoading } = useCart();
   const [visible, setVisible] = React.useState(false);
+  const outOfStock = product.stock_status === "outofstock";
+  const isVariable = product.type === "variable";
 
   React.useEffect(() => {
     function onScroll() {
@@ -17,6 +22,17 @@ export function StickyAddToCart({ product }: { product: WCProduct }) {
     onScroll();
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  const handleClick = () => {
+    if (isVariable) {
+      // Send the customer back to the purchase panel so they can pick
+      // a dose. Otherwise a raw add-to-cart on a variable product would
+      // fail with "Missing attributes for variable product".
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+    addItem(product.id, 1);
+  };
 
   return (
     <AnimatePresence>
@@ -35,12 +51,32 @@ export function StickyAddToCart({ product }: { product: WCProduct }) {
                   {product.name}
                 </p>
                 <p className="text-xs text-muted-foreground">
+                  {isVariable && "From "}
                   {formatPrice(product.price)}
                 </p>
               </div>
-              <div className="w-64 max-w-full">
-                <AddToCart product={product} />
-              </div>
+              <Button
+                size="lg"
+                disabled={outOfStock || isLoading}
+                onClick={handleClick}
+                className="shrink-0"
+              >
+                {isLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : outOfStock ? (
+                  "Out of stock"
+                ) : isVariable ? (
+                  <>
+                    <ArrowUp className="h-4 w-4" />
+                    Choose options
+                  </>
+                ) : (
+                  <>
+                    <ShoppingBag className="h-4 w-4" />
+                    Add to cart
+                  </>
+                )}
+              </Button>
             </div>
           </div>
         </motion.div>
