@@ -13,8 +13,8 @@ export interface Promo {
 }
 
 export const currentPromo: Promo = {
-  enabled: true,
-  message: "Free shipping on US orders over $250.",
+  enabled: false,
+  message: "",
   cta_label: "Shop peptides",
   cta_href: "/shop",
   ends_at: null,
