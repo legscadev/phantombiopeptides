@@ -46,43 +46,40 @@ export const CheckoutService = {
     )?.value;
 
     const line_items = cartItems.map((it) => {
-      const meta: Array<{ key: string; value: string }> =
-        it.variation?.map((v) => ({
-          key: v.attribute,
-          value: v.value,
-        })) ?? [];
-      return {
+      const line: Record<string, unknown> = {
         product_id: it.id,
         quantity: it.quantity,
-        meta_data: meta,
       };
+      if (it.variation && it.variation.length > 0) {
+        line.meta_data = it.variation.map((v) => ({
+          key: v.attribute,
+          value: v.value,
+        }));
+      }
+      return line;
     });
 
-    const meta_data: Array<{ key: string; value: unknown }> = [
-      { key: "_headless_source", value: "phantombiopeptides-nextjs" },
-    ];
+    const orderPayload: Record<string, unknown> = {
+      payment_method: input.payment_method || "stripe",
+      payment_method_title:
+        input.payment_method === "stripe" ? "Stripe" : input.payment_method,
+      set_paid: false,
+      status: "pending",
+      billing: input.billing_address,
+      shipping: input.shipping_address,
+      line_items,
+    };
+    if (input.customer_note) orderPayload.customer_note = input.customer_note;
     if (stripePmId) {
-      meta_data.push({
-        key: "_stripe_payment_method_id",
-        value: String(stripePmId),
-      });
+      orderPayload.meta_data = [
+        { key: "_stripe_payment_method_id", value: String(stripePmId) },
+      ];
     }
 
     const order = await wc<Record<string, unknown>>("/orders", {
       method: "POST",
       revalidate: false,
-      body: JSON.stringify({
-        payment_method: input.payment_method || "stripe",
-        payment_method_title:
-          input.payment_method === "stripe" ? "Stripe" : input.payment_method,
-        set_paid: false,
-        status: "pending",
-        billing: input.billing_address,
-        shipping: input.shipping_address,
-        line_items,
-        customer_note: input.customer_note ?? "",
-        meta_data,
-      }),
+      body: JSON.stringify(orderPayload),
     } as never);
 
     if (!env.WC_STORE_URL) {
