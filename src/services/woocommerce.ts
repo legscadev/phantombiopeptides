@@ -44,28 +44,50 @@ function buildQuery(
 async function rawFetch(url: string, options: WCFetchOptions): Promise<Response> {
   const { query, body, revalidate, tags, headers, ...rest } = options;
   const finalUrl = `${url}${buildQuery(query)}`;
-  const res = await fetch(finalUrl, {
-    ...rest,
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-      ...(headers ?? {}),
-    },
-    body: body ? JSON.stringify(body) : undefined,
-    next:
-      revalidate === false
-        ? { revalidate: 0 }
-        : { revalidate: revalidate ?? 60, tags },
-  });
-  if (!res.ok) {
-    const detail = await res.text().catch(() => "");
-    throw new WooError(
-      `WooCommerce request failed: ${res.status} ${res.statusText}`,
-      res.status,
-      detail,
-    );
+  const method = (rest.method ?? "GET").toUpperCase();
+  const isWrite = method !== "GET";
+
+  // WordPress.com's WAF / wpcomsh sometimes returns a PHP fatal (500)
+  // on the first hit of a write request — retry once for POST/PUT/etc.
+  // Also send a browser-like UA; some hosts are stricter with the
+  // default node UA on write endpoints.
+  let attempt = 0;
+  const maxAttempts = isWrite ? 2 : 1;
+  while (true) {
+    attempt++;
+    const res = await fetch(finalUrl, {
+      ...rest,
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        "User-Agent":
+          "PhantomBiopeptides-Nextjs/1.0 (+https://phantombiopeptides.com)",
+        ...(headers ?? {}),
+      },
+      body: body ? JSON.stringify(body) : undefined,
+      cache: isWrite ? "no-store" : undefined,
+      next: isWrite
+        ? undefined
+        : revalidate === false
+          ? { revalidate: 0 }
+          : { revalidate: revalidate ?? 60, tags },
+    });
+    if (!res.ok) {
+      const detail = await res.text().catch(() => "");
+      const transient = res.status >= 500 && res.status <= 504;
+      if (transient && attempt < maxAttempts) {
+        // Small delay and retry once.
+        await new Promise((r) => setTimeout(r, 350));
+        continue;
+      }
+      throw new WooError(
+        `WooCommerce request failed: ${res.status} ${res.statusText}`,
+        res.status,
+        detail,
+      );
+    }
+    return res;
   }
-  return res;
 }
 
 async function request<T>(url: string, options: WCFetchOptions): Promise<T> {

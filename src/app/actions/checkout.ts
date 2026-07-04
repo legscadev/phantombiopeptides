@@ -48,31 +48,13 @@ export async function startCheckoutAction(
     }
 
     // Woo order in "pending" — payment is not yet captured.
-    let order;
-    try {
-      order = await CheckoutService.submit({
-        billing_address: input.billing_address,
-        shipping_address: input.shipping_address,
-        customer_note: input.customer_note ?? "",
-        payment_method: "stripe",
-        payment_data: [],
-      });
-    } catch (err) {
-      const e = err as { status?: number; detail?: string; message?: string };
-      // Try to pull out the human-readable message from the wpcomsh
-      // fatal HTML, otherwise fall through to a chunk of the raw body.
-      const raw = e?.detail ?? "";
-      const m1 = raw.match(/<h2[^>]*>([^<]{5,300})<\/h2>/);
-      const m2 = raw.match(/<p[^>]*>([^<]{20,400})<\/p>/);
-      console.error("[startCheckoutAction] CheckoutService.submit failed", {
-        status: e?.status,
-        message: e?.message,
-        h2: m1?.[1],
-        p: m2?.[1],
-        rawTail: raw.slice(-800),
-      });
-      throw err;
-    }
+    const order = await CheckoutService.submit({
+      billing_address: input.billing_address,
+      shipping_address: input.shipping_address,
+      customer_note: input.customer_note ?? "",
+      payment_method: "stripe",
+      payment_data: [],
+    });
 
     const minorUnits = cart.totals.currency_minor_unit ?? 2;
     const amountMinor = Math.round(total * 10 ** minorUnits);
