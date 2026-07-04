@@ -46,6 +46,16 @@ async function rawFetch(url: string, options: WCFetchOptions): Promise<Response>
   const finalUrl = `${url}${buildQuery(query)}`;
   const method = (rest.method ?? "GET").toUpperCase();
   const isWrite = method !== "GET";
+  // Callers can pass either a raw object (we JSON.stringify) or a
+  // pre-serialised string (we send as-is). Double-stringifying was
+  // silently sending Woo a JSON-encoded string containing the payload,
+  // which Woo happily parsed as text and then created an empty order.
+  const serialisedBody =
+    body === undefined || body === null
+      ? undefined
+      : typeof body === "string"
+        ? body
+        : JSON.stringify(body);
 
   // WordPress.com's WAF / wpcomsh sometimes returns a PHP fatal (500)
   // on the first hit of a write request — retry once for POST/PUT/etc.
@@ -64,7 +74,7 @@ async function rawFetch(url: string, options: WCFetchOptions): Promise<Response>
           "PhantomBiopeptides-Nextjs/1.0 (+https://phantombiopeptides.com)",
         ...(headers ?? {}),
       },
-      body: body ? JSON.stringify(body) : undefined,
+      body: serialisedBody,
       cache: isWrite ? "no-store" : undefined,
       next: isWrite
         ? undefined
