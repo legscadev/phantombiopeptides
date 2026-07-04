@@ -6,14 +6,9 @@ import {
   FileCheck,
   Snowflake,
 } from "lucide-react";
-import { DarkSection } from "@/components/common/dark-section";
+import { Section } from "@/components/common/section";
 import { Reveal } from "@/components/common/reveal";
 
-/**
- * "The Phantom Standard" — dark six-card feature grid. Each card is a
- * translucent glass tile on the brand-black surface, with a small
- * rounded brand-gradient icon plinth to draw the eye.
- */
 const items = [
   {
     icon: Beaker,
@@ -49,7 +44,7 @@ const items = [
 
 export function Benefits() {
   return (
-    <DarkSection
+    <Section
       eyebrow="Why choose us"
       title="The Phantom Standard."
       description="Six commitments we enforce on every shipment that leaves the facility."
@@ -57,28 +52,28 @@ export function Benefits() {
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {items.map((item, i) => (
           <Reveal key={item.title} delay={i * 0.05}>
-            <div className="glass-dark ring-glass-dark group h-full rounded-3xl p-7 transition-transform duration-500 hover:-translate-y-1">
+            <div className="glass ring-glass group h-full rounded-3xl p-7 transition-transform duration-500 hover:-translate-y-1">
               <div
-                className="mb-5 inline-flex h-11 w-11 items-center justify-center rounded-2xl text-white"
+                className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-2xl text-white"
                 style={{
                   background:
                     "linear-gradient(135deg, hsl(var(--brand-500)) 0%, hsl(var(--brand-400)) 100%)",
                   boxShadow:
-                    "0 10px 24px -12px hsl(var(--brand-500) / 0.55)",
+                    "0 10px 24px -12px hsl(var(--brand-500) / 0.5)",
                 }}
               >
                 <item.icon className="h-5 w-5" strokeWidth={2.2} />
               </div>
-              <h3 className="font-display text-lg font-extrabold tracking-tight text-white">
+              <h3 className="font-display text-lg font-extrabold tracking-tight text-foreground">
                 {item.title}
               </h3>
-              <p className="mt-2 text-sm leading-relaxed text-white/65">
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                 {item.body}
               </p>
             </div>
           </Reveal>
         ))}
       </div>
-    </DarkSection>
+    </Section>
   );
 }

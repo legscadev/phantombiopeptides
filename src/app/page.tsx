@@ -12,7 +12,6 @@ import { CategoryShowcase } from "@/components/marketing/category-showcase";
 import { CtaSection } from "@/components/marketing/cta-section";
 import { FAQAccordion } from "@/components/marketing/faq-accordion";
 import { Section } from "@/components/common/section";
-import { DarkSection } from "@/components/common/dark-section";
 import { Reveal } from "@/components/common/reveal";
 import { ProductGrid } from "@/components/product/product-grid";
 import { Button } from "@/components/ui/button";
@@ -52,19 +51,14 @@ export default async function HomePage() {
       {/* 1 — HERO (dark) */}
       <Hero />
 
-      {/* 2 — BEST SELLERS (dark) — sits directly under the hero to mirror
-             the EVO reference. Product cards use the dark variant so
-             their info panels read on the brand-black surface. */}
-      <DarkSection
+      {/* 2 — BEST SELLERS (light) — light surface breaks the dark hero
+             so we never run two dark sections in a row. */}
+      <Section
         eyebrow="Top research compounds"
         title="Bestselling now."
         description="Our most-ordered peptides — verified batch-by-batch, in stock and ready to ship."
         actions={
-          <Button
-            variant="outline"
-            asChild
-            className="border-white/25 bg-white/[0.04] text-white hover:bg-white/[0.08] hover:text-white"
-          >
+          <Button variant="outline" asChild>
             <Link href="/shop">
               View all products <ArrowUpRight className="h-3.5 w-3.5" />
             </Link>
@@ -72,29 +66,26 @@ export default async function HomePage() {
         }
       >
         <Reveal>
-          <ProductGrid
-            products={bestsellers.slice(0, 8)}
-            priorityCount={4}
-            variant="dark"
-          />
+          <ProductGrid products={bestsellers.slice(0, 8)} priorityCount={4} />
         </Reveal>
         <div className="mt-10 text-center">
           <Link
             href="/shop"
-            className="inline-flex items-center gap-1 text-sm font-semibold text-[color:hsl(var(--brand-300))] transition-transform duration-300 hover:translate-x-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:hsl(var(--brand-300))] focus-visible:ring-offset-2 focus-visible:ring-offset-[#060606]"
+            className="inline-flex items-center gap-1 text-sm font-semibold text-[color:hsl(var(--brand-500))] transition-transform duration-300 hover:translate-x-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:hsl(var(--brand-500))] focus-visible:ring-offset-2"
           >
             Browse the catalog <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </div>
-      </DarkSection>
+      </Section>
 
-      {/* 3 — GUARANTEE (light) — pastel cards break to a light surface */}
+      {/* 3 — GUARANTEE (light) */}
       <Guarantee />
 
       {/* 4 — SHOP BY CATEGORY (dark) — horizontal rail */}
       <CategoryShowcase categories={categories} />
 
-      {/* 5 — THE PHANTOM STANDARD (dark) */}
+      {/* 5 — THE PHANTOM STANDARD (light) — breaks the Category dark
+             surface so nothing runs dark-dark. */}
       <Benefits />
 
       {/* 6 — WHY RESEARCHERS CHOOSE PHANTOM BIO (light comparison) */}
