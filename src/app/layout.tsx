@@ -3,7 +3,6 @@ import { Geist_Mono, Roboto } from "next/font/google";
 import Script from "next/script";
 import { CartService } from "@/services/cart";
 import { CategoriesService } from "@/services/categories";
-import { AuthService } from "@/services/auth";
 import { Providers } from "@/providers";
 import { AnnouncementBar } from "@/components/layout/announcement-bar";
 import { Navbar } from "@/components/layout/navbar";
@@ -32,12 +31,10 @@ export const viewport: Viewport = {
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const [initialCart, categories, session] = await Promise.all([
+  const [initialCart, categories] = await Promise.all([
     CartService.get().catch(() => null),
     CategoriesService.list().catch(() => []),
-    AuthService.getSession().catch(() => null),
   ]);
-  const isSignedIn = Boolean(session);
 
   return (
     <html
@@ -57,7 +54,7 @@ export default async function RootLayout({
           <AgeGate />
           <PromoModal />
           <AnnouncementBar />
-          <Navbar isSignedIn={isSignedIn} />
+          <Navbar />
           <CartDrawer />
           <main className="flex-1">{children}</main>
           <Footer categories={categories} />

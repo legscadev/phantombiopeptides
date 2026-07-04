@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, ShoppingBag, User2 } from "lucide-react";
+import { Menu, ShoppingBag } from "lucide-react";
 import { Logo } from "./logo";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,9 +15,6 @@ import {
 } from "@/components/ui/sheet";
 import { useCart } from "@/hooks/use-cart";
 import { cn } from "@/lib/utils";
-interface NavbarProps {
-  isSignedIn?: boolean;
-}
 
 const STATIC_NAV = [
   { href: "/shop", label: "Products" },
@@ -25,7 +22,7 @@ const STATIC_NAV = [
   { href: "/faq", label: "FAQ" },
 ];
 
-export function Navbar({ isSignedIn = false }: NavbarProps) {
+export function Navbar() {
   const pathname = usePathname();
   const { itemCount, openDrawer } = useCart();
   const [scrolled, setScrolled] = React.useState(false);
@@ -81,18 +78,6 @@ export function Navbar({ isSignedIn = false }: NavbarProps) {
           </nav>
 
           <div className="ml-auto flex items-center gap-2 lg:ml-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="hidden md:inline-flex"
-              aria-label={isSignedIn ? "Account" : "Sign in"}
-              asChild
-            >
-              <Link href={isSignedIn ? "/account" : "/login"}>
-                <User2 className="h-4 w-4" />
-              </Link>
-            </Button>
-
             <button
               type="button"
               onClick={openDrawer}
