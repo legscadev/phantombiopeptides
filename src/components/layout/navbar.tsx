@@ -20,6 +20,7 @@ const STATIC_NAV = [
   { href: "/shop", label: "Products" },
   { href: "/about", label: "About" },
   { href: "/faq", label: "FAQ" },
+  { href: "/contact", label: "Contact" },
 ];
 
 export function Navbar() {
