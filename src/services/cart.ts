@@ -1,7 +1,7 @@
 import "server-only";
 import { cookies } from "next/headers";
 import { ProductsService } from "./products";
-import type { WCCart, WCProduct } from "@/types";
+import type { WCCart, WCProduct, WCVariation } from "@/types";
 
 /**
  * Cart is stored on our side (httpOnly cookie), not in WooCommerce.
@@ -26,6 +26,8 @@ interface CartLineItem {
   id: number;
   quantity: number;
   variation?: Array<{ attribute: string; value: string }>;
+  /** WooCommerce variation id for variable products. */
+  variation_id?: number;
 }
 
 function variationHash(v?: CartLineItem["variation"]): string {
@@ -41,6 +43,9 @@ function variationHash(v?: CartLineItem["variation"]): string {
 }
 
 function itemKey(item: CartLineItem): string {
+  // Prefer the concrete WC variation id when we have it (guaranteed
+  // unique per line), fall back to hashing the raw attributes.
+  if (item.variation_id) return `k${item.id}-v${item.variation_id}`;
   const suffix = variationHash(item.variation);
   return suffix ? `k${item.id}-${suffix}` : `k${item.id}`;
 }
@@ -56,10 +61,18 @@ async function readCartItems(): Promise<CartLineItem[]> {
   try {
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
-    return parsed.filter(
-      (x): x is CartLineItem =>
-        typeof x?.id === "number" && typeof x?.quantity === "number",
-    );
+    return parsed
+      .filter(
+        (x): x is CartLineItem =>
+          typeof x?.id === "number" && typeof x?.quantity === "number",
+      )
+      .map((x) => ({
+        id: x.id,
+        quantity: x.quantity,
+        variation: x.variation,
+        variation_id:
+          typeof x.variation_id === "number" ? x.variation_id : undefined,
+      }));
   } catch {
     return [];
   }
@@ -98,24 +111,36 @@ function emptyCart(): WCCart {
 function buildLineItem(
   item: CartLineItem,
   product: WCProduct,
+  variation: WCVariation | null,
 ): WCCart["items"][number] {
-  const price = parseFloat(product.price) || 0;
-  const lineSubtotal = price * item.quantity;
+  // Variation price / image / stock take precedence over the parent
+  // product's values when the customer picked a specific variation.
+  const unitPrice = parseFloat(variation?.price || product.price) || 0;
+  const regularPrice = variation?.regular_price || product.regular_price;
+  const salePrice = variation?.sale_price || product.sale_price;
+  const lineSubtotal = unitPrice * item.quantity;
+  const image = variation?.image ?? product.images[0];
+  const doseSuffix = item.variation
+    ?.map((v) => v.value)
+    .join(" / ");
+  const displayName = doseSuffix
+    ? `${product.name} — ${doseSuffix}`
+    : product.name;
   return {
     key: itemKey(item),
     id: product.id,
     quantity: item.quantity,
-    name: product.name,
+    name: displayName,
     short_description: product.short_description,
     permalink: product.permalink,
-    images: product.images.slice(0, 1),
+    images: image ? [image] : [],
     prices: {
       currency_code: "USD",
       currency_symbol: "$",
       currency_minor_unit: 2,
-      price: product.price,
-      regular_price: product.regular_price,
-      sale_price: product.sale_price,
+      price: unitPrice.toFixed(2),
+      regular_price: regularPrice,
+      sale_price: salePrice,
     },
     totals: {
       line_subtotal: lineSubtotal.toFixed(2),
@@ -126,13 +151,44 @@ function buildLineItem(
 
 async function hydrateCart(items: CartLineItem[]): Promise<WCCart> {
   if (items.length === 0) return emptyCart();
-  const products = await Promise.all(
+  const productsPromise = Promise.all(
     items.map((it) => ProductsService.getById(it.id).catch(() => null)),
   );
+  // For every line that has a variation_id, fetch the full variations
+  // list for the parent product once and pick the matching variant.
+  const uniqueVariableIds = Array.from(
+    new Set(
+      items
+        .filter((it) => typeof it.variation_id === "number")
+        .map((it) => it.id),
+    ),
+  );
+  const variationListsPromise = Promise.all(
+    uniqueVariableIds.map((pid) =>
+      ProductsService.getVariations(pid).catch(() => [] as WCVariation[]),
+    ),
+  );
+  const [products, variationLists] = await Promise.all([
+    productsPromise,
+    variationListsPromise,
+  ]);
+  const variationsByProductId = new Map<number, WCVariation[]>();
+  uniqueVariableIds.forEach((pid, i) =>
+    variationsByProductId.set(pid, variationLists[i] ?? []),
+  );
+
   const cartItems: WCCart["items"] = [];
   for (let i = 0; i < items.length; i++) {
     const p = products[i];
-    if (p) cartItems.push(buildLineItem(items[i], p));
+    if (!p) continue;
+    const line = items[i];
+    let variation: WCVariation | null = null;
+    if (line.variation_id) {
+      const list = variationsByProductId.get(line.id) ?? [];
+      variation =
+        list.find((v) => v.id === line.variation_id) ?? null;
+    }
+    cartItems.push(buildLineItem(line, p, variation));
   }
   const subtotal = cartItems.reduce(
     (s, it) => s + parseFloat(it.totals.line_subtotal),
@@ -165,9 +221,15 @@ export const CartService = {
     productId: number,
     quantity = 1,
     variation?: Array<{ attribute: string; value: string }>,
+    variationId?: number,
   ): Promise<WCCart> {
     const items = await readCartItems();
-    const newLine: CartLineItem = { id: productId, quantity, variation };
+    const newLine: CartLineItem = {
+      id: productId,
+      quantity,
+      variation,
+      variation_id: variationId,
+    };
     const existing = items.find((it) => sameLine(it, newLine));
     if (existing) existing.quantity += quantity;
     else items.push(newLine);

@@ -24,6 +24,7 @@ interface CartContextValue {
     productId: number,
     quantity?: number,
     variation?: Array<{ attribute: string; value: string }>,
+    variationId?: number,
   ) => Promise<void>;
   updateItem: (key: string, quantity: number) => Promise<void>;
   removeItem: (key: string) => Promise<void>;
@@ -70,9 +71,9 @@ export function CartProvider({
           const next = await getCartAction();
           return next;
         }),
-      addItem: async (productId, quantity = 1, variation) => {
+      addItem: async (productId, quantity = 1, variation, variationId) => {
         await withLoading(() =>
-          addToCartAction(productId, quantity, variation),
+          addToCartAction(productId, quantity, variation, variationId),
         );
         toast.success("Added to cart");
       },

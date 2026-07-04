@@ -8,8 +8,14 @@ export async function addToCartAction(
   productId: number,
   quantity = 1,
   variation?: Array<{ attribute: string; value: string }>,
+  variationId?: number,
 ): Promise<WCCart> {
-  const cart = await CartService.addItem(productId, quantity, variation);
+  const cart = await CartService.addItem(
+    productId,
+    quantity,
+    variation,
+    variationId,
+  );
   revalidatePath("/cart");
   return cart;
 }

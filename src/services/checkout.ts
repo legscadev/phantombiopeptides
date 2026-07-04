@@ -59,7 +59,12 @@ export const CheckoutService = {
         product_id: it.id,
         quantity: it.quantity,
       };
-      if (it.variation && it.variation.length > 0) {
+      if (typeof it.variation_id === "number") {
+        // With a concrete variation_id Woo uses the variation's price
+        // and no attribute meta needs to be sent — Woo resolves the
+        // display name and options itself.
+        line.variation_id = it.variation_id;
+      } else if (it.variation && it.variation.length > 0) {
         line.meta_data = it.variation.map((v) => ({
           key: v.attribute,
           value: v.value,

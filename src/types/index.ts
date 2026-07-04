@@ -3,6 +3,7 @@ export type {
   WCCategory,
   WCAttribute,
   WCProduct,
+  WCVariation,
   WCReview,
   WCCart,
   WCCartItem,

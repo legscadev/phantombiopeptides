@@ -21,12 +21,7 @@ import {
   productJsonLd,
   breadcrumbJsonLd,
 } from "@/lib/seo";
-import {
-  calculateDiscount,
-  formatPrice,
-  stripHtml,
-  truncate,
-} from "@/lib/utils";
+import { calculateDiscount, stripHtml, truncate } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -72,9 +67,12 @@ export default async function ProductPage({ params }: Props) {
   const product = await ProductsService.getBySlug(slug);
   if (!product) notFound();
 
-  const [related, reviews] = await Promise.all([
+  const [related, reviews, variations] = await Promise.all([
     ProductsService.getRelated(product.id, 4),
     ProductsService.getReviews(product.id),
+    product.type === "variable"
+      ? ProductsService.getVariations(product.id).catch(() => [])
+      : Promise.resolve([]),
   ]);
 
   const primaryCategory = product.categories[0];
@@ -84,7 +82,6 @@ export default async function ProductPage({ params }: Props) {
         product.sale_price || product.price,
       )
     : 0;
-  const stock = product.stock_status;
 
   return (
     <>
@@ -194,37 +191,8 @@ export default async function ProductPage({ params }: Props) {
               {product.short_description}
             </p>
 
-            <div className="mt-8 flex items-baseline gap-3">
-              <span className="text-4xl font-semibold tracking-tight">
-                {formatPrice(product.price)}
-              </span>
-              {product.on_sale && (
-                <span className="text-lg text-muted-foreground line-through">
-                  {formatPrice(product.regular_price)}
-                </span>
-              )}
-            </div>
-
-            <div className="mt-3 flex items-center gap-2 text-sm">
-              <span
-                className={
-                  stock === "instock"
-                    ? "text-success"
-                    : stock === "onbackorder"
-                      ? "text-warning"
-                      : "text-destructive"
-                }
-              >
-                {stock === "instock"
-                  ? `In stock${product.stock_quantity ? ` — ${product.stock_quantity} units` : ""}`
-                  : stock === "onbackorder"
-                    ? "Available on backorder"
-                    : "Out of stock"}
-              </span>
-            </div>
-
             <div className="mt-8">
-              <PurchasePanel product={product} />
+              <PurchasePanel product={product} variations={variations} />
             </div>
 
             <div className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-4">

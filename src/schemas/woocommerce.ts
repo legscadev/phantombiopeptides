@@ -102,6 +102,29 @@ export const wcProductSchema = z.object({
   meta_data: z.array(wcMetaSchema).optional().default([]),
 });
 
+export const wcVariationSchema = z.object({
+  id: z.number(),
+  price: z.string().default("0"),
+  regular_price: z.string().default("0"),
+  sale_price: z.string().default(""),
+  on_sale: z.boolean().default(false),
+  stock_status: z
+    .enum(["instock", "outofstock", "onbackorder"])
+    .default("instock"),
+  stock_quantity: z.number().nullable().optional(),
+  image: wcImageSchema.nullable().optional(),
+  sku: z.string().optional().default(""),
+  attributes: z
+    .array(
+      z.object({
+        id: z.number().optional(),
+        name: decodedString,
+        option: decodedString,
+      }),
+    )
+    .default([]),
+});
+
 export const wcReviewSchema = z.object({
   id: z.number(),
   product_id: z.number(),
@@ -203,6 +226,7 @@ export type WCImage = z.infer<typeof wcImageSchema>;
 export type WCCategory = z.infer<typeof wcCategorySchema>;
 export type WCAttribute = z.infer<typeof wcAttributeSchema>;
 export type WCProduct = z.infer<typeof wcProductSchema>;
+export type WCVariation = z.infer<typeof wcVariationSchema>;
 export type WCReview = z.infer<typeof wcReviewSchema>;
 export type WCCart = z.infer<typeof wcCartSchema>;
 export type WCCartItem = z.infer<typeof wcCartItemSchema>;

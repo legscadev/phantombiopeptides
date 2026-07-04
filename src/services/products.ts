@@ -1,12 +1,22 @@
 import "server-only";
 import { z } from "zod";
 import { wc, wcWithMeta, shouldUseMocks } from "./woocommerce";
-import { wcProductSchema, wcReviewSchema } from "@/schemas/woocommerce";
+import {
+  wcProductSchema,
+  wcReviewSchema,
+  wcVariationSchema,
+} from "@/schemas/woocommerce";
 import { mockProducts, mockReviewsByProduct } from "@/mocks/products";
-import type { ProductQueryParams, WCProduct, WCReview } from "@/types";
+import type {
+  ProductQueryParams,
+  WCProduct,
+  WCReview,
+  WCVariation,
+} from "@/types";
 
 const productsArraySchema = z.array(wcProductSchema);
 const reviewsArraySchema = z.array(wcReviewSchema);
+const variationsArraySchema = z.array(wcVariationSchema);
 
 const CACHE = { revalidate: 300, tag: (p: string) => `products:${p}` };
 
@@ -154,6 +164,15 @@ export const ProductsService = {
   async getFeatured(limit = 6): Promise<WCProduct[]> {
     const { data } = await this.list({ featured: true, per_page: limit });
     return data;
+  },
+
+  async getVariations(productId: number): Promise<WCVariation[]> {
+    if (shouldUseMocks()) return [];
+    const data = await wc<WCVariation[]>(
+      `/products/${productId}/variations`,
+      { query: { per_page: 20 }, revalidate: CACHE.revalidate },
+    );
+    return variationsArraySchema.parse(data);
   },
 
   async getReviews(productId: number): Promise<WCReview[]> {
