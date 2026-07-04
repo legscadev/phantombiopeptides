@@ -48,13 +48,24 @@ export async function startCheckoutAction(
     }
 
     // Woo order in "pending" — payment is not yet captured.
-    const order = await CheckoutService.submit({
-      billing_address: input.billing_address,
-      shipping_address: input.shipping_address,
-      customer_note: input.customer_note ?? "",
-      payment_method: "stripe",
-      payment_data: [],
-    });
+    let order;
+    try {
+      order = await CheckoutService.submit({
+        billing_address: input.billing_address,
+        shipping_address: input.shipping_address,
+        customer_note: input.customer_note ?? "",
+        payment_method: "stripe",
+        payment_data: [],
+      });
+    } catch (err) {
+      const e = err as { status?: number; detail?: string; message?: string };
+      console.error("[startCheckoutAction] CheckoutService.submit failed", {
+        status: e?.status,
+        message: e?.message,
+        detail: e?.detail?.slice(0, 500),
+      });
+      throw err;
+    }
 
     const minorUnits = cart.totals.currency_minor_unit ?? 2;
     const amountMinor = Math.round(total * 10 ** minorUnits);
