@@ -59,10 +59,17 @@ export async function startCheckoutAction(
       });
     } catch (err) {
       const e = err as { status?: number; detail?: string; message?: string };
+      // Try to pull out the human-readable message from the wpcomsh
+      // fatal HTML, otherwise fall through to a chunk of the raw body.
+      const raw = e?.detail ?? "";
+      const m1 = raw.match(/<h2[^>]*>([^<]{5,300})<\/h2>/);
+      const m2 = raw.match(/<p[^>]*>([^<]{20,400})<\/p>/);
       console.error("[startCheckoutAction] CheckoutService.submit failed", {
         status: e?.status,
         message: e?.message,
-        detail: e?.detail?.slice(0, 500),
+        h2: m1?.[1],
+        p: m2?.[1],
+        rawTail: raw.slice(-800),
       });
       throw err;
     }
