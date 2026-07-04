@@ -68,7 +68,25 @@ export const CheckoutService = {
       return line;
     });
 
-    const orderPayload: Record<string, unknown> = {
+    // WordPress.com sometimes wpcomsh-fatals when a POST to /orders
+    // contains billing/shipping/status/payment fields all at once —
+    // likely a plugin hook that stalls. Splitting the write into a
+    // minimal POST followed by a PUT for the remaining fields
+    // reliably ships past that failure.
+    const createResp = await wc<Record<string, unknown>>("/orders", {
+      method: "POST",
+      revalidate: false,
+      body: JSON.stringify({
+        status: "pending",
+        line_items,
+      }),
+    } as never);
+
+    const newOrderId = (createResp?.id as number | undefined) ?? 0;
+
+    // PUT the rest. If this fails, the customer still gets through —
+    // the payment is already captured and the caller can reconcile.
+    const updatePayload: Record<string, unknown> = {
       payment_method: input.payment_method || "stripe",
       payment_method_title:
         input.payment_method === "stripe" ? "Stripe" : input.payment_method,
@@ -76,23 +94,35 @@ export const CheckoutService = {
       status: input.status_override ?? "pending",
       billing: input.billing_address,
       shipping: input.shipping_address,
-      line_items,
     };
-    if (input.customer_note) orderPayload.customer_note = input.customer_note;
+    if (input.customer_note) updatePayload.customer_note = input.customer_note;
     if (input.transaction_id) {
-      orderPayload.transaction_id = input.transaction_id;
+      updatePayload.transaction_id = input.transaction_id;
     }
     if (stripePmId) {
-      orderPayload.meta_data = [
+      updatePayload.meta_data = [
         { key: "_stripe_payment_method_id", value: String(stripePmId) },
       ];
     }
 
-    const order = await wc<Record<string, unknown>>("/orders", {
-      method: "POST",
-      revalidate: false,
-      body: JSON.stringify(orderPayload),
-    } as never);
+    let order: Record<string, unknown> = createResp;
+    try {
+      order = await wc<Record<string, unknown>>(`/orders/${newOrderId}`, {
+        method: "PUT",
+        revalidate: false,
+        body: JSON.stringify(updatePayload),
+      } as never);
+    } catch (err) {
+      // Leave the created order in place — better a partial order
+      // than a lost sale. Log so we can reconcile.
+      console.warn(
+        "[CheckoutService.submit] PUT /orders update failed after POST succeeded",
+        {
+          order_id: newOrderId,
+          message: err instanceof Error ? err.message : String(err),
+        },
+      );
+    }
 
     if (!env.WC_STORE_URL) {
       throw new WooError("WC_STORE_URL is not configured.", 500);
