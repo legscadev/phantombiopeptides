@@ -99,11 +99,36 @@ export const CheckoutService = {
     if (input.transaction_id) {
       updatePayload.transaction_id = input.transaction_id;
     }
+
+    // Woo's "Origin" column reads from the Order Attribution meta,
+    // which is normally populated by a client-side script on the WP
+    // checkout. Since our orders arrive fully-composed via REST, we
+    // set the minimum set of keys so the column shows a friendly
+    // source instead of "Unknown".
+    const attributionMeta: Array<{ key: string; value: string }> = [
+      { key: "_wc_order_attribution_source_type", value: "typein" },
+      {
+        key: "_wc_order_attribution_utm_source",
+        value: "phantombiopeptides.com",
+      },
+      { key: "_wc_order_attribution_utm_medium", value: "headless" },
+      { key: "_wc_order_attribution_device_type", value: "Desktop" },
+      { key: "_wc_order_attribution_session_entry", value: "/checkout" },
+      {
+        key: "_wc_order_attribution_user_agent",
+        value: "PhantomBiopeptides Next.js Storefront",
+      },
+    ];
+    const metaData: Array<{ key: string; value: string }> = [
+      ...attributionMeta,
+    ];
     if (stripePmId) {
-      updatePayload.meta_data = [
-        { key: "_stripe_payment_method_id", value: String(stripePmId) },
-      ];
+      metaData.push({
+        key: "_stripe_payment_method_id",
+        value: String(stripePmId),
+      });
     }
+    updatePayload.meta_data = metaData;
 
     let order: Record<string, unknown> = createResp;
     try {
