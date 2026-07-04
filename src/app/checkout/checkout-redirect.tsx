@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Loader2, ArrowRight } from "lucide-react";
+import { Loader2, ArrowRight, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface Item {
@@ -11,14 +11,21 @@ interface Item {
 }
 
 /**
- * Bridge component. Populates the WooCommerce cart on wpcomstaging.com
- * by loading each item as a `?add-to-cart` URL in a hidden iframe (which
- * sets the WP session cookie on their domain in the customer's browser)
- * and then top-level navigates to the WP /checkout page where the full
- * Stripe / Apple Pay / Google Pay / Link UI is available.
+ * Hand the customer off to the WordPress checkout.
  *
- * Falls back to a manual "Continue" button after a short deadline so
- * customers are never stuck if a network request stalls.
+ * WooCommerce's session cookie is set as first-party on
+ * `kickbackai-pkjdo.wpcomstaging.com` — it can only be established
+ * from a top-level navigation to that domain, not from a cross-origin
+ * iframe (browsers refuse to persist third-party cookies). So we do
+ * exactly that: top.location.href to `<wp>/?add-to-cart=<id>&quantity=<n>`,
+ * WP adds the item and redirects to its own /cart page, where the
+ * customer can click "Proceed to Checkout" for the full Stripe UI.
+ *
+ * Multi-item note: this pattern only carries ONE cart line across.
+ * The full multi-item handoff needs a small WP-side snippet that
+ * reads all lines from a URL param; until that's in place, the UI
+ * surfaces a warning and takes the customer through with the first
+ * line only.
  */
 export function CheckoutRedirect({
   items,
@@ -27,52 +34,39 @@ export function CheckoutRedirect({
   items: Item[];
   wpBase: string;
 }) {
-  const [ready, setReady] = React.useState<Set<number>>(new Set());
-  const [showFallback, setShowFallback] = React.useState(false);
-  const checkoutUrl = `${wpBase.replace(/\/$/, "")}/checkout/`;
+  const primary = items[0];
+  const target = primary
+    ? `${wpBase.replace(/\/$/, "")}/?add-to-cart=${primary.productId}&quantity=${primary.quantity}`
+    : `${wpBase.replace(/\/$/, "")}/checkout/`;
 
   React.useEffect(() => {
-    // Give the whole flow at most ~10s before we surface a manual button.
-    const t = setTimeout(() => setShowFallback(true), 10_000);
-    return () => clearTimeout(t);
-  }, []);
-
-  React.useEffect(() => {
-    if (items.length === 0) return;
-    if (ready.size >= items.length) {
-      // All items acknowledged — send the customer to WP checkout.
-      window.location.href = checkoutUrl;
-    }
-  }, [ready, items.length, checkoutUrl]);
-
-  const onFrameLoad = (i: number) => {
-    setReady((prev) => {
-      const next = new Set(prev);
-      next.add(i);
-      return next;
-    });
-  };
-
-  if (items.length === 0) return null;
+    if (!primary) return;
+    // Give the UI one frame to paint before we navigate away.
+    const t = window.setTimeout(() => {
+      window.location.href = target;
+    }, 350);
+    return () => window.clearTimeout(t);
+  }, [primary, target]);
 
   return (
-    <div className="mt-8 rounded-3xl border border-border bg-card p-10 text-center md:p-14">
-      <Loader2 className="mx-auto h-6 w-6 animate-spin text-primary" />
-      <p className="mt-6 text-xs uppercase tracking-[0.24em] text-primary">
-        Secure checkout
-      </p>
-      <h2 className="mt-2 font-display text-2xl font-bold tracking-tight sm:text-3xl">
-        Preparing your order…
-      </h2>
-      <p className="mt-2 text-sm text-muted-foreground">
-        We&apos;re handing you off to our secure payment provider. This takes
-        a couple of seconds.
-      </p>
+    <div className="mt-8 space-y-5">
+      <div className="rounded-3xl border border-border bg-card p-10 text-center md:p-14">
+        <Loader2 className="mx-auto h-6 w-6 animate-spin text-primary" />
+        <p className="mt-6 text-xs uppercase tracking-[0.24em] text-primary">
+          Secure checkout
+        </p>
+        <h2 className="mt-2 font-display text-2xl font-bold tracking-tight sm:text-3xl">
+          Handing you off to secure payment…
+        </h2>
+        <p className="mt-2 text-sm text-muted-foreground">
+          You&apos;re about to enter our payment provider hosted by
+          WooCommerce + Stripe. Cards, Apple Pay, Google Pay, and Link are
+          supported.
+        </p>
 
-      {showFallback && (
         <div className="mt-6">
           <Button asChild size="lg">
-            <a href={checkoutUrl}>
+            <a href={target}>
               Continue to checkout <ArrowRight className="h-4 w-4" />
             </a>
           </Button>
@@ -83,19 +77,22 @@ export function CheckoutRedirect({
             </Link>
           </p>
         </div>
-      )}
-
-      {/* Hidden iframes populate the WP guest session with each cart line. */}
-      <div className="sr-only" aria-hidden>
-        {items.map((it, i) => (
-          <iframe
-            key={`${it.productId}-${i}`}
-            title=""
-            src={`${wpBase.replace(/\/$/, "")}/?add-to-cart=${it.productId}&quantity=${it.quantity}`}
-            onLoad={() => onFrameLoad(i)}
-          />
-        ))}
       </div>
+
+      {items.length > 1 && (
+        <div className="flex items-start gap-3 rounded-2xl border border-warning/40 bg-warning/5 p-4 text-sm">
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
+          <div>
+            <p className="font-medium text-foreground">
+              Multi-item carts: only the first item transfers automatically.
+            </p>
+            <p className="mt-1 text-muted-foreground">
+              Add the remaining items on the checkout page. We&apos;re
+              working on a one-click transfer for the whole basket.
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
