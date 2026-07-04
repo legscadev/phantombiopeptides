@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { ShoppingBag } from "lucide-react";
+import { ShoppingBag, KeyRound } from "lucide-react";
 import { CartService } from "@/services/cart";
 import { Breadcrumb } from "@/components/common/breadcrumb";
 import { Button } from "@/components/ui/button";
-import { CheckoutRedirect } from "./checkout-redirect";
+import { CheckoutForm } from "@/components/checkout/checkout-form";
 import { buildMetadata } from "@/lib/seo";
 import { env } from "@/env";
 
@@ -17,9 +17,10 @@ export const metadata = buildMetadata({
 export const dynamic = "force-dynamic";
 
 export default async function CheckoutPage() {
-  const items = await CartService.getLineItems();
+  const cart = await CartService.get().catch(() => null);
+  const hasStripe = Boolean(env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
 
-  if (items.length === 0) {
+  if (!cart || cart.items.length === 0) {
     return (
       <div className="container-page py-16">
         <Breadcrumb
@@ -40,8 +41,6 @@ export default async function CheckoutPage() {
     );
   }
 
-  const wpBase = env.WC_STORE_URL ?? "";
-
   return (
     <div className="container-page py-10 md:py-14">
       <Breadcrumb
@@ -55,13 +54,32 @@ export default async function CheckoutPage() {
         Checkout
       </h1>
 
-      <CheckoutRedirect
-        items={items.map((it) => ({
-          productId: it.id,
-          quantity: it.quantity,
-        }))}
-        wpBase={wpBase}
-      />
+      {!hasStripe ? (
+        <div className="mt-8 flex items-start gap-3 rounded-2xl border border-warning/40 bg-warning/5 p-5 text-sm">
+          <KeyRound className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
+          <div>
+            <p className="font-medium text-foreground">
+              Stripe publishable key missing
+            </p>
+            <p className="mt-1 text-muted-foreground">
+              Set{" "}
+              <code className="font-mono">
+                NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+              </code>{" "}
+              in Vercel (Project → Settings → Environment Variables) to
+              enable the payment form. It starts with{" "}
+              <code className="font-mono">pk_live_</code> or{" "}
+              <code className="font-mono">pk_test_</code>. The matching{" "}
+              <code className="font-mono">STRIPE_SECRET_KEY</code> is also
+              required for the server side of the flow.
+            </p>
+          </div>
+        </div>
+      ) : (
+        <div className="mt-8">
+          <CheckoutForm cart={cart} />
+        </div>
+      )}
     </div>
   );
 }

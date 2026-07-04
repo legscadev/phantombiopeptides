@@ -15,7 +15,10 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { Loader2, Lock, ArrowRight, AlertTriangle } from "lucide-react";
 import { getStripe } from "@/lib/stripe";
-import { submitCheckoutAction } from "@/app/actions/checkout";
+import {
+  startCheckoutAction,
+  finalizeCheckoutAction,
+} from "@/app/actions/checkout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -48,21 +51,21 @@ export function CheckoutForm({ cart }: { cart: WCCart }) {
       10 ** (cart.totals.currency_minor_unit ?? 2),
   );
 
+  // "Deferred" Elements mode — we haven't created a PaymentIntent yet
+  // (that happens on submit), so we pass amount + currency here and
+  // Stripe uses them to decide which methods to show (Card, Apple Pay,
+  // Google Pay, Link, etc.).
   const options: StripeElementsOptions = {
     mode: "payment",
     amount: amountMinor > 0 ? amountMinor : 100,
     currency,
-    paymentMethodCreation: "manual",
     appearance: {
-      theme: "night",
+      theme: "stripe",
       variables: {
-        colorPrimary: "hsl(178 78% 52%)",
-        colorBackground: "hsl(224 40% 7%)",
-        colorText: "hsl(210 40% 98%)",
-        colorDanger: "hsl(0 85% 60%)",
-        fontFamily:
-          "var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif",
+        colorPrimary: "hsl(264 100% 45%)",
         borderRadius: "12px",
+        fontFamily:
+          "var(--font-roboto), ui-sans-serif, system-ui, sans-serif",
       },
     },
   };
@@ -87,9 +90,7 @@ function InnerCheckoutForm({ cart }: { cart: WCCart }) {
     formState: { errors },
   } = useForm<Values>({
     resolver: zodResolver(schema),
-    defaultValues: {
-      country: "US",
-    },
+    defaultValues: { country: "US" },
   });
 
   const currency = cart.totals.currency_code;
@@ -104,35 +105,10 @@ function InnerCheckoutForm({ cart }: { cart: WCCart }) {
 
     setSubmitting(true);
     try {
-      // Validate the Payment Element (card, wallets, etc.).
+      // Have the Payment Element validate what the customer has typed.
       const { error: submitError } = await elements.submit();
       if (submitError) {
         setError(submitError.message ?? "Please check the payment details.");
-        return;
-      }
-
-      // Create a PaymentMethod from the collected details.
-      const { error: pmError, paymentMethod } =
-        await stripe.createPaymentMethod({
-          elements,
-          params: {
-            billing_details: {
-              email: values.email,
-              name: `${values.first_name} ${values.last_name}`.trim(),
-              phone: values.phone || undefined,
-              address: {
-                line1: values.address_1,
-                line2: values.address_2 || undefined,
-                city: values.city,
-                state: values.state,
-                postal_code: values.postcode,
-                country: values.country,
-              },
-            },
-          },
-        });
-      if (pmError || !paymentMethod) {
-        setError(pmError?.message ?? "Card details could not be processed.");
         return;
       }
 
@@ -150,45 +126,77 @@ function InnerCheckoutForm({ cart }: { cart: WCCart }) {
         phone: values.phone ?? "",
       };
 
-      const result = await submitCheckoutAction({
+      // Server: create Woo order + Stripe PaymentIntent, return
+      // client_secret.
+      const start = await startCheckoutAction({
         billing_address: address,
         shipping_address: address,
         customer_note: values.customer_note ?? "",
-        stripe_payment_method_id: paymentMethod.id,
       });
-
-      if (!result.ok) {
-        setError(result.error ?? "Checkout failed. Please try again.");
+      if (!start.ok || !start.client_secret || !start.order_id) {
+        setError(start.error ?? "Checkout could not be started.");
         return;
       }
 
-      // Handle 3-D Secure (SCA).
-      if (result.requires_action_client_secret) {
-        const { error: actionError, paymentIntent } =
-          await stripe.handleNextAction({
-            clientSecret: result.requires_action_client_secret,
-          });
-        if (actionError) {
-          setError(actionError.message ?? "Authentication failed.");
-          return;
-        }
-        if (paymentIntent?.status !== "succeeded") {
-          setError(
-            "Payment was not completed. Please try again or use a different card.",
-          );
-          return;
-        }
-      } else if (result.redirect_url) {
-        window.location.assign(result.redirect_url);
+      // Confirm the payment against Stripe. `redirect: "if_required"`
+      // keeps the customer on our page unless the payment method (e.g.
+      // some cards under 3-D Secure) mandates a bank-hosted step.
+      const { error: confirmError, paymentIntent } =
+        await stripe.confirmPayment({
+          elements,
+          clientSecret: start.client_secret,
+          confirmParams: {
+            return_url: `${window.location.origin}/thank-you?order=${start.order_id}`,
+            payment_method_data: {
+              billing_details: {
+                email: values.email,
+                name: `${values.first_name} ${values.last_name}`.trim(),
+                phone: values.phone || undefined,
+                address: {
+                  line1: values.address_1,
+                  line2: values.address_2 || undefined,
+                  city: values.city,
+                  state: values.state,
+                  postal_code: values.postcode,
+                  country: values.country.toUpperCase(),
+                },
+              },
+            },
+          },
+          redirect: "if_required",
+        });
+
+      if (confirmError) {
+        setError(
+          confirmError.message ??
+            "Payment was declined. Please try a different card.",
+        );
         return;
       }
 
-      const orderId = result.order?.order_id;
-      const orderKey = result.order?.order_key;
-      toast.success("Payment approved — thank you.");
-      router.push(
-        `/thank-you?order=${orderId ?? ""}${orderKey ? `&key=${orderKey}` : ""}`,
+      if (paymentIntent?.status !== "succeeded") {
+        setError(
+          `Payment was not completed (status: ${paymentIntent?.status ?? "unknown"}).`,
+        );
+        return;
+      }
+
+      // Flip the Woo order to processing + clear the cart.
+      const finalize = await finalizeCheckoutAction(
+        start.order_id,
+        paymentIntent.id,
       );
+      if (!finalize.ok) {
+        // The payment succeeded but bookkeeping failed — don't lose the
+        // customer. Log them through anyway; support can reconcile.
+        toast.error(
+          "Payment recorded but our system had a hiccup — support has been notified.",
+        );
+      } else {
+        toast.success("Payment approved — thank you.");
+      }
+
+      router.push(`/thank-you?order=${start.order_id}`);
     } catch (err) {
       setError(
         err instanceof Error
@@ -317,8 +325,8 @@ function InnerCheckoutForm({ cart }: { cart: WCCart }) {
             Payment
           </legend>
           <p className="mb-4 text-xs text-muted-foreground">
-            Cards, Apple Pay, and Google Pay are supported. Your details are
-            processed by Stripe — we never see the card number.
+            Cards, Apple Pay, Google Pay and Link are supported. Details go
+            straight to Stripe — we never see your card number.
           </p>
           <PaymentElement
             options={{
@@ -373,18 +381,12 @@ function InnerCheckoutForm({ cart }: { cart: WCCart }) {
             <span>Subtotal</span>
             <span>{formatPrice(cart.totals.total_items, currency)}</span>
           </div>
-          {parseFloat(cart.totals.total_discount) > 0 && (
-            <div className="flex justify-between text-success">
-              <span>Discount</span>
-              <span>
-                -{formatPrice(cart.totals.total_discount, currency)}
-              </span>
-            </div>
-          )}
           {parseFloat(cart.totals.total_shipping ?? "0") > 0 && (
             <div className="flex justify-between text-muted-foreground">
               <span>Shipping</span>
-              <span>{formatPrice(cart.totals.total_shipping!, currency)}</span>
+              <span>
+                {formatPrice(cart.totals.total_shipping!, currency)}
+              </span>
             </div>
           )}
           {parseFloat(cart.totals.total_tax ?? "0") > 0 && (
@@ -416,7 +418,7 @@ function InnerCheckoutForm({ cart }: { cart: WCCart }) {
         </Button>
         <p className="flex items-center justify-center gap-1.5 text-center text-[11px] text-muted-foreground">
           <Lock className="h-3 w-3" />
-          Secure headless checkout · Stripe · SSL
+          Secure checkout · Stripe · SSL
         </p>
       </aside>
     </form>

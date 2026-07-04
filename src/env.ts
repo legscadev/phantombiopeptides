@@ -16,6 +16,8 @@ const envSchema = z.object({
   WC_API_VERSION: z.string().default("wc/v3"),
   WC_STORE_API_VERSION: z.string().default("wc/store/v1"),
 
+  STRIPE_SECRET_KEY: z.string().optional(),
+
   REVALIDATE_SECRET: z.string().optional(),
 });
 
@@ -30,6 +32,7 @@ const parsed = envSchema.safeParse({
   WC_CONSUMER_SECRET: process.env.WC_CONSUMER_SECRET,
   WC_API_VERSION: process.env.WC_API_VERSION,
   WC_STORE_API_VERSION: process.env.WC_STORE_API_VERSION,
+  STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
   REVALIDATE_SECRET: process.env.REVALIDATE_SECRET,
 });
 
