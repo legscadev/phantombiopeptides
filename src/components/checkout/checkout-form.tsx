@@ -57,10 +57,9 @@ export function CheckoutForm({ cart }: { cart: WCCart }) {
   // Google Pay, Link, etc.).
   //
   // Stripe's Payment Element renders in a cross-origin iframe so CSS
-  // custom properties like `var(--font-roboto)` from the host page do
-  // not resolve — falling back to Times New Roman. We instead point
-  // Stripe at Google Fonts directly via `fonts.cssSrc` and name the
-  // family explicitly.
+  // custom properties like `var(--font-brand)` from the host page do
+  // not resolve. Load Barlow (our brand font) directly via
+  // `fonts.cssSrc` and name it explicitly.
   const options: StripeElementsOptions = {
     mode: "payment",
     amount: amountMinor > 0 ? amountMinor : 100,
@@ -68,15 +67,15 @@ export function CheckoutForm({ cart }: { cart: WCCart }) {
     fonts: [
       {
         cssSrc:
-          "https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap",
+          "https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600;700&display=swap",
       },
     ],
     appearance: {
       theme: "stripe",
       variables: {
-        colorPrimary: "hsl(264 100% 45%)",
+        colorPrimary: "hsl(264 100% 34%)",
         borderRadius: "12px",
-        fontFamily: "Roboto, ui-sans-serif, system-ui, sans-serif",
+        fontFamily: "Barlow, ui-sans-serif, system-ui, sans-serif",
       },
     },
   };

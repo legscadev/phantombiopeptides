@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist_Mono, Roboto } from "next/font/google";
+import { Geist_Mono, Barlow, Barlow_Condensed } from "next/font/google";
 import Script from "next/script";
 import { CartService } from "@/services/cart";
 import { CategoriesService } from "@/services/categories";
@@ -13,10 +13,20 @@ import { PromoModal } from "@/components/marketing/promo-modal";
 import { buildMetadata, organizationJsonLd } from "@/lib/seo";
 import "./globals.css";
 
-const sans = Roboto({
-  variable: "--font-roboto",
+// Body / UI sans: Barlow — closest free Google Fonts match to
+// Adidas' proprietary AdihausDIN (geometric, slightly condensed,
+// strong x-height).
+const sans = Barlow({
+  variable: "--font-brand",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "700", "900"],
+  weight: ["300", "400", "500", "600", "700", "800", "900"],
+});
+// Display headings: Barlow Condensed for a punchier athletic feel
+// on titles — pairs cleanly with Barlow at body sizes.
+const display = Barlow_Condensed({
+  variable: "--font-brand-display",
+  subsets: ["latin"],
+  weight: ["500", "600", "700", "800", "900"],
 });
 const mono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 
@@ -39,7 +49,7 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      className={`${sans.variable} ${mono.variable} antialiased`}
+      className={`${sans.variable} ${display.variable} ${mono.variable} antialiased`}
     >
       <body className="min-h-screen bg-background text-foreground flex flex-col font-sans">
         <Script
