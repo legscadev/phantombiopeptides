@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { ProductsService } from "@/services/products";
 import { CategoriesService } from "@/services/categories";
 import { Hero } from "@/components/marketing/hero";
@@ -13,6 +13,7 @@ import { Testimonials } from "@/components/marketing/testimonials";
 import { CtaSection } from "@/components/marketing/cta-section";
 import { FAQAccordion } from "@/components/marketing/faq-accordion";
 import { Section } from "@/components/common/section";
+import { DarkSection } from "@/components/common/dark-section";
 import { Reveal } from "@/components/common/reveal";
 import { ProductGrid } from "@/components/product/product-grid";
 import { Button } from "@/components/ui/button";
@@ -49,47 +50,67 @@ export default async function HomePage() {
 
   return (
     <>
+      {/* 1 — HERO (dark) */}
       <Hero />
 
-      <Reveal>
-        <Section
-          eyebrow="Bestsellers"
-          title="Bestselling now"
-          description="Our most-ordered compounds, verified batch-by-batch."
-          actions={
-            <Button variant="outline" asChild>
-              <Link href="/shop">
-                Shop all <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
-            </Button>
-          }
-        >
-          <ProductGrid products={bestsellers.slice(0, 8)} priorityCount={4} />
-          <div className="mt-10 text-center">
-            <Link
-              href="/shop"
-              className="inline-flex items-center gap-1 text-sm font-semibold text-[color:hsl(var(--brand-500))] transition-transform duration-300 hover:translate-x-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:hsl(var(--brand-500))] focus-visible:ring-offset-2"
-            >
-              Browse the catalog <ArrowRight className="h-3.5 w-3.5" />
+      {/* 2 — BEST SELLERS (dark) — sits directly under the hero to mirror
+             the EVO reference. Product cards use the dark variant so
+             their info panels read on the brand-black surface. */}
+      <DarkSection
+        eyebrow="Top research compounds"
+        title="Bestselling now."
+        description="Our most-ordered peptides — verified batch-by-batch, in stock and ready to ship."
+        actions={
+          <Button
+            variant="outline"
+            asChild
+            className="border-white/25 bg-white/[0.04] text-white hover:bg-white/[0.08] hover:text-white"
+          >
+            <Link href="/shop">
+              View all products <ArrowUpRight className="h-3.5 w-3.5" />
             </Link>
-          </div>
-        </Section>
-      </Reveal>
+          </Button>
+        }
+      >
+        <Reveal>
+          <ProductGrid
+            products={bestsellers.slice(0, 8)}
+            priorityCount={4}
+            variant="dark"
+          />
+        </Reveal>
+        <div className="mt-10 text-center">
+          <Link
+            href="/shop"
+            className="inline-flex items-center gap-1 text-sm font-semibold text-[color:hsl(var(--brand-300))] transition-transform duration-300 hover:translate-x-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:hsl(var(--brand-300))] focus-visible:ring-offset-2 focus-visible:ring-offset-[#060606]"
+          >
+            Browse the catalog <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
+        </div>
+      </DarkSection>
 
+      {/* 3 — GUARANTEE (light) — pastel cards break to a light surface */}
       <Guarantee />
 
+      {/* 4 — SHOP BY CATEGORY (dark) — horizontal rail */}
       <CategoryShowcase categories={categories} />
 
+      {/* 5 — THE PHANTOM STANDARD (dark) */}
       <Benefits />
 
+      {/* 6 — WHY RESEARCHERS CHOOSE PHANTOM BIO (light comparison) */}
       <Comparison />
 
+      {/* 7 — OUR COMMITMENT (light) */}
       <Commitment />
 
+      {/* 8 — HOW IT WORKS (light) */}
       <HowItWorks />
 
+      {/* 9 — TESTIMONIALS (light) */}
       <Testimonials />
 
+      {/* 10 — FAQ preview (light) */}
       <Reveal>
         <Section eyebrow="FAQ" title="Answers, before you ask.">
           <div className="mx-auto max-w-3xl">
@@ -105,6 +126,7 @@ export default async function HomePage() {
         </Section>
       </Reveal>
 
+      {/* 11 — CLOSING CTA (dark ambient banner) */}
       <CtaSection />
     </>
   );

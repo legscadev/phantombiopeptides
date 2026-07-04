@@ -6,14 +6,32 @@ interface Props {
   products: WCProduct[];
   className?: string;
   priorityCount?: number;
+  variant?: "light" | "dark";
 }
 
-export function ProductGrid({ products, className, priorityCount = 0 }: Props) {
+export function ProductGrid({
+  products,
+  className,
+  priorityCount = 0,
+  variant = "light",
+}: Props) {
   if (products.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-border bg-card p-16 text-center">
+      <div
+        className={cn(
+          "rounded-2xl border border-dashed p-16 text-center",
+          variant === "dark"
+            ? "border-white/15 bg-white/[0.03] text-white/80"
+            : "border-border bg-card",
+        )}
+      >
         <p className="text-lg font-medium">No products found</p>
-        <p className="mt-2 text-sm text-muted-foreground">
+        <p
+          className={cn(
+            "mt-2 text-sm",
+            variant === "dark" ? "text-white/50" : "text-muted-foreground",
+          )}
+        >
           Try adjusting your filters or search terms.
         </p>
       </div>
@@ -31,6 +49,7 @@ export function ProductGrid({ products, className, priorityCount = 0 }: Props) {
           key={p.id}
           product={p}
           priority={i < priorityCount}
+          variant={variant}
         />
       ))}
     </div>

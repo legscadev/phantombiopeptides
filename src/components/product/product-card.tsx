@@ -13,6 +13,10 @@ interface ProductCardProps {
   product: WCProduct;
   priority?: boolean;
   className?: string;
+  /** Surface variant. "light" (default) sits on light sections; "dark"
+   *  swaps the info panel for a translucent dark tile that reads on a
+   *  brand-black surface (e.g. the Bestsellers rail). */
+  variant?: "light" | "dark";
 }
 
 /**
@@ -20,7 +24,12 @@ interface ProductCardProps {
  * media plinth. Hover: gentle lift, brighter halo, image cross-fades to
  * the secondary shot.
  */
-export function ProductCard({ product, priority, className }: ProductCardProps) {
+export function ProductCard({
+  product,
+  priority,
+  className,
+  variant = "light",
+}: ProductCardProps) {
   const { addItem, isLoading } = useCart();
   const discount = product.on_sale
     ? calculateDiscount(product.regular_price, product.sale_price || product.price)
@@ -32,17 +41,17 @@ export function ProductCard({ product, priority, className }: ProductCardProps) 
   const priceLabel = isVariable
     ? `From ${formatPrice(product.price)}`
     : formatPrice(product.price);
+  const isDark = variant === "dark";
 
   return (
     <motion.article
       whileHover={{ y: -6 }}
       transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
       className={cn(
-        "group relative flex flex-col overflow-hidden rounded-3xl bg-white/80 backdrop-blur-md",
-        "ring-1 ring-black/5",
-        "shadow-[0_10px_30px_-15px_rgba(9,4,24,0.15)]",
-        "transition-all duration-500",
-        "hover:ring-[color:hsl(var(--brand-500))]/25 hover:shadow-[0_35px_60px_-25px_hsl(var(--brand-500)/0.35)]",
+        "group relative flex flex-col overflow-hidden rounded-3xl backdrop-blur-md transition-all duration-500",
+        isDark
+          ? "bg-white/[0.04] ring-1 ring-white/10 shadow-[0_18px_40px_-25px_rgba(0,0,0,0.7)] hover:ring-[color:hsl(var(--brand-300))]/40 hover:shadow-[0_45px_80px_-30px_hsl(var(--brand-500)/0.55)]"
+          : "bg-white/80 ring-1 ring-black/5 shadow-[0_10px_30px_-15px_rgba(9,4,24,0.15)] hover:ring-[color:hsl(var(--brand-500))]/25 hover:shadow-[0_35px_60px_-25px_hsl(var(--brand-500)/0.35)]",
         className,
       )}
     >
@@ -133,32 +142,64 @@ export function ProductCard({ product, priority, className }: ProductCardProps) 
 
       <div className="flex flex-1 flex-col gap-1.5 p-5">
         {product.categories[0] && (
-          <p className="text-[10px] uppercase tracking-[0.16em] text-[color:hsl(var(--brand-500))]">
+          <p
+            className={cn(
+              "text-[10px] uppercase tracking-[0.16em]",
+              isDark
+                ? "text-[color:hsl(var(--brand-300))]"
+                : "text-[color:hsl(var(--brand-500))]",
+            )}
+          >
             {product.categories[0].name}
           </p>
         )}
         <Link
           href={`/product/${product.slug}`}
-          className="font-display text-lg font-bold leading-snug tracking-tight transition-colors hover:text-[color:hsl(var(--brand-500))]"
+          className={cn(
+            "font-display text-lg font-bold leading-snug tracking-tight transition-colors",
+            isDark
+              ? "text-white hover:text-[color:hsl(var(--brand-200))]"
+              : "text-foreground hover:text-[color:hsl(var(--brand-500))]",
+          )}
         >
           {product.name}
         </Link>
-        <p className="line-clamp-2 text-sm leading-relaxed text-muted-foreground">
+        <p
+          className={cn(
+            "line-clamp-2 text-sm leading-relaxed",
+            isDark ? "text-white/60" : "text-muted-foreground",
+          )}
+        >
           {product.short_description}
         </p>
         <div className="mt-auto flex items-end justify-between pt-4">
           <div className="flex flex-col">
             {isVariable && (
-              <span className="text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+              <span
+                className={cn(
+                  "text-[10px] uppercase tracking-[0.16em]",
+                  isDark ? "text-white/50" : "text-muted-foreground",
+                )}
+              >
                 From
               </span>
             )}
             <div className="flex items-baseline gap-2">
-              <span className="font-display text-xl font-bold text-foreground">
+              <span
+                className={cn(
+                  "font-display text-xl font-bold",
+                  isDark ? "text-white" : "text-foreground",
+                )}
+              >
                 {isVariable ? formatPrice(product.price) : priceLabel}
               </span>
               {product.on_sale && !isVariable && (
-                <span className="text-xs text-muted-foreground line-through">
+                <span
+                  className={cn(
+                    "text-xs line-through",
+                    isDark ? "text-white/40" : "text-muted-foreground",
+                  )}
+                >
                   {formatPrice(product.regular_price)}
                 </span>
               )}

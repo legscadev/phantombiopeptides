@@ -104,15 +104,34 @@ export function Footer({ categories = [] }: FooterProps) {
           ))}
         </div>
 
-        <div className="mt-14 flex flex-col gap-4 border-t border-white/10 pt-8 text-[11px] uppercase tracking-[0.22em] text-white/50 md:flex-row md:items-center md:justify-between">
+        {/* FDA disclosure block */}
+        <div className="mt-14 rounded-2xl border border-white/10 bg-white/[0.02] p-5 text-[11px] leading-relaxed text-white/55">
+          <span className="font-semibold text-white/80">FDA Disclosure:</span>{" "}
+          The statements on this website have not been evaluated by the U.S.
+          Food and Drug Administration. The products and information provided
+          by {SITE_NAME} are not intended to diagnose, treat, cure, or prevent
+          any disease. These compounds are strictly for laboratory research
+          and in-vitro use — not for human consumption, therapeutic use, or
+          diagnostic applications.
+        </div>
+
+        {/* Bottom bar — copyright + payment methods */}
+        <div className="mt-8 flex flex-col gap-4 border-t border-white/10 pt-8 text-[11px] uppercase tracking-[0.22em] text-white/50 md:flex-row md:items-center md:justify-between">
           <p>
             © {new Date().getFullYear()} {SITE_NAME}. All rights reserved.
           </p>
-          <p className="max-w-xl normal-case tracking-normal md:text-right">
-            All products offered are strictly for laboratory research and
-            in-vitro use. Not for human consumption, therapeutic use, or
-            diagnostic applications.
-          </p>
+          <ul className="flex flex-wrap items-center gap-2">
+            {["Visa", "Mastercard", "Amex", "Discover", "Apple Pay", "Google Pay", "Link"].map(
+              (label) => (
+                <li
+                  key={label}
+                  className="glass-dark rounded-md px-2.5 py-1 text-[10px] font-semibold tracking-wide text-white/70"
+                >
+                  {label}
+                </li>
+              ),
+            )}
+          </ul>
         </div>
       </div>
     </footer>
