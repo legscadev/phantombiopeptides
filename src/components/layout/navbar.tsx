@@ -44,7 +44,7 @@ export function Navbar() {
       className={cn(
         "sticky top-0 z-40 w-full transition-all duration-300",
         scrolled
-          ? "glass-strong border-b border-white/40 shadow-[0_10px_30px_-20px_rgba(9,4,24,0.15)]"
+          ? "border-b border-border bg-background shadow-[0_10px_30px_-20px_rgba(9,4,24,0.15)]"
           : "border-b border-transparent bg-transparent",
       )}
     >
