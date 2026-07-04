@@ -55,17 +55,28 @@ export function CheckoutForm({ cart }: { cart: WCCart }) {
   // (that happens on submit), so we pass amount + currency here and
   // Stripe uses them to decide which methods to show (Card, Apple Pay,
   // Google Pay, Link, etc.).
+  //
+  // Stripe's Payment Element renders in a cross-origin iframe so CSS
+  // custom properties like `var(--font-roboto)` from the host page do
+  // not resolve — falling back to Times New Roman. We instead point
+  // Stripe at Google Fonts directly via `fonts.cssSrc` and name the
+  // family explicitly.
   const options: StripeElementsOptions = {
     mode: "payment",
     amount: amountMinor > 0 ? amountMinor : 100,
     currency,
+    fonts: [
+      {
+        cssSrc:
+          "https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap",
+      },
+    ],
     appearance: {
       theme: "stripe",
       variables: {
         colorPrimary: "hsl(264 100% 45%)",
         borderRadius: "12px",
-        fontFamily:
-          "var(--font-roboto), ui-sans-serif, system-ui, sans-serif",
+        fontFamily: "Roboto, ui-sans-serif, system-ui, sans-serif",
       },
     },
   };
