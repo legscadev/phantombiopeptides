@@ -13,6 +13,15 @@ interface CheckoutInput {
     key: string;
     value: string | number | boolean | null;
   }>;
+  /**
+   * When set, use this as the order's WooCommerce status. Default is
+   * "pending". Payment-first flows should use "processing".
+   */
+  status_override?: string;
+  /** Marks the order as paid on creation (used after Stripe capture). */
+  set_paid?: boolean;
+  /** Payment gateway transaction id (e.g. Stripe PaymentIntent id). */
+  transaction_id?: string;
 }
 
 /**
@@ -63,13 +72,16 @@ export const CheckoutService = {
       payment_method: input.payment_method || "stripe",
       payment_method_title:
         input.payment_method === "stripe" ? "Stripe" : input.payment_method,
-      set_paid: false,
-      status: "pending",
+      set_paid: input.set_paid ?? false,
+      status: input.status_override ?? "pending",
       billing: input.billing_address,
       shipping: input.shipping_address,
       line_items,
     };
     if (input.customer_note) orderPayload.customer_note = input.customer_note;
+    if (input.transaction_id) {
+      orderPayload.transaction_id = input.transaction_id;
+    }
     if (stripePmId) {
       orderPayload.meta_data = [
         { key: "_stripe_payment_method_id", value: String(stripePmId) },

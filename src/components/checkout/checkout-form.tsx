@@ -137,27 +137,27 @@ function InnerCheckoutForm({ cart }: { cart: WCCart }) {
         phone: values.phone ?? "",
       };
 
-      // Server: create Woo order + Stripe PaymentIntent, return
-      // client_secret.
+      // 1. Ask the server for a Stripe PaymentIntent for the live cart.
+      //    Woo order creation happens AFTER payment succeeds so a WP
+      //    hiccup can't block the customer from paying.
       const start = await startCheckoutAction({
         billing_address: address,
         shipping_address: address,
         customer_note: values.customer_note ?? "",
       });
-      if (!start.ok || !start.client_secret || !start.order_id) {
+      if (!start.ok || !start.client_secret || !start.payment_intent_id) {
         setError(start.error ?? "Checkout could not be started.");
         return;
       }
 
-      // Confirm the payment against Stripe. `redirect: "if_required"`
-      // keeps the customer on our page unless the payment method (e.g.
-      // some cards under 3-D Secure) mandates a bank-hosted step.
+      // 2. Confirm the payment. redirect: "if_required" keeps the
+      //    customer on this page unless a bank pushes 3DS.
       const { error: confirmError, paymentIntent } =
         await stripe.confirmPayment({
           elements,
           clientSecret: start.client_secret,
           confirmParams: {
-            return_url: `${window.location.origin}/thank-you?order=${start.order_id}`,
+            return_url: `${window.location.origin}/thank-you`,
             payment_method_data: {
               billing_details: {
                 email: values.email,
@@ -184,7 +184,6 @@ function InnerCheckoutForm({ cart }: { cart: WCCart }) {
         );
         return;
       }
-
       if (paymentIntent?.status !== "succeeded") {
         setError(
           `Payment was not completed (status: ${paymentIntent?.status ?? "unknown"}).`,
@@ -192,22 +191,32 @@ function InnerCheckoutForm({ cart }: { cart: WCCart }) {
         return;
       }
 
-      // Flip the Woo order to processing + clear the cart.
-      const finalize = await finalizeCheckoutAction(
-        start.order_id,
-        paymentIntent.id,
-      );
+      // 3. Payment is captured. Ask the server to record the Woo order
+      //    + clear the cart. Woo failure here does not block the
+      //    customer — the finalize action logs the failure to Stripe
+      //    metadata for reconciliation and still returns ok.
+      const finalize = await finalizeCheckoutAction({
+        payment_intent_id: paymentIntent.id,
+        billing_address: address,
+        shipping_address: address,
+        customer_note: values.customer_note ?? "",
+      });
       if (!finalize.ok) {
-        // The payment succeeded but bookkeeping failed — don't lose the
-        // customer. Log them through anyway; support can reconcile.
         toast.error(
-          "Payment recorded but our system had a hiccup — support has been notified.",
+          "Payment approved but our order system had a hiccup — support will follow up.",
+        );
+      } else if (!finalize.order_id) {
+        toast.success(
+          "Payment approved — your order will be confirmed shortly.",
         );
       } else {
         toast.success("Payment approved — thank you.");
       }
 
-      router.push(`/thank-you?order=${start.order_id}`);
+      const q = new URLSearchParams();
+      q.set("pi", paymentIntent.id);
+      if (finalize.order_id) q.set("order", String(finalize.order_id));
+      router.push(`/thank-you?${q.toString()}`);
     } catch (err) {
       setError(
         err instanceof Error

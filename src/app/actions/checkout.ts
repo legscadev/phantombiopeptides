@@ -4,7 +4,6 @@ import { revalidatePath } from "next/cache";
 import { CartService } from "@/services/cart";
 import { CheckoutService } from "@/services/checkout";
 import { requireStripe } from "@/lib/stripe-server";
-import { wc, WooError } from "@/services/woocommerce";
 import type { WCAddress } from "@/types";
 
 export interface StartCheckoutInput {
@@ -16,18 +15,27 @@ export interface StartCheckoutInput {
 export interface StartCheckoutResult {
   ok: boolean;
   error?: string;
-  order_id?: number;
   client_secret?: string;
   payment_intent_id?: string;
+  amount?: number;
 }
 
 /**
- * 1. Create the Woo order (status: pending) via the authenticated REST API.
- * 2. Create a Stripe PaymentIntent for the cart total with the order id
- *    in metadata.
- * 3. Return the client_secret so the browser can confirm the payment
- *    against Stripe (which supports Card / Apple Pay / Google Pay / Link
- *    through the Payment Element automatically).
+ * Payment goes first, order goes second.
+ *
+ * WordPress.com's REST orders endpoint occasionally returns a wpcomsh
+ * fatal PHP error 500 even when the same payload succeeds via curl
+ * moments later. We refuse to let that block the customer. So the
+ * flow is:
+ *   1. Create a Stripe PaymentIntent for the exact cart total with
+ *      the cart line items serialized into the PI's metadata (so the
+ *      cart contents survive even if the Woo order write drops).
+ *   2. Customer confirms the payment against Stripe.
+ *   3. `finalizeCheckoutAction` (below) verifies the PI is
+ *      succeeded, THEN writes the Woo order with status=processing
+ *      set_paid=true. If Woo write fails, we still let the customer
+ *      through and mark the PI so it can be reconciled server-side
+ *      later.
  */
 export async function startCheckoutAction(
   input: StartCheckoutInput,
@@ -35,8 +43,8 @@ export async function startCheckoutAction(
   try {
     const stripe = requireStripe();
 
-    // Read the live cart so amount + line items always match what the
-    // customer sees, not something the client sends.
+    // Read the live cart so amount always matches what the customer
+    // sees, not something the client claims.
     const cart = await CartService.get();
     if (cart.items.length === 0) {
       return { ok: false, error: "Your cart is empty." };
@@ -47,87 +55,140 @@ export async function startCheckoutAction(
       return { ok: false, error: "Cart total is zero." };
     }
 
-    // Woo order in "pending" — payment is not yet captured.
+    const minorUnits = cart.totals.currency_minor_unit ?? 2;
+    const amountMinor = Math.round(total * 10 ** minorUnits);
+    const currency = (cart.totals.currency_code || "USD").toLowerCase();
+
+    // Serialize the cart lines into PI metadata so a downstream write
+    // failure still leaves us a reconstructable order.
+    const rawItems = await CartService.getLineItems();
+    const itemsMeta = JSON.stringify(
+      rawItems.slice(0, 20).map((it) => ({
+        id: it.id,
+        q: it.quantity,
+        v: it.variation ?? null,
+      })),
+    );
+
+    const pi = await stripe.paymentIntents.create({
+      amount: amountMinor,
+      currency,
+      automatic_payment_methods: { enabled: true },
+      metadata: {
+        source: "phantombiopeptides-nextjs",
+        cart_items: itemsMeta.slice(0, 480),
+        billing_email: input.billing_address.email,
+        billing_name:
+          `${input.billing_address.first_name} ${input.billing_address.last_name}`.trim(),
+        billing_country: input.billing_address.country,
+        shipping_country: input.shipping_address.country,
+        customer_note: (input.customer_note ?? "").slice(0, 400),
+      },
+      description: `Phantom Bio Peptides — ${cart.items_count} item${cart.items_count === 1 ? "" : "s"}`,
+    });
+
+    return {
+      ok: true,
+      client_secret: pi.client_secret ?? undefined,
+      payment_intent_id: pi.id,
+      amount: amountMinor,
+    };
+  } catch (err) {
+    const message =
+      err instanceof Error ? err.message : "Checkout could not be started.";
+    console.error("[startCheckoutAction]", message);
+    return { ok: false, error: message };
+  }
+}
+
+export interface FinalizeInput {
+  payment_intent_id: string;
+  billing_address: WCAddress;
+  shipping_address: WCAddress;
+  customer_note?: string;
+}
+
+export interface FinalizeResult {
+  ok: boolean;
+  order_id?: number;
+  error?: string;
+}
+
+/**
+ * Called by the browser after `stripe.confirmPayment` returns
+ * succeeded. Independently verifies the PaymentIntent against Stripe,
+ * then tries to create the Woo order. Any Woo failure is logged and
+ * recorded on the PaymentIntent for later reconciliation — the
+ * customer still completes checkout because the money is already
+ * captured.
+ */
+export async function finalizeCheckoutAction(
+  input: FinalizeInput,
+): Promise<FinalizeResult> {
+  const stripe = requireStripe();
+
+  // 1. Confirm the payment really succeeded.
+  let pi;
+  try {
+    pi = await stripe.paymentIntents.retrieve(input.payment_intent_id);
+  } catch (err) {
+    return {
+      ok: false,
+      error:
+        err instanceof Error ? err.message : "Payment could not be verified.",
+    };
+  }
+  if (pi.status !== "succeeded") {
+    return {
+      ok: false,
+      error: `Payment not completed (status: ${pi.status}).`,
+    };
+  }
+
+  // 2. Try to create the Woo order. This can fail on WP.com hosting
+  // hiccups; don't let that block the customer.
+  try {
     const order = await CheckoutService.submit({
       billing_address: input.billing_address,
       shipping_address: input.shipping_address,
       customer_note: input.customer_note ?? "",
       payment_method: "stripe",
-      payment_data: [],
+      payment_data: [
+        { key: "stripe_payment_intent_id", value: input.payment_intent_id },
+      ],
+      // Mark the order as processing + paid up front — payment is
+      // already captured on Stripe.
+      status_override: "processing",
+      set_paid: true,
+      transaction_id: input.payment_intent_id,
     });
-
-    const minorUnits = cart.totals.currency_minor_unit ?? 2;
-    const amountMinor = Math.round(total * 10 ** minorUnits);
-    const currency = (cart.totals.currency_code || "USD").toLowerCase();
-
-    const pi = await stripe.paymentIntents.create({
-      amount: amountMinor,
-      currency,
-      // Enable Card + wallets (Apple Pay, Google Pay, Link) without
-      // hardcoding a list — Stripe picks the eligible methods based on
-      // amount, currency, and account settings.
-      automatic_payment_methods: { enabled: true },
-      metadata: {
-        woo_order_id: String(order.order_id),
-        source: "phantombiopeptides-nextjs",
-      },
-      description: `Order #${order.order_id} — Phantom Bio Peptides`,
-    });
-
-    return {
-      ok: true,
-      order_id: order.order_id,
-      client_secret: pi.client_secret ?? undefined,
-      payment_intent_id: pi.id,
-    };
-  } catch (err) {
-    const message =
-      err instanceof Error ? err.message : "Checkout could not be started.";
-    return { ok: false, error: message };
-  }
-}
-
-/**
- * Called by the browser after `stripe.confirmPayment` returns succeeded.
- * We independently verify the PaymentIntent status against Stripe, then
- * flip the Woo order to "processing" and clear the cart.
- */
-export async function finalizeCheckoutAction(
-  orderId: number,
-  paymentIntentId: string,
-): Promise<{ ok: boolean; error?: string }> {
-  try {
-    const stripe = requireStripe();
-    const pi = await stripe.paymentIntents.retrieve(paymentIntentId);
-    if (pi.status !== "succeeded") {
-      return {
-        ok: false,
-        error: `Payment not completed (status: ${pi.status}).`,
-      };
-    }
-    if (String(pi.metadata.woo_order_id) !== String(orderId)) {
-      return { ok: false, error: "Order / payment mismatch." };
-    }
-
-    await wc(`/orders/${orderId}`, {
-      method: "PUT",
-      revalidate: false,
-      body: JSON.stringify({
-        status: "processing",
-        set_paid: true,
-        transaction_id: pi.id,
-      }),
-    } as never);
 
     await CartService.clear();
     revalidatePath("/cart");
-    return { ok: true };
+    return { ok: true, order_id: order.order_id };
   } catch (err) {
-    if (err instanceof WooError) {
-      return { ok: false, error: err.message };
-    }
     const message =
-      err instanceof Error ? err.message : "Failed to finalize checkout.";
-    return { ok: false, error: message };
+      err instanceof Error ? err.message : "Order write failed.";
+    console.error("[finalizeCheckoutAction] Woo order write failed", {
+      payment_intent_id: input.payment_intent_id,
+      message,
+    });
+    // Tag the PI so we can find these when reconciling later.
+    try {
+      await stripe.paymentIntents.update(input.payment_intent_id, {
+        metadata: {
+          ...(pi.metadata ?? {}),
+          woo_order_write_failed: "true",
+          woo_order_error: message.slice(0, 480),
+        },
+      });
+    } catch {
+      /* best-effort */
+    }
+    // Cart is still cleared — the money is already captured, we don't
+    // want the customer to accidentally pay twice.
+    await CartService.clear();
+    revalidatePath("/cart");
+    return { ok: true };
   }
 }
