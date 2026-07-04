@@ -29,9 +29,11 @@ export function StickyAddToCart({ product }: { product: WCProduct }) {
           className="fixed bottom-4 left-0 right-0 z-30 px-4"
         >
           <div className="container-page">
-            <div className="glass-strong flex items-center gap-4 rounded-2xl p-3 shadow-2xl">
+            <div className="flex items-center gap-4 rounded-2xl border border-border bg-background/95 p-3 shadow-[0_-16px_50px_-20px_rgba(15,15,25,0.35)] ring-1 ring-black/5 backdrop-blur-xl">
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium">{product.name}</p>
+                <p className="truncate text-sm font-semibold text-foreground">
+                  {product.name}
+                </p>
                 <p className="text-xs text-muted-foreground">
                   {formatPrice(product.price)}
                 </p>
