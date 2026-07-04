@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, ShoppingBag } from "lucide-react";
+import { Menu, Search, ShoppingBag } from "lucide-react";
 import { Logo } from "./logo";
 import { Button } from "@/components/ui/button";
 import {
@@ -44,7 +44,7 @@ export function Navbar() {
       className={cn(
         "sticky top-0 z-40 w-full transition-all duration-300",
         scrolled
-          ? "border-b border-border/60 bg-background/80 backdrop-blur-xl"
+          ? "glass-strong border-b border-white/40 shadow-[0_10px_30px_-20px_rgba(9,4,24,0.15)]"
           : "border-b border-transparent bg-transparent",
       )}
     >
@@ -62,14 +62,20 @@ export function Navbar() {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "relative rounded-full px-4 py-2 text-sm font-medium transition-colors",
+                    "relative rounded-full px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:hsl(var(--brand-500))] focus-visible:ring-offset-2",
                     active
-                      ? "text-foreground"
-                      : "text-muted-foreground hover:text-foreground",
+                      ? "text-[color:hsl(var(--brand-500))]"
+                      : "text-muted-foreground hover:text-[color:hsl(var(--brand-500))]",
                   )}
                 >
                   {active && (
-                    <span className="absolute inset-0 rounded-full bg-background-elevated" />
+                    <span
+                      className="absolute inset-0 rounded-full"
+                      style={{
+                        background:
+                          "linear-gradient(135deg, hsl(var(--brand-100) / 0.9) 0%, hsl(var(--brand-50) / 0.9) 100%)",
+                      }}
+                    />
                   )}
                   <span className="relative">{item.label}</span>
                 </Link>
@@ -78,15 +84,29 @@ export function Navbar() {
           </nav>
 
           <div className="ml-auto flex items-center gap-2 lg:ml-2">
+            <Link
+              href="/search"
+              aria-label="Search"
+              className="relative hidden h-10 w-10 items-center justify-center rounded-full border border-white/60 bg-white/40 backdrop-blur transition-all hover:border-[color:hsl(var(--brand-500))]/40 hover:text-[color:hsl(var(--brand-500))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:hsl(var(--brand-500))] focus-visible:ring-offset-2 lg:inline-flex"
+            >
+              <Search className="h-4 w-4" />
+            </Link>
+
             <button
               type="button"
               onClick={openDrawer}
-              className="relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-border-strong bg-background-elevated/60 backdrop-blur transition-all hover:border-primary/40 hover:bg-background-elevated"
+              className="relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/60 bg-white/40 backdrop-blur transition-all hover:border-[color:hsl(var(--brand-500))]/40 hover:text-[color:hsl(var(--brand-500))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:hsl(var(--brand-500))] focus-visible:ring-offset-2"
               aria-label={`Open cart (${itemCount} items)`}
             >
               <ShoppingBag className="h-4 w-4" />
               {itemCount > 0 && (
-                <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold text-primary-foreground ring-2 ring-background">
+                <span
+                  className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px] font-semibold text-white ring-2 ring-background"
+                  style={{
+                    background:
+                      "linear-gradient(135deg, hsl(var(--brand-500)) 0%, hsl(var(--brand-400)) 100%)",
+                  }}
+                >
                   {itemCount > 99 ? "99+" : itemCount}
                 </span>
               )}
@@ -110,12 +130,20 @@ export function Navbar() {
                   </SheetTitle>
                 </SheetHeader>
                 <nav className="flex flex-col px-2 pb-8 pt-4">
+                  <Link
+                    href="/search"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center gap-2 rounded-xl px-4 py-3 text-base font-medium text-foreground/80 transition hover:bg-[color:hsl(var(--brand-50))] hover:text-[color:hsl(var(--brand-500))]"
+                  >
+                    <Search className="h-4 w-4" />
+                    Search
+                  </Link>
                   {nav.map((item) => (
                     <Link
                       key={item.href}
                       href={item.href}
                       onClick={() => setMobileOpen(false)}
-                      className="rounded-xl px-4 py-3 text-base font-medium text-foreground/80 transition hover:bg-background-elevated hover:text-foreground"
+                      className="rounded-xl px-4 py-3 text-base font-medium text-foreground/80 transition hover:bg-[color:hsl(var(--brand-50))] hover:text-[color:hsl(var(--brand-500))]"
                     >
                       {item.label}
                     </Link>

@@ -32,17 +32,26 @@ export function Testimonials() {
       <div className="grid gap-5 md:grid-cols-3">
         {testimonials.map((t, i) => (
           <Reveal key={i} delay={i * 0.08}>
-            <figure className="h-full rounded-2xl border border-border bg-card p-8">
-              <div className="flex gap-0.5" aria-hidden>
+            <figure className="glass ring-glass group relative h-full overflow-hidden rounded-3xl p-8 transition-transform duration-500 hover:-translate-y-1">
+              <span
+                aria-hidden
+                className="text-brand-gradient pointer-events-none absolute -top-6 left-4 select-none font-display text-[110px] font-extrabold leading-none opacity-50"
+              >
+                &ldquo;
+              </span>
+              <div className="relative flex gap-0.5" aria-hidden>
                 {Array.from({ length: 5 }).map((_, j) => (
-                  <Star key={j} className="h-3.5 w-3.5 fill-warning text-warning" />
+                  <Star
+                    key={j}
+                    className="h-3.5 w-3.5 fill-[color:hsl(var(--brand-400))] text-[color:hsl(var(--brand-400))]"
+                  />
                 ))}
               </div>
-              <blockquote className="mt-4 text-sm leading-relaxed text-foreground/90">
-                “{t.quote}”
+              <blockquote className="relative mt-5 text-sm leading-relaxed text-foreground/90">
+                &ldquo;{t.quote}&rdquo;
               </blockquote>
-              <figcaption className="mt-6 text-xs">
-                <div className="font-medium">{t.author}</div>
+              <figcaption className="relative mt-6 text-xs">
+                <div className="font-semibold text-foreground">{t.author}</div>
                 <div className="text-muted-foreground">{t.role}</div>
               </figcaption>
             </figure>

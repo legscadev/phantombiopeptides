@@ -4,31 +4,33 @@ import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/common/reveal";
 
 /**
- * "Never Sell a Batch Without Proof" — pull-quote on the left, 2×2 grid
- * of colored stat squares on the right. Mirrors EVO's colorful stat
- * grid, with pastels chosen to complement Phantom's violet primary.
+ * "Never Sell a Batch Without Proof" — left glass panel with headline + copy,
+ * right column is a 2x2 grid of glass stat tiles with brand-gradient
+ * numbers.
  */
 const STATS = [
-  { n: "99%+", label: "Avg. purity", bg: "bg-pastel-gold", fg: "text-pastel-gold-fg" },
-  { n: "100%", label: "Batches tested", bg: "bg-pastel-mint", fg: "text-pastel-mint-fg" },
-  { n: "Same Day", label: "Fulfilment", bg: "bg-pastel-violet", fg: "text-pastel-violet-fg" },
-  { n: "Free", label: "Shipping $250+", bg: "bg-pastel-coral", fg: "text-pastel-coral-fg" },
+  { n: "99%+", label: "Avg. purity" },
+  { n: "100%", label: "Batches tested" },
+  { n: "Same Day", label: "Fulfilment" },
+  { n: "Free", label: "Shipping $250+" },
 ];
 
 export function Commitment() {
   return (
-    <section className="py-16 md:py-24">
+    <section className="py-20 md:py-28">
       <div className="container-page">
         <Reveal>
-          <div className="grid gap-10 lg:grid-cols-[1fr_1fr] lg:items-center">
-            <div>
-              <p className="text-[11px] uppercase tracking-[0.22em] text-primary">
+          <div className="grid gap-8 lg:grid-cols-[1fr_1fr] lg:items-stretch">
+            <div className="glass ring-glass rounded-3xl p-8 md:p-12">
+              <p className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.24em] text-[color:hsl(var(--brand-500))]">
+                <span className="h-px w-6 bg-[color:hsl(var(--brand-500))]/50" />
                 Our commitment
               </p>
-              <h2 className="mt-3 max-w-lg text-balance font-display text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
-                Phantom Bio never ships a batch without proof of purity.
+              <h2 className="mt-4 max-w-lg font-display font-extrabold tracking-tight text-3xl sm:text-4xl md:text-5xl text-balance">
+                Phantom Bio never ships a batch without{" "}
+                <span className="text-brand-gradient">proof of purity.</span>
               </h2>
-              <p className="mt-5 max-w-md text-muted-foreground leading-relaxed">
+              <p className="mt-5 max-w-md text-base leading-relaxed text-muted-foreground">
                 Every product is independently tested by ISL Labs before it
                 leaves our facility. A lot-specific Certificate of Analysis
                 ships in every box.
@@ -41,23 +43,19 @@ export function Commitment() {
                 </Button>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              {STATS.map((s) => (
-                <div
-                  key={s.label}
-                  className={`rounded-2xl border border-black/5 p-8 shadow-sm ${s.bg}`}
-                >
-                  <div
-                    className={`font-display text-4xl font-bold tracking-tight ${s.fg}`}
-                  >
-                    {s.n}
+
+            <div className="grid grid-cols-2 gap-4">
+              {STATS.map((s, i) => (
+                <Reveal key={s.label} delay={i * 0.06}>
+                  <div className="glass ring-glass group h-full rounded-3xl p-6 md:p-8 transition-transform duration-500 hover:-translate-y-1">
+                    <div className="text-brand-gradient font-display text-3xl font-extrabold tracking-tight md:text-4xl">
+                      {s.n}
+                    </div>
+                    <div className="mt-2 text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
+                      {s.label}
+                    </div>
                   </div>
-                  <div
-                    className={`mt-2 text-xs uppercase tracking-widest ${s.fg} opacity-80`}
-                  >
-                    {s.label}
-                  </div>
-                </div>
+                </Reveal>
               ))}
             </div>
           </div>

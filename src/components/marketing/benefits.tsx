@@ -1,11 +1,12 @@
 import { Beaker, ShieldCheck, Truck, Award, FileCheck, Snowflake } from "lucide-react";
+import { Section } from "@/components/common/section";
 import { Reveal } from "@/components/common/reveal";
 
 /**
- * "The Phantom Standard" — the one full-width dark section on the light
- * page. Provides a rhythm break between the pastel Guarantee cards
- * above and the Category rail below. Mirrors EVO Labs' "The EVO
- * Standard" section.
+ * "The Phantom Standard" — six-card feature grid on a light glass surface.
+ * Icons sit on rounded brand-gradient plinths (same treatment as
+ * guarantee.tsx). Section reads as a rhythm break between the pastel
+ * Guarantee cards and the Category rail.
  */
 const items = [
   {
@@ -42,45 +43,36 @@ const items = [
 
 export function Benefits() {
   return (
-    <section className="surface-dark relative overflow-hidden py-20 md:py-28">
-      <div className="pointer-events-none absolute inset-0 opacity-40">
-        <div className="absolute -left-32 -top-32 h-80 w-80 rounded-full bg-primary/30 blur-[120px]" />
-        <div className="absolute -right-32 -bottom-32 h-80 w-80 rounded-full bg-fuchsia-500/20 blur-[120px]" />
-      </div>
-      <div className="container-page relative">
-        <Reveal>
-          <div className="mb-12 text-center">
-            <p className="text-[11px] uppercase tracking-[0.22em]" style={{ color: "hsl(264 100% 72%)" }}>
-              Why choose us
-            </p>
-            <h2 className="mt-3 font-display text-3xl font-bold tracking-tight text-white sm:text-4xl md:text-5xl">
-              The Phantom Standard.
-            </h2>
-          </div>
-        </Reveal>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {items.map((item, i) => (
-            <Reveal key={item.title} delay={i * 0.05}>
-              <div className="h-full rounded-2xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur transition-all hover:border-white/20 hover:bg-white/[0.06]">
-                <div
-                  className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-lg"
-                  style={{
-                    background:
-                      "linear-gradient(135deg, hsl(264 100% 50% / 0.25), hsl(300 66% 50% / 0.15))",
-                    color: "hsl(264 100% 78%)",
-                  }}
-                >
-                  <item.icon className="h-4 w-4" strokeWidth={2.2} />
-                </div>
-                <h3 className="font-display text-base font-bold text-white">{item.title}</h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-white/65">
-                  {item.body}
-                </p>
+    <Section
+      eyebrow="Why choose us"
+      title="The Phantom Standard."
+      description="Six commitments we enforce on every shipment that leaves the facility."
+    >
+      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {items.map((item, i) => (
+          <Reveal key={item.title} delay={i * 0.05}>
+            <div className="glass ring-glass group h-full rounded-3xl p-7 transition-transform duration-500 hover:-translate-y-1">
+              <div
+                className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-2xl text-white"
+                style={{
+                  background:
+                    "linear-gradient(135deg, hsl(var(--brand-500)) 0%, hsl(var(--brand-400)) 100%)",
+                  boxShadow:
+                    "0 10px 24px -12px hsl(var(--brand-500) / 0.5)",
+                }}
+              >
+                <item.icon className="h-5 w-5" strokeWidth={2.2} />
               </div>
-            </Reveal>
-          ))}
-        </div>
+              <h3 className="font-display text-lg font-extrabold tracking-tight text-foreground">
+                {item.title}
+              </h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                {item.body}
+              </p>
+            </div>
+          </Reveal>
+        ))}
       </div>
-    </section>
+    </Section>
   );
 }

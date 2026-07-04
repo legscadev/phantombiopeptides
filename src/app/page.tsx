@@ -54,7 +54,7 @@ export default async function HomePage() {
       <Reveal>
         <Section
           eyebrow="Bestsellers"
-          title="Popular in research this month."
+          title="Bestselling now"
           description="Our most-ordered compounds, verified batch-by-batch."
           actions={
             <Button variant="outline" asChild>
@@ -65,6 +65,14 @@ export default async function HomePage() {
           }
         >
           <ProductGrid products={bestsellers.slice(0, 8)} priorityCount={4} />
+          <div className="mt-10 text-center">
+            <Link
+              href="/shop"
+              className="inline-flex items-center gap-1 text-sm font-semibold text-[color:hsl(var(--brand-500))] transition-transform duration-300 hover:translate-x-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:hsl(var(--brand-500))] focus-visible:ring-offset-2"
+            >
+              Browse the catalog <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
         </Section>
       </Reveal>
 

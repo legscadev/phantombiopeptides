@@ -42,16 +42,33 @@
     --input: 220 14% 96%;
     --ring: 264 100% 34%;
 
-    /* Brand — Phantom deep violet */
-    --primary: 264 100% 30%;                /* #42009b */
+    /* Brand — Phantom Bio Labs
+       Purple: #4900AD  ->  hsl(264, 100%, 34%)
+       Black:  #060606  ->  hsl(0, 0%, 2%)
+    */
+    --primary: 264 100% 34%;                /* #4900AD brand purple */
     --primary-foreground: 0 0% 100%;
     --primary-soft: 264 100% 96%;           /* faint violet tint */
-    --accent: 264 100% 40%;                 /* #4900ad brighter */
+    --accent: 264 100% 44%;                 /* lifted violet for hovers */
     --accent-foreground: 0 0% 100%;
 
-    /* Dark accent surfaces (hero card, CTA banner, footer) */
-    --surface-dark: 224 47% 8%;             /* deep navy */
+    /* Brand scale (derived from #4900AD) */
+    --brand-50:  264 100% 97%;              /* #F6EEFF */
+    --brand-100: 264 100% 94%;              /* #ECDDFF */
+    --brand-200: 264 100% 87%;              /* #D2B7FF */
+    --brand-300: 264 100% 76%;              /* #A879FF */
+    --brand-400: 264 100% 60%;              /* #7433FF */
+    --brand-500: 264 100% 34%;              /* #4900AD  (base) */
+    --brand-600: 264 100% 28%;              /* #3B008E */
+    --brand-700: 264 100% 22%;              /* #2E006F */
+    --brand-800: 264 100% 15%;              /* #1F004C */
+    --brand-900: 264 100% 10%;              /* #150033 */
+
+    /* Deep dark surface (hero, footer, glass on dark)
+       Base #060606 with faint violet warm undertone */
+    --surface-dark: 0 0% 2%;                /* #060606 brand black */
     --surface-dark-fg: 0 0% 100%;
+    --surface-dark-alt: 264 30% 6%;         /* subtle violet-tinted */
 
     /* Pastel cards — EVO-style variety, tinted toward violet family */
     --pastel-mint: 150 60% 92%;             /* soft mint */
@@ -120,6 +137,17 @@
   --color-pastel-gold-fg: hsl(var(--pastel-gold-fg));
   --color-pastel-coral: hsl(var(--pastel-coral));
   --color-pastel-coral-fg: hsl(var(--pastel-coral-fg));
+
+  --color-brand-50:  hsl(var(--brand-50));
+  --color-brand-100: hsl(var(--brand-100));
+  --color-brand-200: hsl(var(--brand-200));
+  --color-brand-300: hsl(var(--brand-300));
+  --color-brand-400: hsl(var(--brand-400));
+  --color-brand-500: hsl(var(--brand-500));
+  --color-brand-600: hsl(var(--brand-600));
+  --color-brand-700: hsl(var(--brand-700));
+  --color-brand-800: hsl(var(--brand-800));
+  --color-brand-900: hsl(var(--brand-900));
 }
 
 @layer base {
@@ -205,6 +233,151 @@
 
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  /* ------------------------------------------------------------
+     Glass surfaces. Layered translucency + backdrop blur + hairline
+     ring for edge definition. Two variants for light / dark scenes.
+     ------------------------------------------------------------ */
+  .glass {
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.6) inset,
+      0 24px 60px -30px rgba(9, 4, 24, 0.15),
+      0 4px 16px -8px rgba(73, 0, 173, 0.08);
+  }
+  .glass-strong {
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(28px) saturate(160%);
+    -webkit-backdrop-filter: blur(28px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.7) inset,
+      0 40px 80px -40px rgba(9, 4, 24, 0.2),
+      0 6px 20px -8px rgba(73, 0, 173, 0.12);
+  }
+  .glass-dark {
+    background: rgba(20, 8, 40, 0.32);
+    backdrop-filter: blur(20px) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) saturate(140%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.05) inset,
+      0 24px 60px -30px rgba(0, 0, 0, 0.6);
+  }
+  .glass-dark-strong {
+    background: rgba(20, 8, 40, 0.55);
+    backdrop-filter: blur(28px) saturate(150%);
+    -webkit-backdrop-filter: blur(28px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.06) inset,
+      0 40px 80px -40px rgba(0, 0, 0, 0.7);
+  }
+
+  /* Ambient background — soft blobs + subtle grid + noise. Layered
+     for a warm, high-end feel without heavy gradients. */
+  .bg-ambient {
+    background:
+      radial-gradient(
+        45% 40% at 15% 12%,
+        rgba(73, 0, 173, 0.14) 0%,
+        transparent 60%
+      ),
+      radial-gradient(
+        40% 35% at 85% 20%,
+        rgba(116, 51, 255, 0.10) 0%,
+        transparent 65%
+      ),
+      radial-gradient(
+        50% 45% at 50% 100%,
+        rgba(168, 121, 255, 0.09) 0%,
+        transparent 70%
+      );
+  }
+  .bg-ambient-dark {
+    background:
+      radial-gradient(
+        55% 40% at 25% 20%,
+        rgba(73, 0, 173, 0.55) 0%,
+        transparent 55%
+      ),
+      radial-gradient(
+        40% 40% at 80% 65%,
+        rgba(116, 51, 255, 0.25) 0%,
+        transparent 65%
+      ),
+      linear-gradient(180deg, #060606 0%, #050308 100%);
+  }
+
+  /* Fine-grid overlay — used behind ambient blobs to add texture */
+  .bg-grid {
+    background-image:
+      linear-gradient(
+        to right,
+        hsl(var(--foreground) / 0.05) 1px,
+        transparent 1px
+      ),
+      linear-gradient(
+        to bottom,
+        hsl(var(--foreground) / 0.05) 1px,
+        transparent 1px
+      );
+    background-size: 48px 48px;
+  }
+  .bg-grid-dark {
+    background-image:
+      linear-gradient(
+        to right,
+        rgba(255, 255, 255, 0.045) 1px,
+        transparent 1px
+      ),
+      linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0.045) 1px,
+        transparent 1px
+      );
+    background-size: 56px 56px;
+  }
+
+  /* Elevation ring — subtle inner+outer definition for glass tiles */
+  .ring-glass {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.5),
+      0 0 0 1px rgba(9, 4, 24, 0.04),
+      0 10px 30px -15px rgba(73, 0, 173, 0.14);
+  }
+  .ring-glass-dark {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      0 0 0 1px rgba(255, 255, 255, 0.05),
+      0 20px 60px -25px rgba(0, 0, 0, 0.6);
+  }
+
+  /* Sale/badge chip using brand purple with a subtle gradient */
+  .chip-brand {
+    background: linear-gradient(
+      135deg,
+      hsl(var(--brand-500)) 0%,
+      hsl(var(--brand-400)) 100%
+    );
+    color: white;
+    box-shadow: 0 6px 16px -8px hsl(var(--brand-500) / 0.55);
+  }
+
+  /* Soft brand gradient text (headline accents) */
+  .text-brand-gradient {
+    background: linear-gradient(
+      120deg,
+      hsl(var(--brand-500)) 0%,
+      hsl(var(--brand-300)) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
 }
 
 @keyframes shimmer {
@@ -241,4 +414,17 @@
 
 .animate-float {
   animation: float 6s ease-in-out infinite;
+}
+
+@keyframes blob-drift {
+  0%   { transform: translate(0, 0)   scale(1); }
+  33%  { transform: translate(24px, -36px) scale(1.06); }
+  66%  { transform: translate(-18px, 30px) scale(0.96); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+.animate-blob {
+  animation: blob-drift 22s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-blob, .animate-float, .animate-shimmer { animation: none; }
 }
