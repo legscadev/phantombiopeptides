@@ -11,8 +11,6 @@ import {
 
 const OPTIONS: Array<{ value: string; label: string }> = [
   { value: "date-desc", label: "Newest" },
-  { value: "popularity-desc", label: "Popularity" },
-  { value: "rating-desc", label: "Highest rated" },
   { value: "price-asc", label: "Price: Low → High" },
   { value: "price-desc", label: "Price: High → Low" },
   { value: "title-asc", label: "Name: A → Z" },
