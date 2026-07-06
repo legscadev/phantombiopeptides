@@ -8,6 +8,7 @@ import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { CartDrawer } from "@/components/cart/cart-drawer";
 import { AgeGate } from "@/components/common/age-gate";
+import { BackToTop } from "@/components/common/back-to-top";
 import { PromoModal } from "@/components/marketing/promo-modal";
 import { buildMetadata, organizationJsonLd } from "@/lib/seo";
 import "./globals.css";
@@ -68,6 +69,7 @@ export default async function RootLayout({
           <CartDrawer />
           <main className="flex-1">{children}</main>
           <Footer categories={categories} />
+          <BackToTop />
         </Providers>
       </body>
     </html>
