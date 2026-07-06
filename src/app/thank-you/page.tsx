@@ -2,6 +2,7 @@ import Link from "next/link";
 import { CheckCircle2, Package, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { buildMetadata } from "@/lib/seo";
+import { CartRefresh } from "./cart-refresh";
 
 export const metadata = buildMetadata({
   title: "Order confirmed",
@@ -21,6 +22,7 @@ export default async function ThankYouPage({ searchParams }: Props) {
 
   return (
     <div className="container-page py-16 md:py-24">
+      <CartRefresh />
       <div className="mx-auto max-w-2xl text-center">
         <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-success/10 text-success">
           <CheckCircle2 className="h-7 w-7" strokeWidth={2.4} />
