@@ -45,6 +45,19 @@ export function CartProvider({
   const [isLoading, setIsLoading] = React.useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
 
+  // Root layout intentionally doesn't hydrate the cart server-side
+  // (calling cookies() there would force every route dynamic). Sync
+  // from the cookie once on mount so the badge/drawer reflect the
+  // real state without a page refresh.
+  React.useEffect(() => {
+    if (initialCart !== null) return;
+    getCartAction()
+      .then((next) => setCart(next))
+      .catch(() => {
+        /* stay on null → 0 items */
+      });
+  }, [initialCart]);
+
   const withLoading = React.useCallback(
     async (fn: () => Promise<WCCart>) => {
       setIsLoading(true);

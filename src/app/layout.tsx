@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist_Mono, Barlow, Barlow_Condensed } from "next/font/google";
 import Script from "next/script";
-import { CartService } from "@/services/cart";
 import { CategoriesService } from "@/services/categories";
 import { Providers } from "@/providers";
 import { AnnouncementBar } from "@/components/layout/announcement-bar";
@@ -41,10 +40,11 @@ export const viewport: Viewport = {
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const [initialCart, categories] = await Promise.all([
-    CartService.get().catch(() => null),
-    CategoriesService.list().catch(() => []),
-  ]);
+  // Cart is intentionally NOT read here: `CartService.get()` calls
+  // `cookies()`, which forces every route through this layout to be
+  // dynamic. CartProvider fetches the cart client-side on mount so
+  // /product/[slug] and /category/[slug] can stay static + ISR.
+  const categories = await CategoriesService.list().catch(() => []);
 
   return (
     <html
@@ -60,7 +60,7 @@ export default async function RootLayout({
             __html: JSON.stringify(organizationJsonLd()),
           }}
         />
-        <Providers initialCart={initialCart}>
+        <Providers initialCart={null}>
           <AgeGate />
           <PromoModal />
           <AnnouncementBar />
