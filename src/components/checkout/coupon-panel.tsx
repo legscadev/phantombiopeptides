@@ -21,11 +21,20 @@ export function CouponPanel() {
     if (applied.length > 0) setOpen(true);
   }, [applied.length]);
 
-  async function onApply(e: React.FormEvent) {
-    e.preventDefault();
+  async function onApply() {
     if (!code.trim() || isLoading) return;
     await applyCoupon(code);
     setCode("");
+  }
+
+  function onKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    // Explicit Enter handler because we're not inside a <form> — a
+    // nested form would end up submitting the outer checkout form
+    // (browsers flatten invalid form-in-form nesting).
+    if (e.key === "Enter") {
+      e.preventDefault();
+      void onApply();
+    }
   }
 
   return (
@@ -76,7 +85,7 @@ export function CouponPanel() {
             </ul>
           )}
 
-          <form onSubmit={onApply} className="flex gap-2">
+          <div className="flex gap-2">
             <Input
               type="text"
               autoComplete="off"
@@ -84,11 +93,13 @@ export function CouponPanel() {
               placeholder="Enter code"
               value={code}
               onChange={(e) => setCode(e.target.value)}
+              onKeyDown={onKeyDown}
               disabled={isLoading}
               className="flex-1"
             />
             <Button
-              type="submit"
+              type="button"
+              onClick={() => void onApply()}
               disabled={!code.trim() || isLoading}
               className="shrink-0"
             >
@@ -98,7 +109,7 @@ export function CouponPanel() {
                 "Apply"
               )}
             </Button>
-          </form>
+          </div>
         </div>
       )}
     </fieldset>
