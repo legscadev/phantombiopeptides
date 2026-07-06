@@ -26,27 +26,14 @@ const STATIC_NAV = [
 export function Navbar() {
   const pathname = usePathname();
   const { itemCount, openDrawer } = useCart();
-  const [scrolled, setScrolled] = React.useState(false);
   const [mobileOpen, setMobileOpen] = React.useState(false);
-
-  React.useEffect(() => {
-    function onScroll() {
-      setScrolled(window.scrollY > 8);
-    }
-    window.addEventListener("scroll", onScroll, { passive: true });
-    onScroll();
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   const nav = STATIC_NAV;
 
   return (
     <header
       className={cn(
-        "sticky top-0 z-40 w-full transition-all duration-300",
-        scrolled
-          ? "border-b border-border bg-background shadow-[0_10px_30px_-20px_rgba(9,4,24,0.15)]"
-          : "border-b border-transparent bg-transparent",
+        "sticky top-0 z-40 w-full border-b border-border bg-background shadow-[0_10px_30px_-20px_rgba(9,4,24,0.15)]",
       )}
     >
       <div className="container-page">
