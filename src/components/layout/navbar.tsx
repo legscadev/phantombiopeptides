@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 
 const STATIC_NAV = [
   { href: "/shop", label: "Products" },
+  { href: "/coa", label: "COA" },
   { href: "/about", label: "About" },
   { href: "/faq", label: "FAQ" },
   { href: "/contact", label: "Contact" },
