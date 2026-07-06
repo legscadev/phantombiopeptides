@@ -12,7 +12,14 @@ import { buildMetadata } from "@/lib/seo";
 import { parseProductSearchParams } from "@/lib/parse-search";
 import { cn } from "@/lib/utils";
 
-export const revalidate = 300;
+// Category pages depend on `searchParams` (sort, pagination) at
+// request time. Trying to run them as ISR triggers
+// DYNAMIC_SERVER_USAGE because reading searchParams inside a
+// Suspense boundary still counts against a revalidating route.
+// Keep them fully dynamic — Woo fetches inside ProductsService
+// still hit our fetch cache with per-tag revalidation, so this
+// isn't cold-cache per request.
+export const dynamic = "force-dynamic";
 
 interface Props {
   params: Promise<{ slug: string }>;
