@@ -63,8 +63,12 @@ export default async function ShopAllPage({ searchParams }: Props) {
               href="/shop/all"
               className={cn(
                 "shrink-0 rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] transition-all",
-                "bg-foreground text-background shadow-[0_10px_30px_-10px_hsl(var(--foreground)/0.4)]",
+                "border border-[color:hsl(var(--brand-200))] text-[color:hsl(var(--brand-500))] shadow-[0_10px_24px_-14px_hsl(var(--brand-500)/0.35)]",
               )}
+              style={{
+                background:
+                  "linear-gradient(135deg, hsl(var(--brand-100) / 0.9) 0%, hsl(var(--brand-50) / 0.9) 100%)",
+              }}
             >
               All
             </Link>
