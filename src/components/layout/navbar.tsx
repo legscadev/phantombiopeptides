@@ -3,8 +3,9 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, ShoppingBag } from "lucide-react";
+import { Menu, Search, ShoppingBag } from "lucide-react";
 import { Logo } from "./logo";
+import { SearchOverlay } from "./search-overlay";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -27,6 +28,26 @@ export function Navbar() {
   const pathname = usePathname();
   const { itemCount, openDrawer } = useCart();
   const [mobileOpen, setMobileOpen] = React.useState(false);
+  const [searchOpen, setSearchOpen] = React.useState(false);
+
+  // Global keyboard shortcut: ⌘K / Ctrl+K opens the search overlay.
+  React.useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      const mod = e.metaKey || e.ctrlKey;
+      if (mod && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setSearchOpen(true);
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  // Auto-close overlays when the user navigates (e.g. clicks a result).
+  React.useEffect(() => {
+    setSearchOpen(false);
+    setMobileOpen(false);
+  }, [pathname]);
 
   const nav = STATIC_NAV;
 
@@ -74,6 +95,14 @@ export function Navbar() {
           <div className="ml-auto flex items-center gap-2 lg:ml-2">
             <button
               type="button"
+              onClick={() => setSearchOpen(true)}
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/60 bg-white/40 backdrop-blur transition-all hover:border-[color:hsl(var(--brand-500))]/40 hover:text-[color:hsl(var(--brand-500))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:hsl(var(--brand-500))] focus-visible:ring-offset-2"
+              aria-label="Search products (⌘K)"
+            >
+              <Search className="h-4 w-4" />
+            </button>
+            <button
+              type="button"
               onClick={openDrawer}
               className="relative inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/60 bg-white/40 backdrop-blur transition-all hover:border-[color:hsl(var(--brand-500))]/40 hover:text-[color:hsl(var(--brand-500))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:hsl(var(--brand-500))] focus-visible:ring-offset-2"
               aria-label={`Open cart (${itemCount} items)`}
@@ -110,6 +139,17 @@ export function Navbar() {
                   </SheetTitle>
                 </SheetHeader>
                 <nav className="flex flex-col px-2 pb-8 pt-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileOpen(false);
+                      setSearchOpen(true);
+                    }}
+                    className="flex items-center gap-3 rounded-xl px-4 py-3 text-left text-base font-medium text-foreground/80 transition hover:bg-[color:hsl(var(--brand-50))] hover:text-[color:hsl(var(--brand-500))]"
+                  >
+                    <Search className="h-4 w-4" />
+                    Search
+                  </button>
                   {nav.map((item) => (
                     <Link
                       key={item.href}
@@ -126,6 +166,11 @@ export function Navbar() {
           </div>
         </div>
       </div>
+
+      <SearchOverlay
+        open={searchOpen}
+        onClose={() => setSearchOpen(false)}
+      />
     </header>
   );
 }
