@@ -30,14 +30,12 @@ interface Props {
 }
 
 export async function generateStaticParams() {
-  try {
-    const slugs = await ProductsService.getAllSlugs();
-    return slugs.map((slug) => ({ slug }));
-  } catch {
-    // Credentials not yet configured (or Woo unreachable). Pages will
-    // render on-demand at runtime instead of being prerendered.
-    return [];
-  }
+  // Intentionally empty: prerendering every product at build fans out
+  // ~5 Woo REST calls per slug across 7 build workers, which trips
+  // WordPress.com's 429 rate limit. Pages render on-demand on first
+  // visit and are cached by ISR (see `revalidate` above), so we get
+  // static behaviour without hammering Woo during the build.
+  return [];
 }
 
 export async function generateMetadata({ params }: Props) {
