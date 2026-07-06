@@ -12,6 +12,7 @@ const staticColumns = [
     links: [
       { href: "/about", label: "About" },
       { href: "/quality", label: "Quality & testing" },
+      { href: "/coa", label: "Certificate of Analysis" },
       { href: "/contact", label: "Contact" },
       { href: "/faq", label: "FAQ" },
     ],
