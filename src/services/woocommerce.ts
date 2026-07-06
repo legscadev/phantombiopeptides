@@ -163,3 +163,35 @@ export class WooError extends Error {
 }
 
 export const shouldUseMocks = () => env.NEXT_PUBLIC_USE_MOCKS;
+
+/**
+ * Resolve a WordPress attachment id to its public source_url.
+ *
+ * WooCommerce's REST API returns raw stored meta values for ACF File
+ * fields (e.g. the numeric attachment id `652`), not the resolved URL —
+ * ACF's "Return Format: File URL" transformation only runs inside PHP
+ * via get_field(). We call `/wp-json/wp/v2/media/{id}` (public endpoint,
+ * no auth) to get the source_url, cached with the same 5-min revalidate
+ * we use elsewhere.
+ */
+export async function resolveWpMediaUrl(
+  id: number,
+): Promise<string | null> {
+  if (!env.WC_STORE_URL || !Number.isFinite(id) || id <= 0) return null;
+  const base = env.WC_STORE_URL.replace(/\/$/, "");
+  try {
+    const res = await fetch(`${base}/wp-json/wp/v2/media/${id}`, {
+      headers: {
+        Accept: "application/json",
+        "User-Agent":
+          "PhantomBiopeptides-Nextjs/1.0 (+https://phantombiopeptides.com)",
+      },
+      next: { revalidate: 300, tags: [`wp-media:${id}`] },
+    });
+    if (!res.ok) return null;
+    const data = (await res.json()) as { source_url?: string };
+    return typeof data.source_url === "string" ? data.source_url : null;
+  } catch {
+    return null;
+  }
+}

@@ -11,6 +11,7 @@ import {
   ArrowUpRight,
 } from "lucide-react";
 import { ProductsService } from "@/services/products";
+import { resolveWpMediaUrl } from "@/services/woocommerce";
 import { ProductGallery } from "@/components/product/product-gallery";
 import { PurchasePanel } from "@/components/product/purchase-panel";
 import { ProductTabs } from "@/components/product/product-tabs";
@@ -32,6 +33,7 @@ import {
 import {
   calculateDiscount,
   getProductMeta,
+  getProductMetaAttachmentId,
   stripHtml,
   truncate,
 } from "@/lib/utils";
@@ -93,7 +95,19 @@ export default async function ProductPage({ params }: Props) {
         product.sale_price || product.price,
       )
     : 0;
-  const coaUrl = getProductMeta(product.meta_data, "coa_url");
+  // Prefer a direct URL from meta (ACF File URL or URL field). Fall
+  // back to resolving a raw WordPress attachment id, which is what
+  // Woo REST returns for ACF File fields regardless of Return Format.
+  let coaUrl = getProductMeta(product.meta_data, "coa_url");
+  if (!coaUrl) {
+    const coaAttachmentId = getProductMetaAttachmentId(
+      product.meta_data,
+      "coa_url",
+    );
+    if (coaAttachmentId) {
+      coaUrl = (await resolveWpMediaUrl(coaAttachmentId)) ?? undefined;
+    }
+  }
 
   return (
     <>

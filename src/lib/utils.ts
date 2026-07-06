@@ -91,10 +91,47 @@ export function getProductMeta(
       const url = (v as { url?: unknown }).url;
       if (typeof url === "string" && isUrl(url)) return url.trim();
     }
-    // 3. Skip raw attachment IDs (numbers or numeric strings) — they
-    // need an async /wp/v2/media/{id} lookup to resolve to a URL,
-    // which this sync helper can't do. Editors should set the ACF
-    // field's Return Format to "File URL" to avoid this case.
+    // 3. Raw attachment IDs (numbers or numeric strings) are handled
+    // by getProductMetaAttachmentId + resolveWpMediaUrl. WooCommerce's
+    // REST API returns the raw stored value for ACF File fields;
+    // ACF's "Return Format: File URL" transformation only applies
+    // when reading via PHP's get_field(), not REST.
+  }
+  return undefined;
+}
+
+/**
+ * When the meta value is a raw WordPress attachment id (as returned
+ * by ACF File fields via the REST API), return it as a number so the
+ * caller can resolve it via `/wp-json/wp/v2/media/{id}`.
+ */
+export function getProductMetaAttachmentId(
+  meta: Array<{ key: string; value: unknown }> | undefined,
+  key: string,
+): number | undefined {
+  if (!meta || meta.length === 0) return undefined;
+  const wanted = key.toLowerCase().replace(/^_/, "");
+  for (const entry of meta) {
+    const k = entry.key.toLowerCase().replace(/^_/, "");
+    if (k !== wanted) continue;
+    const v = entry.value;
+    if (typeof v === "number" && Number.isFinite(v) && v > 0) return v;
+    if (typeof v === "string" && /^\d+$/.test(v.trim())) {
+      const n = parseInt(v.trim(), 10);
+      if (Number.isFinite(n) && n > 0) return n;
+    }
+    // ACF File Array shape: { id, url, ... }. If the caller already
+    // grabbed .url via getProductMeta, we return undefined here so
+    // we don't double-resolve.
+    if (v && typeof v === "object") {
+      const id = (v as { id?: unknown }).id;
+      if (typeof id === "number" && Number.isFinite(id) && id > 0) {
+        const url = (v as { url?: unknown }).url;
+        if (typeof url !== "string" || !/^https?:\/\//i.test(url)) {
+          return id;
+        }
+      }
+    }
   }
   return undefined;
 }
