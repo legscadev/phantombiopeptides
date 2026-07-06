@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, Search, ShoppingBag } from "lucide-react";
+import { Menu, ShoppingBag } from "lucide-react";
 import { Logo } from "./logo";
 import { Button } from "@/components/ui/button";
 import {
@@ -85,14 +85,6 @@ export function Navbar() {
           </nav>
 
           <div className="ml-auto flex items-center gap-2 lg:ml-2">
-            <Link
-              href="/search"
-              aria-label="Search"
-              className="relative hidden h-10 w-10 items-center justify-center rounded-full border border-white/60 bg-white/40 backdrop-blur transition-all hover:border-[color:hsl(var(--brand-500))]/40 hover:text-[color:hsl(var(--brand-500))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:hsl(var(--brand-500))] focus-visible:ring-offset-2 lg:inline-flex"
-            >
-              <Search className="h-4 w-4" />
-            </Link>
-
             <button
               type="button"
               onClick={openDrawer}
@@ -131,14 +123,6 @@ export function Navbar() {
                   </SheetTitle>
                 </SheetHeader>
                 <nav className="flex flex-col px-2 pb-8 pt-4">
-                  <Link
-                    href="/search"
-                    onClick={() => setMobileOpen(false)}
-                    className="flex items-center gap-2 rounded-xl px-4 py-3 text-base font-medium text-foreground/80 transition hover:bg-[color:hsl(var(--brand-50))] hover:text-[color:hsl(var(--brand-500))]"
-                  >
-                    <Search className="h-4 w-4" />
-                    Search
-                  </Link>
                   {nav.map((item) => (
                     <Link
                       key={item.href}
