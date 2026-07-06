@@ -29,7 +29,7 @@ const EASE = [0.16, 1, 0.3, 1] as const;
 
 export function Hero() {
   return (
-    <section className="bg-ambient-dark relative overflow-hidden text-white">
+    <section className="bg-ambient-dark relative flex min-h-svh items-center overflow-hidden text-white">
       {/* Ambient blobs — drift slowly */}
       <div className="pointer-events-none absolute inset-0" aria-hidden>
         <div
