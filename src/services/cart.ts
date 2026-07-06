@@ -430,6 +430,28 @@ export const CartService = {
       );
     }
 
+    // Diagnose common "doesn't apply" reasons up front so the user
+    // gets a specific message instead of a vague failure.
+    const amount = parseFloat(coupon.amount) || 0;
+    if (amount <= 0) {
+      throw new CouponError(
+        "This coupon has no value set. Ask an admin to update its amount in WooCommerce.",
+        "not_applicable",
+      );
+    }
+    const supportedTypes = new Set([
+      "percent",
+      "fixed_cart",
+      "percent_product",
+      "fixed_product",
+    ]);
+    if (!supportedTypes.has(coupon.discount_type)) {
+      throw new CouponError(
+        `Discount type "${coupon.discount_type}" isn't supported yet — use Percentage, Fixed cart, or Fixed product.`,
+        "not_applicable",
+      );
+    }
+
     // Hydrate the current cart to check applicability + minimum spend.
     const items = await readCartItems();
     const preview = await hydrateCart(items, [...existing, trimmed]);
@@ -444,8 +466,19 @@ export const CartService = {
           "minimum_amount",
         );
       }
+      const hasProductRestrictions =
+        coupon.product_ids.length > 0 ||
+        coupon.excluded_product_ids.length > 0 ||
+        coupon.product_categories.length > 0 ||
+        coupon.excluded_product_categories.length > 0;
+      if (hasProductRestrictions) {
+        throw new CouponError(
+          "This coupon only applies to specific products or categories that aren't in your cart.",
+          "not_applicable",
+        );
+      }
       throw new CouponError(
-        "This coupon doesn't apply to your current cart.",
+        "This coupon doesn't apply to your current cart. Check the coupon's usage restrictions in WooCommerce.",
         "not_applicable",
       );
     }
