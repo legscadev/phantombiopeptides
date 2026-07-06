@@ -87,14 +87,14 @@ export default async function CategoryPage({ params, searchParams }: Props) {
                   className={cn(
                     "shrink-0 rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.14em] transition-all",
                     active
-                      ? "border border-[color:hsl(var(--brand-200))] text-[color:hsl(var(--brand-500))] shadow-[0_10px_24px_-14px_hsl(var(--brand-500)/0.35)]"
+                      ? "text-white shadow-[0_10px_24px_-10px_hsl(var(--brand-500)/0.55)]"
                       : "border border-border bg-background-elevated text-foreground/70 hover:border-border-strong hover:bg-background-muted hover:text-foreground",
                   )}
                   style={
                     active
                       ? {
                           background:
-                            "linear-gradient(135deg, hsl(var(--brand-100) / 0.9) 0%, hsl(var(--brand-50) / 0.9) 100%)",
+                            "linear-gradient(135deg, hsl(var(--brand-500)) 0%, hsl(var(--brand-400)) 100%)",
                         }
                       : undefined
                   }
