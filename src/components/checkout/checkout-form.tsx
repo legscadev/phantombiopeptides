@@ -26,20 +26,68 @@ import { Separator } from "@/components/ui/separator";
 import type { WCCart, WCAddress } from "@/types";
 import { formatPrice } from "@/lib/utils";
 
-const schema = z.object({
-  email: z.string().email("Enter a valid email"),
-  first_name: z.string().min(1, "Required"),
-  last_name: z.string().min(1, "Required"),
-  company: z.string().optional(),
-  address_1: z.string().min(1, "Required"),
-  address_2: z.string().optional(),
-  city: z.string().min(1, "Required"),
-  state: z.string().min(1, "Required"),
-  postcode: z.string().min(3, "Required"),
-  country: z.string().min(2).max(2, "Use a 2-letter country code"),
-  phone: z.string().optional(),
-  customer_note: z.string().optional(),
-});
+const schema = z
+  .object({
+    email: z.string().email("Enter a valid email"),
+    first_name: z.string().min(1, "Required"),
+    last_name: z.string().min(1, "Required"),
+    company: z.string().optional(),
+    address_1: z.string().min(1, "Required"),
+    address_2: z.string().optional(),
+    city: z.string().min(1, "Required"),
+    state: z.string().min(1, "Required"),
+    postcode: z.string().min(3, "Required"),
+    country: z.string().min(2).max(2, "Use a 2-letter country code"),
+    phone: z.string().optional(),
+    customer_note: z.string().optional(),
+    billing_same: z.boolean(),
+    billing_first_name: z.string().optional(),
+    billing_last_name: z.string().optional(),
+    billing_company: z.string().optional(),
+    billing_address_1: z.string().optional(),
+    billing_address_2: z.string().optional(),
+    billing_city: z.string().optional(),
+    billing_state: z.string().optional(),
+    billing_postcode: z.string().optional(),
+    billing_country: z.string().optional(),
+    billing_phone: z.string().optional(),
+  })
+  .superRefine((val, ctx) => {
+    if (val.billing_same) return;
+    const required: Array<[keyof typeof val, string | undefined]> = [
+      ["billing_first_name", val.billing_first_name],
+      ["billing_last_name", val.billing_last_name],
+      ["billing_address_1", val.billing_address_1],
+      ["billing_city", val.billing_city],
+      ["billing_state", val.billing_state],
+    ];
+    for (const [field, value] of required) {
+      if (!value || value.trim() === "") {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: [field],
+          message: "Required",
+        });
+      }
+    }
+    if (!val.billing_postcode || val.billing_postcode.length < 3) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["billing_postcode"],
+        message: "Required",
+      });
+    }
+    if (
+      !val.billing_country ||
+      val.billing_country.length !== 2
+    ) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["billing_country"],
+        message: "Use a 2-letter country code",
+      });
+    }
+  });
 
 type Values = z.infer<typeof schema>;
 
@@ -102,11 +150,17 @@ function InnerCheckoutForm({ cart }: { cart: WCCart }) {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<Values>({
     resolver: zodResolver(schema),
-    defaultValues: { country: "US" },
+    defaultValues: {
+      country: "US",
+      billing_same: true,
+      billing_country: "US",
+    },
   });
+  const billingSame = watch("billing_same");
 
   const currency = cart.totals.currency_code;
 
@@ -127,7 +181,7 @@ function InnerCheckoutForm({ cart }: { cart: WCCart }) {
         return;
       }
 
-      const address: WCAddress = {
+      const shippingAddress: WCAddress = {
         first_name: values.first_name,
         last_name: values.last_name,
         company: values.company ?? "",
@@ -140,13 +194,28 @@ function InnerCheckoutForm({ cart }: { cart: WCCart }) {
         email: values.email,
         phone: values.phone ?? "",
       };
+      const billingAddress: WCAddress = values.billing_same
+        ? shippingAddress
+        : {
+            first_name: values.billing_first_name ?? "",
+            last_name: values.billing_last_name ?? "",
+            company: values.billing_company ?? "",
+            address_1: values.billing_address_1 ?? "",
+            address_2: values.billing_address_2 ?? "",
+            city: values.billing_city ?? "",
+            state: values.billing_state ?? "",
+            postcode: values.billing_postcode ?? "",
+            country: (values.billing_country ?? "US").toUpperCase(),
+            email: values.email,
+            phone: values.billing_phone ?? values.phone ?? "",
+          };
 
       // 1. Ask the server for a Stripe PaymentIntent for the live cart.
       //    Woo order creation happens AFTER payment succeeds so a WP
       //    hiccup can't block the customer from paying.
       const start = await startCheckoutAction({
-        billing_address: address,
-        shipping_address: address,
+        billing_address: billingAddress,
+        shipping_address: shippingAddress,
         customer_note: values.customer_note ?? "",
       });
       if (!start.ok || !start.client_secret || !start.payment_intent_id) {
@@ -155,7 +224,9 @@ function InnerCheckoutForm({ cart }: { cart: WCCart }) {
       }
 
       // 2. Confirm the payment. redirect: "if_required" keeps the
-      //    customer on this page unless a bank pushes 3DS.
+      //    customer on this page unless a bank pushes 3DS. billing
+      //    details use the actual billing address (needed for AVS
+      //    card verification), which may differ from shipping.
       const { error: confirmError, paymentIntent } =
         await stripe.confirmPayment({
           elements,
@@ -165,15 +236,15 @@ function InnerCheckoutForm({ cart }: { cart: WCCart }) {
             payment_method_data: {
               billing_details: {
                 email: values.email,
-                name: `${values.first_name} ${values.last_name}`.trim(),
-                phone: values.phone || undefined,
+                name: `${billingAddress.first_name} ${billingAddress.last_name}`.trim(),
+                phone: billingAddress.phone || undefined,
                 address: {
-                  line1: values.address_1,
-                  line2: values.address_2 || undefined,
-                  city: values.city,
-                  state: values.state,
-                  postal_code: values.postcode,
-                  country: values.country.toUpperCase(),
+                  line1: billingAddress.address_1,
+                  line2: billingAddress.address_2 || undefined,
+                  city: billingAddress.city,
+                  state: billingAddress.state,
+                  postal_code: billingAddress.postcode,
+                  country: billingAddress.country,
                 },
               },
             },
@@ -201,8 +272,8 @@ function InnerCheckoutForm({ cart }: { cart: WCCart }) {
       //    metadata for reconciliation and still returns ok.
       const finalize = await finalizeCheckoutAction({
         payment_intent_id: paymentIntent.id,
-        billing_address: address,
-        shipping_address: address,
+        billing_address: billingAddress,
+        shipping_address: shippingAddress,
         customer_note: values.customer_note ?? "",
       });
       if (!finalize.ok) {
@@ -341,6 +412,133 @@ function InnerCheckoutForm({ cart }: { cart: WCCart }) {
               <Input id="phone" type="tel" {...register("phone")} />
             </div>
           </div>
+        </fieldset>
+
+        <fieldset className="rounded-2xl border border-border bg-card p-6">
+          <legend className="px-2 text-xs uppercase tracking-widest text-muted-foreground">
+            Billing address
+          </legend>
+          <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-border bg-background-elevated px-4 py-3">
+            <input
+              type="checkbox"
+              className="h-4 w-4 shrink-0 accent-[color:hsl(var(--brand-500))]"
+              {...register("billing_same")}
+            />
+            <span className="text-sm text-foreground">
+              Billing address is the same as shipping
+            </span>
+          </label>
+
+          {!billingSame && (
+            <div className="mt-5 grid gap-3 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label htmlFor="billing_first_name">First name</Label>
+                <Input
+                  id="billing_first_name"
+                  {...register("billing_first_name")}
+                />
+                {errors.billing_first_name && (
+                  <p className="text-xs text-destructive">
+                    {errors.billing_first_name.message}
+                  </p>
+                )}
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="billing_last_name">Last name</Label>
+                <Input
+                  id="billing_last_name"
+                  {...register("billing_last_name")}
+                />
+                {errors.billing_last_name && (
+                  <p className="text-xs text-destructive">
+                    {errors.billing_last_name.message}
+                  </p>
+                )}
+              </div>
+              <div className="space-y-1.5 sm:col-span-2">
+                <Label htmlFor="billing_company">
+                  Institution / company (optional)
+                </Label>
+                <Input
+                  id="billing_company"
+                  {...register("billing_company")}
+                />
+              </div>
+              <div className="space-y-1.5 sm:col-span-2">
+                <Label htmlFor="billing_address_1">Street address</Label>
+                <Input
+                  id="billing_address_1"
+                  {...register("billing_address_1")}
+                />
+                {errors.billing_address_1 && (
+                  <p className="text-xs text-destructive">
+                    {errors.billing_address_1.message}
+                  </p>
+                )}
+              </div>
+              <div className="space-y-1.5 sm:col-span-2">
+                <Label htmlFor="billing_address_2">
+                  Apt / suite (optional)
+                </Label>
+                <Input
+                  id="billing_address_2"
+                  {...register("billing_address_2")}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="billing_city">City</Label>
+                <Input id="billing_city" {...register("billing_city")} />
+                {errors.billing_city && (
+                  <p className="text-xs text-destructive">
+                    {errors.billing_city.message}
+                  </p>
+                )}
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="billing_state">State / province</Label>
+                <Input id="billing_state" {...register("billing_state")} />
+                {errors.billing_state && (
+                  <p className="text-xs text-destructive">
+                    {errors.billing_state.message}
+                  </p>
+                )}
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="billing_postcode">ZIP / postcode</Label>
+                <Input
+                  id="billing_postcode"
+                  {...register("billing_postcode")}
+                />
+                {errors.billing_postcode && (
+                  <p className="text-xs text-destructive">
+                    {errors.billing_postcode.message}
+                  </p>
+                )}
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="billing_country">Country (2-letter)</Label>
+                <Input
+                  id="billing_country"
+                  maxLength={2}
+                  {...register("billing_country")}
+                  placeholder="US"
+                />
+                {errors.billing_country && (
+                  <p className="text-xs text-destructive">
+                    {errors.billing_country.message}
+                  </p>
+                )}
+              </div>
+              <div className="space-y-1.5 sm:col-span-2">
+                <Label htmlFor="billing_phone">Phone (optional)</Label>
+                <Input
+                  id="billing_phone"
+                  type="tel"
+                  {...register("billing_phone")}
+                />
+              </div>
+            </div>
+          )}
         </fieldset>
 
         <fieldset className="rounded-2xl border border-border bg-card p-6">
