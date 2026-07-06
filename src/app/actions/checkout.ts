@@ -73,7 +73,13 @@ export async function startCheckoutAction(
     const pi = await stripe.paymentIntents.create({
       amount: amountMinor,
       currency,
-      automatic_payment_methods: { enabled: true },
+      // Must match the client-side Elements config (checkout-form.tsx
+      // pins paymentMethodTypes: ["card"]). If this stays on
+      // automatic_payment_methods, Stripe refuses to confirm the PI
+      // with the error "Payment details were collected through Stripe
+      // Elements using payment_method_types and cannot be confirmed
+      // through the API configured with automatic payment methods".
+      payment_method_types: ["card"],
       metadata: {
         source: "phantombiopeptides-nextjs",
         cart_items: itemsMeta.slice(0, 480),
