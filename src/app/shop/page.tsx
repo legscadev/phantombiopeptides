@@ -5,6 +5,7 @@ import { CategoriesService } from "@/services/categories";
 import { ProductsService } from "@/services/products";
 import { Breadcrumb } from "@/components/common/breadcrumb";
 import { Reveal } from "@/components/common/reveal";
+import { ImagePlaceholder } from "@/components/common/image-placeholder";
 import { Button } from "@/components/ui/button";
 import { buildMetadata } from "@/lib/seo";
 
@@ -77,8 +78,8 @@ export default async function ShopPage() {
                 href={`/category/${cat.slug}`}
                 className="group flex h-full flex-col overflow-hidden rounded-3xl border border-border bg-card shadow-sm transition-all hover:border-border-strong hover:shadow-md"
               >
-                <div className="relative aspect-[4/5] overflow-hidden bg-background-muted">
-                  {cat.image?.src && (
+                <div className="relative aspect-[4/5] overflow-hidden">
+                  {cat.image?.src ? (
                     <Image
                       src={cat.image.src}
                       alt={cat.image.alt || cat.name}
@@ -86,6 +87,8 @@ export default async function ShopPage() {
                       sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
                       className="object-cover transition-transform duration-700 group-hover:scale-[1.05]"
                     />
+                  ) : (
+                    <ImagePlaceholder label={cat.name} />
                   )}
                   <div className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-widest text-foreground backdrop-blur">
                     {cat.count ?? 0} items
