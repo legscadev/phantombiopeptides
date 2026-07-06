@@ -1,17 +1,22 @@
 import { Skeleton } from "@/components/ui/skeleton";
+import { ProductGridSkeleton } from "@/components/product/product-card-skeleton";
 
 export default function Loading() {
   return (
-    <div className="container-page py-16 space-y-8">
-      <Skeleton className="h-14 w-1/2 max-w-md" />
-      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {Array.from({ length: 8 }).map((_, i) => (
-          <div key={i} className="space-y-3">
-            <Skeleton className="aspect-square" />
-            <Skeleton className="h-4 w-3/4" />
-            <Skeleton className="h-4 w-1/2" />
-          </div>
-        ))}
+    <div className="container-page py-16 md:py-24">
+      <div className="max-w-3xl space-y-5">
+        <Skeleton className="h-3 w-48 rounded-full" />
+        <Skeleton className="h-14 w-full max-w-2xl" />
+        <Skeleton className="h-14 w-4/5 max-w-xl" />
+        <div className="space-y-2 pt-2">
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-11/12" />
+          <Skeleton className="h-4 w-2/3" />
+        </div>
+      </div>
+
+      <div className="mt-12 border-t border-border pt-8">
+        <ProductGridSkeleton />
       </div>
     </div>
   );

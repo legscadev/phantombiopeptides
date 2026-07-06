@@ -3,10 +3,10 @@ import Link from "next/link";
 import { ProductsService } from "@/services/products";
 import { CategoriesService } from "@/services/categories";
 import { ProductGrid } from "@/components/product/product-grid";
+import { ProductGridSkeleton } from "@/components/product/product-card-skeleton";
 import { ProductSort } from "@/components/product/product-sort";
 import { Pagination } from "@/components/product/pagination";
 import { Reveal } from "@/components/common/reveal";
-import { Skeleton } from "@/components/ui/skeleton";
 import { buildMetadata } from "@/lib/seo";
 import { parseProductSearchParams } from "@/lib/parse-search";
 import { cn } from "@/lib/utils";
@@ -91,7 +91,7 @@ export default async function ShopAllPage({ searchParams }: Props) {
 
       <Reveal delay={0.16}>
         <div className="mt-12">
-          <Suspense fallback={<GridSkeleton />}>
+          <Suspense fallback={<ProductGridSkeleton />}>
             <ProductGrid products={data} priorityCount={4} />
           </Suspense>
 
@@ -104,16 +104,3 @@ export default async function ShopAllPage({ searchParams }: Props) {
   );
 }
 
-function GridSkeleton() {
-  return (
-    <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {Array.from({ length: 8 }).map((_, i) => (
-        <div key={i} className="space-y-3">
-          <Skeleton className="aspect-square" />
-          <Skeleton className="h-4 w-2/3" />
-          <Skeleton className="h-4 w-1/3" />
-        </div>
-      ))}
-    </div>
-  );
-}
