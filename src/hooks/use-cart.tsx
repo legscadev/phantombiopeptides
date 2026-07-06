@@ -98,11 +98,17 @@ export function CartProvider({
         toast("Item removed");
       },
       applyCoupon: async (code) => {
+        setIsLoading(true);
         try {
-          await withLoading(() => applyCouponAction(code));
-          toast.success(`Coupon "${code}" applied`);
-        } catch {
-          toast.error("Coupon could not be applied");
+          const result = await applyCouponAction(code);
+          if (result.ok) {
+            setCart(result.cart);
+            toast.success(`Coupon "${code.toUpperCase()}" applied`);
+          } else {
+            toast.error(result.error);
+          }
+        } finally {
+          setIsLoading(false);
         }
       },
       removeCoupon: async (code) => {

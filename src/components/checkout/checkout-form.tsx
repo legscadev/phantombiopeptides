@@ -23,6 +23,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { CouponPanel } from "./coupon-panel";
+import { useCart } from "@/hooks/use-cart";
 import type { WCCart, WCAddress } from "@/types";
 import { formatPrice } from "@/lib/utils";
 
@@ -91,7 +93,9 @@ const schema = z
 
 type Values = z.infer<typeof schema>;
 
-export function CheckoutForm({ cart }: { cart: WCCart }) {
+export function CheckoutForm({ cart: initialCart }: { cart: WCCart }) {
+  const { cart: liveCart } = useCart();
+  const cart = liveCart ?? initialCart;
   const stripePromise = React.useMemo(() => getStripe(), []);
   const currency = cart.totals.currency_code.toLowerCase();
   const amountMinor = Math.round(
@@ -541,6 +545,8 @@ function InnerCheckoutForm({ cart }: { cart: WCCart }) {
           )}
         </fieldset>
 
+        <CouponPanel />
+
         <fieldset className="rounded-2xl border border-border bg-card p-6">
           <legend className="flex items-center gap-2 px-2 text-xs uppercase tracking-widest text-muted-foreground">
             <Lock className="h-3 w-3" />
@@ -603,6 +609,21 @@ function InnerCheckoutForm({ cart }: { cart: WCCart }) {
             <span>Subtotal</span>
             <span>{formatPrice(cart.totals.total_items, currency)}</span>
           </div>
+          {parseFloat(cart.totals.total_discount) > 0 && (
+            <div className="flex justify-between text-success">
+              <span>
+                Discount
+                {cart.coupons.length > 0 && (
+                  <span className="ml-1 text-xs uppercase tracking-wider text-success/80">
+                    ({cart.coupons.map((c) => c.code).join(", ")})
+                  </span>
+                )}
+              </span>
+              <span>
+                −{formatPrice(cart.totals.total_discount, currency)}
+              </span>
+            </div>
+          )}
           {parseFloat(cart.totals.total_shipping ?? "0") > 0 && (
             <div className="flex justify-between text-muted-foreground">
               <span>Shipping</span>

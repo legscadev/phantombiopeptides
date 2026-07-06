@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { CartService } from "@/services/cart";
+import { CartService, CouponError } from "@/services/cart";
 import type { WCCart } from "@/types";
 
 export async function addToCartAction(
@@ -35,10 +35,27 @@ export async function removeCartItemAction(key: string): Promise<WCCart> {
   return cart;
 }
 
-export async function applyCouponAction(code: string): Promise<WCCart> {
-  const cart = await CartService.applyCoupon(code);
-  revalidatePath("/cart");
-  return cart;
+export type ApplyCouponResult =
+  | { ok: true; cart: WCCart }
+  | { ok: false; error: string; code: CouponError["code"] };
+
+export async function applyCouponAction(
+  code: string,
+): Promise<ApplyCouponResult> {
+  try {
+    const cart = await CartService.applyCoupon(code);
+    revalidatePath("/cart");
+    return { ok: true, cart };
+  } catch (err) {
+    if (err instanceof CouponError) {
+      return { ok: false, error: err.message, code: err.code };
+    }
+    return {
+      ok: false,
+      error: "Coupon could not be applied. Try again in a moment.",
+      code: "not_found",
+    };
+  }
 }
 
 export async function removeCouponAction(code: string): Promise<WCCart> {

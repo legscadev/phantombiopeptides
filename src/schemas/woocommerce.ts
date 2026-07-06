@@ -222,6 +222,29 @@ export const wcCheckoutResponseSchema = z.object({
     .optional(),
 });
 
+export const wcCouponSchema = z.object({
+  id: z.number(),
+  code: z.string(),
+  amount: z.string(),
+  discount_type: z.enum([
+    "fixed_cart",
+    "percent",
+    "fixed_product",
+    "percent_product",
+  ]),
+  minimum_amount: z.string().optional().default("0"),
+  maximum_amount: z.string().optional().default("0"),
+  usage_limit: z.number().nullable().optional().default(0),
+  usage_count: z.number().optional().default(0),
+  date_expires: z.string().nullable().optional(),
+  product_ids: z.array(z.number()).default([]),
+  excluded_product_ids: z.array(z.number()).default([]),
+  product_categories: z.array(z.number()).default([]),
+  excluded_product_categories: z.array(z.number()).default([]),
+  individual_use: z.boolean().optional().default(false),
+  free_shipping: z.boolean().optional().default(false),
+});
+
 export type WCImage = z.infer<typeof wcImageSchema>;
 export type WCCategory = z.infer<typeof wcCategorySchema>;
 export type WCAttribute = z.infer<typeof wcAttributeSchema>;
@@ -232,3 +255,4 @@ export type WCCart = z.infer<typeof wcCartSchema>;
 export type WCCartItem = z.infer<typeof wcCartItemSchema>;
 export type WCAddress = z.infer<typeof wcAddressSchema>;
 export type WCCheckoutResponse = z.infer<typeof wcCheckoutResponseSchema>;
+export type WCCoupon = z.infer<typeof wcCouponSchema>;

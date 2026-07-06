@@ -9,6 +9,7 @@ export type {
   WCCartItem,
   WCAddress,
   WCCheckoutResponse,
+  WCCoupon,
 } from "@/schemas/woocommerce";
 
 export interface CheckoutFormValues {

@@ -73,6 +73,12 @@ export const CheckoutService = {
       return line;
     });
 
+    // Applied coupons — Woo re-computes the discount server-side from
+    // the coupon rules when it sees coupon_lines, and stores the codes
+    // on the order so admins see them in wp-admin.
+    const applied = await CartService.getAppliedCoupons();
+    const coupon_lines = applied.map((code) => ({ code }));
+
     // WordPress.com sometimes wpcomsh-fatals when a POST to /orders
     // contains billing/shipping/status/payment fields all at once —
     // likely a plugin hook that stalls. Splitting the write into a
@@ -84,6 +90,7 @@ export const CheckoutService = {
       body: JSON.stringify({
         status: "pending",
         line_items,
+        ...(coupon_lines.length > 0 ? { coupon_lines } : {}),
       }),
     } as never);
 

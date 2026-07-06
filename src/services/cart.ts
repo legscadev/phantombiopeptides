@@ -1,7 +1,8 @@
 import "server-only";
 import { cookies } from "next/headers";
 import { ProductsService } from "./products";
-import type { WCCart, WCProduct, WCVariation } from "@/types";
+import { CouponsService } from "./coupons";
+import type { WCCart, WCCoupon, WCProduct, WCVariation } from "@/types";
 
 /**
  * Cart is stored on our side (httpOnly cookie), not in WooCommerce.
@@ -20,7 +21,25 @@ import type { WCCart, WCProduct, WCVariation } from "@/types";
  */
 
 const CART_COOKIE = "pl_cart_items";
+const COUPON_COOKIE = "pl_cart_coupons";
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 30;
+
+/** Invalid-coupon signal used by applyCoupon. */
+export class CouponError extends Error {
+  constructor(
+    message: string,
+    public readonly code:
+      | "not_found"
+      | "expired"
+      | "usage_limit"
+      | "minimum_amount"
+      | "not_applicable"
+      | "already_applied",
+  ) {
+    super(message);
+    this.name = "CouponError";
+  }
+}
 
 interface CartLineItem {
   id: number;
@@ -89,6 +108,92 @@ async function writeCartItems(items: CartLineItem[]) {
   });
 }
 
+async function readCoupons(): Promise<string[]> {
+  const store = await cookies();
+  const raw = store.get(COUPON_COOKIE)?.value;
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .filter((x): x is string => typeof x === "string" && x.trim() !== "")
+      .map((x) => x.trim());
+  } catch {
+    return [];
+  }
+}
+
+async function writeCoupons(codes: string[]) {
+  const store = await cookies();
+  if (codes.length === 0) {
+    store.delete(COUPON_COOKIE);
+    return;
+  }
+  store.set(COUPON_COOKIE, JSON.stringify(codes), {
+    httpOnly: true,
+    sameSite: "lax",
+    path: "/",
+    maxAge: COOKIE_MAX_AGE,
+    secure: process.env.NODE_ENV === "production",
+  });
+}
+
+/**
+ * Compute the discount a coupon takes off the current cart, plus the
+ * per-line adjustments so line totals can be redisplayed net-of-discount.
+ * Only supports the four core Woo discount types.
+ */
+function applyCoupon(
+  coupon: WCCoupon,
+  items: WCCart["items"],
+  products: Map<number, WCProduct>,
+): number {
+  const amount = parseFloat(coupon.amount) || 0;
+  const eligible = items.filter((it) => {
+    const p = products.get(it.id);
+    if (!p) return false;
+    const productMatches =
+      coupon.product_ids.length === 0 ||
+      coupon.product_ids.includes(it.id);
+    const productExcluded = coupon.excluded_product_ids.includes(it.id);
+    const catIds = p.categories.map((c) => c.id);
+    const catMatches =
+      coupon.product_categories.length === 0 ||
+      catIds.some((id) => coupon.product_categories.includes(id));
+    const catExcluded = catIds.some((id) =>
+      coupon.excluded_product_categories.includes(id),
+    );
+    return productMatches && !productExcluded && catMatches && !catExcluded;
+  });
+
+  const eligibleSubtotal = eligible.reduce(
+    (s, it) => s + parseFloat(it.totals.line_subtotal),
+    0,
+  );
+
+  switch (coupon.discount_type) {
+    case "percent":
+      return round2((eligibleSubtotal * amount) / 100);
+    case "fixed_cart":
+      return Math.min(round2(amount), eligibleSubtotal);
+    case "percent_product":
+      return round2((eligibleSubtotal * amount) / 100);
+    case "fixed_product":
+      return round2(
+        eligible.reduce(
+          (s, it) => s + Math.min(amount, parseFloat(it.prices.price)) * it.quantity,
+          0,
+        ),
+      );
+    default:
+      return 0;
+  }
+}
+
+function round2(n: number): number {
+  return Math.round(n * 100) / 100;
+}
+
 function emptyCart(): WCCart {
   return {
     items: [],
@@ -149,7 +254,10 @@ function buildLineItem(
   };
 }
 
-async function hydrateCart(items: CartLineItem[]): Promise<WCCart> {
+async function hydrateCart(
+  items: CartLineItem[],
+  couponCodes: string[] = [],
+): Promise<WCCart> {
   if (items.length === 0) return emptyCart();
   const productsPromise = Promise.all(
     items.map((it) => ProductsService.getById(it.id).catch(() => null)),
@@ -194,27 +302,57 @@ async function hydrateCart(items: CartLineItem[]): Promise<WCCart> {
     (s, it) => s + parseFloat(it.totals.line_subtotal),
     0,
   );
+
+  // Resolve applied coupons and roll them into the cart totals. Any
+  // coupon that no longer exists in Woo (deleted or renamed) is
+  // silently dropped so a stale cookie doesn't crash the flow.
+  const appliedCoupons: Array<{ code: string; discount_type: string }> = [];
+  let totalDiscount = 0;
+  if (couponCodes.length > 0) {
+    const productMap = new Map<number, WCProduct>();
+    for (const p of products) if (p) productMap.set(p.id, p);
+    const resolved = await Promise.all(
+      couponCodes.map((code) => CouponsService.getByCode(code)),
+    );
+    for (const coupon of resolved) {
+      if (!coupon) continue;
+      const eligibleSubtotal = subtotal;
+      const min = parseFloat(coupon.minimum_amount || "0");
+      if (min > 0 && eligibleSubtotal < min) continue;
+      const discount = applyCoupon(coupon, cartItems, productMap);
+      if (discount <= 0) continue;
+      totalDiscount += discount;
+      appliedCoupons.push({
+        code: coupon.code,
+        discount_type: coupon.discount_type,
+      });
+    }
+  }
+  // Never discount past zero.
+  totalDiscount = Math.min(round2(totalDiscount), subtotal);
+  const totalPrice = round2(subtotal - totalDiscount);
+
   return {
     items: cartItems,
     items_count: cartItems.reduce((s, it) => s + it.quantity, 0),
     needs_shipping: cartItems.length > 0,
-    coupons: [],
+    coupons: appliedCoupons,
     totals: {
       currency_code: "USD",
       currency_symbol: "$",
       currency_minor_unit: 2,
       total_items: subtotal.toFixed(2),
-      total_discount: "0.00",
+      total_discount: totalDiscount.toFixed(2),
       total_shipping: "0.00",
       total_tax: "0.00",
-      total_price: subtotal.toFixed(2),
+      total_price: totalPrice.toFixed(2),
     },
   };
 }
 
 export const CartService = {
   async get(): Promise<WCCart> {
-    return hydrateCart(await readCartItems());
+    return hydrateCart(await readCartItems(), await readCoupons());
   },
 
   async addItem(
@@ -234,7 +372,7 @@ export const CartService = {
     if (existing) existing.quantity += quantity;
     else items.push(newLine);
     await writeCartItems(items);
-    return hydrateCart(items);
+    return hydrateCart(items, await readCoupons());
   },
 
   async updateItem(key: string, quantity: number): Promise<WCCart> {
@@ -246,7 +384,7 @@ export const CartService = {
       if (item) item.quantity = quantity;
     }
     await writeCartItems(items);
-    return hydrateCart(items);
+    return hydrateCart(items, await readCoupons());
   },
 
   async removeItem(key: string): Promise<WCCart> {
@@ -254,17 +392,79 @@ export const CartService = {
       (it) => itemKey(it) !== key,
     );
     await writeCartItems(items);
-    return hydrateCart(items);
+    return hydrateCart(items, await readCoupons());
   },
 
-  // Coupons aren't supported yet — we'd need to run Woo's discount rules
-  // ourselves or hand the cart off to Woo at checkout, then re-read.
-  async applyCoupon(_code: string): Promise<WCCart> {
-    return this.get();
+  /**
+   * Validate a coupon against Woo, verify it applies to the current
+   * cart, then persist it in the coupon cookie so hydrateCart will
+   * fold the discount into totals from now on.
+   */
+  async applyCoupon(code: string): Promise<WCCart> {
+    const trimmed = code.trim();
+    if (!trimmed) throw new CouponError("Enter a coupon code.", "not_found");
+    const existing = await readCoupons();
+    if (
+      existing.some((c) => c.toLowerCase() === trimmed.toLowerCase())
+    ) {
+      throw new CouponError("Coupon is already applied.", "already_applied");
+    }
+    const coupon = await CouponsService.getByCode(trimmed);
+    if (!coupon) {
+      throw new CouponError("That code isn't valid.", "not_found");
+    }
+    if (coupon.date_expires) {
+      const exp = new Date(coupon.date_expires);
+      if (!isNaN(exp.getTime()) && exp.getTime() < Date.now()) {
+        throw new CouponError("That coupon has expired.", "expired");
+      }
+    }
+    if (
+      coupon.usage_limit != null &&
+      coupon.usage_limit > 0 &&
+      coupon.usage_count >= coupon.usage_limit
+    ) {
+      throw new CouponError(
+        "That coupon has been fully redeemed.",
+        "usage_limit",
+      );
+    }
+
+    // Hydrate the current cart to check applicability + minimum spend.
+    const items = await readCartItems();
+    const preview = await hydrateCart(items, [...existing, trimmed]);
+    const applied = preview.coupons.some(
+      (c) => c.code.toLowerCase() === trimmed.toLowerCase(),
+    );
+    if (!applied) {
+      const min = parseFloat(coupon.minimum_amount || "0");
+      if (min > 0) {
+        throw new CouponError(
+          `Order subtotal must be at least $${min.toFixed(2)} to use this coupon.`,
+          "minimum_amount",
+        );
+      }
+      throw new CouponError(
+        "This coupon doesn't apply to your current cart.",
+        "not_applicable",
+      );
+    }
+
+    // If it's an individual-use coupon, drop any others first.
+    const next = coupon.individual_use
+      ? [trimmed]
+      : [...existing, trimmed];
+    await writeCoupons(next);
+    return hydrateCart(items, next);
   },
 
-  async removeCoupon(_code: string): Promise<WCCart> {
-    return this.get();
+  async removeCoupon(code: string): Promise<WCCart> {
+    const trimmed = code.trim().toLowerCase();
+    const next = (await readCoupons()).filter(
+      (c) => c.toLowerCase() !== trimmed,
+    );
+    await writeCoupons(next);
+    return hydrateCart(await readCartItems(), next);
   },
 
   /**
@@ -275,7 +475,16 @@ export const CartService = {
     return readCartItems();
   },
 
+  /**
+   * Applied coupon codes — used at order write time so Woo records the
+   * coupons on the order via coupon_lines.
+   */
+  async getAppliedCoupons(): Promise<string[]> {
+    return readCoupons();
+  },
+
   async clear(): Promise<void> {
     await writeCartItems([]);
+    await writeCoupons([]);
   },
 };
