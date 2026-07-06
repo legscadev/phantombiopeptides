@@ -66,3 +66,25 @@ export function absoluteUrl(path = ""): string {
     "http://localhost:3000";
   return `${base}${path.startsWith("/") ? path : `/${path}`}`;
 }
+
+/**
+ * Read a WooCommerce product's custom-field value. Woo returns meta
+ * as `[{ key, value }]`; we accept either a public key (`coa_url`)
+ * or the underscored private form (`_coa_url`) so wp-admin editors
+ * can use whichever they're comfortable with. Case-insensitive match.
+ */
+export function getProductMeta(
+  meta: Array<{ key: string; value: unknown }> | undefined,
+  key: string,
+): string | undefined {
+  if (!meta || meta.length === 0) return undefined;
+  const wanted = key.toLowerCase().replace(/^_/, "");
+  for (const entry of meta) {
+    const k = entry.key.toLowerCase().replace(/^_/, "");
+    if (k !== wanted) continue;
+    const v = entry.value;
+    if (typeof v === "string" && v.trim() !== "") return v.trim();
+    if (typeof v === "number") return String(v);
+  }
+  return undefined;
+}

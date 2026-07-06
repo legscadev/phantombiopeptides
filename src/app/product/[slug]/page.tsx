@@ -1,7 +1,15 @@
 import { notFound } from "next/navigation";
 import Script from "next/script";
 import Link from "next/link";
-import { Star, Truck, ShieldCheck, RotateCcw, Package } from "lucide-react";
+import {
+  Star,
+  Truck,
+  ShieldCheck,
+  RotateCcw,
+  Package,
+  FileText,
+  ArrowUpRight,
+} from "lucide-react";
 import { ProductsService } from "@/services/products";
 import { ProductGallery } from "@/components/product/product-gallery";
 import { PurchasePanel } from "@/components/product/purchase-panel";
@@ -21,7 +29,12 @@ import {
   productJsonLd,
   breadcrumbJsonLd,
 } from "@/lib/seo";
-import { calculateDiscount, stripHtml, truncate } from "@/lib/utils";
+import {
+  calculateDiscount,
+  getProductMeta,
+  stripHtml,
+  truncate,
+} from "@/lib/utils";
 
 export const revalidate = 300;
 
@@ -80,6 +93,7 @@ export default async function ProductPage({ params }: Props) {
         product.sale_price || product.price,
       )
     : 0;
+  const coaUrl = getProductMeta(product.meta_data, "coa_url");
 
   return (
     <>
@@ -205,6 +219,52 @@ export default async function ProductPage({ params }: Props) {
                 </div>
               ))}
             </div>
+
+            {coaUrl && (
+              <a
+                href={coaUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="ring-glass group relative mt-6 flex items-center gap-4 overflow-hidden rounded-2xl p-5 transition-transform duration-500 hover:-translate-y-0.5"
+                style={{
+                  background:
+                    "linear-gradient(135deg, hsl(var(--brand-50)) 0%, rgba(255,255,255,0.7) 100%)",
+                }}
+                aria-label={`Download Certificate of Analysis for ${product.name} (opens PDF in a new tab)`}
+              >
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full opacity-40 blur-[70px]"
+                  style={{
+                    background:
+                      "radial-gradient(circle, hsl(var(--brand-400)) 0%, transparent 70%)",
+                  }}
+                />
+                <div
+                  className="relative inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-white"
+                  style={{
+                    background:
+                      "linear-gradient(135deg, hsl(var(--brand-500)) 0%, hsl(var(--brand-400)) 100%)",
+                    boxShadow:
+                      "0 10px 24px -12px hsl(var(--brand-500) / 0.5)",
+                  }}
+                >
+                  <FileText className="h-5 w-5" strokeWidth={2.2} />
+                </div>
+                <div className="relative min-w-0 flex-1">
+                  <p className="text-[10px] uppercase tracking-[0.22em] text-[color:hsl(var(--brand-500))]">
+                    Certificate of Analysis
+                  </p>
+                  <p className="mt-1 font-display text-base font-bold tracking-tight text-foreground">
+                    Download the batch COA for {product.name}
+                  </p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    Signed HPLC + mass-spec report from our third-party lab.
+                  </p>
+                </div>
+                <ArrowUpRight className="relative h-4 w-4 shrink-0 text-[color:hsl(var(--brand-500))] transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+              </a>
+            )}
 
             {product.attributes.length > 0 && (
               <div className="mt-8 rounded-xl border border-border bg-card p-5">
