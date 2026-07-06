@@ -36,16 +36,19 @@ export function BackToTop() {
           exit={{ opacity: 0, y: 12, scale: 0.9 }}
           transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
           aria-label="Back to top"
+          style={{
+            background:
+              "linear-gradient(135deg, hsl(var(--brand-500)) 0%, hsl(var(--brand-400)) 100%)",
+          }}
           className={cn(
-            "fixed right-4 z-30 inline-flex h-11 w-11 items-center justify-center rounded-full md:right-6",
-            "border border-white/60 bg-white/85 text-foreground backdrop-blur",
-            "shadow-[0_16px_36px_-14px_rgba(9,4,24,0.35)] ring-1 ring-black/5",
-            "transition-all hover:border-[color:hsl(var(--brand-500))]/40 hover:text-[color:hsl(var(--brand-500))]",
+            "fixed right-4 z-30 inline-flex h-12 w-12 items-center justify-center rounded-2xl text-white md:right-6",
+            "shadow-[0_16px_36px_-12px_hsl(var(--brand-500)/0.6)] ring-1 ring-white/15",
+            "transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-[0_20px_44px_-12px_hsl(var(--brand-500)/0.7)]",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:hsl(var(--brand-500))] focus-visible:ring-offset-2",
             onProductPage ? "bottom-24 md:bottom-24" : "bottom-6 md:bottom-8",
           )}
         >
-          <ArrowUp className="h-4 w-4" strokeWidth={2.2} />
+          <ArrowUp className="h-5 w-5" strokeWidth={3} />
         </motion.button>
       )}
     </AnimatePresence>
