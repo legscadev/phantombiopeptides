@@ -20,12 +20,13 @@ interface Props {
 }
 
 export async function generateStaticParams() {
-  try {
-    const slugs = await CategoriesService.getAllSlugs();
-    return slugs.map((slug) => ({ slug }));
-  } catch {
-    return [];
-  }
+  // Intentionally empty: prerendering every category at build fans
+  // out enough concurrent Woo REST calls (list + all products per
+  // category) across build workers that WordPress.com trips 429.
+  // Pages render on-demand on first visit and cache via ISR (see
+  // `revalidate`), so we still get static behaviour without hammering
+  // Woo during the build. Same pattern as /product/[slug].
+  return [];
 }
 
 export async function generateMetadata({ params }: Props) {
