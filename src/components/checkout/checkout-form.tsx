@@ -64,6 +64,11 @@ export function CheckoutForm({ cart }: { cart: WCCart }) {
     mode: "payment",
     amount: amountMinor > 0 ? amountMinor : 100,
     currency,
+    // Card only. Apple Pay and Google Pay ride on the "card" method
+    // via Stripe's wallets support, so restricting to ["card"] keeps
+    // wallets available while dropping Link, Cash App Pay, US bank
+    // debits, Klarna, Amazon Pay, etc.
+    paymentMethodTypes: ["card"],
     fonts: [
       {
         cssSrc:
@@ -344,7 +349,7 @@ function InnerCheckoutForm({ cart }: { cart: WCCart }) {
             Payment
           </legend>
           <p className="mb-4 text-xs text-muted-foreground">
-            Cards, Apple Pay, Google Pay and Link are supported. Details go
+            Cards, Apple Pay, and Google Pay are supported. Details go
             straight to Stripe — we never see your card number.
           </p>
           <PaymentElement
