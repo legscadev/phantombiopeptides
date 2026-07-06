@@ -79,12 +79,22 @@ export function getProductMeta(
 ): string | undefined {
   if (!meta || meta.length === 0) return undefined;
   const wanted = key.toLowerCase().replace(/^_/, "");
+  const isUrl = (s: string) => /^https?:\/\//i.test(s.trim());
   for (const entry of meta) {
     const k = entry.key.toLowerCase().replace(/^_/, "");
     if (k !== wanted) continue;
     const v = entry.value;
-    if (typeof v === "string" && v.trim() !== "") return v.trim();
-    if (typeof v === "number") return String(v);
+    // 1. Plain string — ACF Return Format: "File URL" or a URL field.
+    if (typeof v === "string" && isUrl(v)) return v.trim();
+    // 2. ACF "File Array" return format: { id, url, filename, ... }.
+    if (v && typeof v === "object") {
+      const url = (v as { url?: unknown }).url;
+      if (typeof url === "string" && isUrl(url)) return url.trim();
+    }
+    // 3. Skip raw attachment IDs (numbers or numeric strings) — they
+    // need an async /wp/v2/media/{id} lookup to resolve to a URL,
+    // which this sync helper can't do. Editors should set the ACF
+    // field's Return Format to "File URL" to avoid this case.
   }
   return undefined;
 }
