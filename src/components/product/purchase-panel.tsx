@@ -23,7 +23,23 @@ export function PurchasePanel({
     (a) =>
       a.name.toLowerCase() === "dose" || a.name.toLowerCase() === "dosage",
   );
-  const doses = doseAttr?.options ?? [];
+  // Woo returns options in the order they were configured, which for
+  // dosages often ends up as "10 mg, 20 mg, 40 mg, 5 mg" (lex order).
+  // Sort by the leading numeric value so the picker reads 5 → 10 → 20
+  // → 40. Fall back to lex order for anything without a number.
+  const doses = React.useMemo(() => {
+    const raw = doseAttr?.options ?? [];
+    const leadingNum = (s: string) => {
+      const m = s.match(/-?\d+(\.\d+)?/);
+      return m ? parseFloat(m[0]) : Number.POSITIVE_INFINITY;
+    };
+    return [...raw].sort((a, b) => {
+      const na = leadingNum(a);
+      const nb = leadingNum(b);
+      if (na !== nb) return na - nb;
+      return a.localeCompare(b);
+    });
+  }, [doseAttr?.options]);
 
   const isVariable = product.type === "variable";
 
