@@ -23,7 +23,7 @@ import {
 } from "@/lib/seo";
 import { calculateDiscount, stripHtml, truncate } from "@/lib/utils";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 interface Props {
   params: Promise<{ slug: string }>;
