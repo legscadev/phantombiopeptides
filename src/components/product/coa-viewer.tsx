@@ -18,6 +18,17 @@ interface COAViewerProps {
 export function COAViewer({ url, productName }: COAViewerProps) {
   const [open, setOpen] = React.useState(false);
 
+  // Build a nice filename and route the download through our own
+  // origin so the browser actually saves the file. Cross-origin
+  // <a download> is silently ignored — the proxy route sets
+  // Content-Disposition: attachment which browsers always honour.
+  const downloadFilename = `${productName
+    .replace(/[^a-z0-9._-]+/gi, "-")
+    .replace(/^-+|-+$/g, "")}-COA.pdf`;
+  const downloadHref = `/api/coa/download?url=${encodeURIComponent(
+    url,
+  )}&name=${encodeURIComponent(downloadFilename)}`;
+
   React.useEffect(() => {
     if (!open) return;
     function onKey(e: KeyboardEvent) {
@@ -113,10 +124,8 @@ export function COAViewer({ url, productName }: COAViewerProps) {
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
                   <a
-                    href={url}
-                    download
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    href={downloadHref}
+                    download={downloadFilename}
                     className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-semibold text-white shadow-[0_10px_24px_-10px_hsl(var(--brand-500)/0.55)] transition-transform hover:-translate-y-0.5"
                     style={{
                       background:
