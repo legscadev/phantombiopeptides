@@ -16,7 +16,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  let body: { tag?: string; path?: string; slug?: string } = {};
+  let body: {
+    tag?: string;
+    path?: string;
+    slug?: string;
+    categorySlug?: string;
+  } = {};
   try {
     body = await req.json();
   } catch {
@@ -31,6 +36,10 @@ export async function POST(req: Request) {
   if (body.slug) {
     tags.add(`products:slug:${body.slug}`);
     paths.add(`/product/${body.slug}`);
+  }
+  if (body.categorySlug) {
+    tags.add(`categories:slug:${body.categorySlug}`);
+    paths.add(`/category/${body.categorySlug}`);
   }
 
   tags.forEach((t) => revalidateTag(t, "default"));
