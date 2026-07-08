@@ -29,6 +29,17 @@ const nextConfig: NextConfig = {
       { source: "/returns", destination: "/legal/returns" },
       { source: "/research-use", destination: "/legal/research-use" },
       { source: "/quality", destination: "/legal/quality" },
+      // Woo Stripe (and other Woo plugins) register webhooks against
+      // the WordPress site_url — since DNS moved, that URL now points
+      // at our Vercel site instead of WordPress and every webhook
+      // POST 404s. Proxy `?wc-api=<handler>` requests transparently
+      // back to the underlying WP host so plugin-registered webhooks
+      // keep working (Stripe events, refunds, disputes, etc.).
+      {
+        source: "/",
+        has: [{ type: "query", key: "wc-api" }],
+        destination: "https://kickbackai-pkjdo.wpcomstaging.com/",
+      },
     ];
   },
   async headers() {
