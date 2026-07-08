@@ -46,7 +46,7 @@ export function CtaSection() {
               </h3>
               <p className="mt-5 text-base leading-relaxed text-white/70">
                 Same-day fulfilment. Independently verified by ISL Labs.
-                Discreet packaging. Free shipping over $250.
+                Discreet packaging. Free shipping over $125.
               </p>
               <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
                 <Button

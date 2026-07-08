@@ -12,7 +12,7 @@ const STATS = [
   { n: "99%+", label: "Avg. purity" },
   { n: "100%", label: "Batches tested" },
   { n: "Same Day", label: "Fulfilment" },
-  { n: "Free", label: "Shipping $250+" },
+  { n: "Free", label: "Shipping $125+" },
 ];
 
 export function Commitment() {

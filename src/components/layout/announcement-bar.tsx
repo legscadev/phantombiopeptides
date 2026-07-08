@@ -1,11 +1,10 @@
-import { ShieldCheck, Truck, Lock, Percent, PackageCheck, FlaskConical } from "lucide-react";
+import { ShieldCheck, Truck, Lock, PackageCheck, FlaskConical } from "lucide-react";
 
 const ITEMS = [
   { icon: ShieldCheck, label: "99%+ purity" },
   { icon: Truck, label: "Fast U.S. shipping" },
   { icon: Lock, label: "Secure checkout" },
-  { icon: Percent, label: "$250 order = 50% off ground shipping" },
-  { icon: PackageCheck, label: "FREE ground shipping at $450" },
+  { icon: PackageCheck, label: "FREE U.S. shipping over $125" },
   { icon: FlaskConical, label: "Third-party tested" },
 ];
 

@@ -15,7 +15,7 @@ const ROWS: Row[] = [
   { feature: "Independent 3rd-party COA", us: true, others: false, gray: false },
   { feature: "Minimum 99% purity guarantee", us: true, others: "Varies", gray: false },
   { feature: "U.S. based & shipped", us: true, others: "Sometimes", gray: false },
-  { feature: "Free shipping threshold", us: "$250+", others: "Rare", gray: false },
+  { feature: "Free shipping threshold", us: "$125+", others: "Rare", gray: false },
   { feature: "Order tracking", us: true, others: true, gray: false },
   { feature: "Same-day fulfilment", us: true, others: false, gray: false },
   { feature: "Bulk / institutional pricing", us: true, others: "Limited", gray: false },

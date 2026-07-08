@@ -103,7 +103,7 @@ export const LEGAL_DOCS: Record<string, LegalDoc> = {
       {
         heading: "Free shipping",
         body: [
-          "Orders over $250 ship free within the United States.",
+          "Orders over $125 ship free within the United States.",
         ],
       },
       {
