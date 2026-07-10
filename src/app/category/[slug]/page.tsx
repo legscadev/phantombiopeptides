@@ -6,6 +6,7 @@ import { ProductsService } from "@/services/products";
 import { ProductGrid } from "@/components/product/product-grid";
 import { ProductGridSkeleton } from "@/components/product/product-card-skeleton";
 import { ProductSort } from "@/components/product/product-sort";
+import { ProductSearchInput } from "@/components/product/product-search-input";
 import { Pagination } from "@/components/product/pagination";
 import { Reveal } from "@/components/common/reveal";
 import { buildMetadata } from "@/lib/seo";
@@ -73,9 +74,16 @@ export default async function CategoryPage({ params, searchParams }: Props) {
         </div>
       </Reveal>
 
-      {/* Filter + sort bar */}
+      {/* Search + filter + sort */}
       <Reveal delay={0.08}>
-        <div className="mt-12 flex flex-col gap-6 border-t border-border pt-8 md:flex-row md:items-center md:justify-between">
+        <div className="mt-12 border-t border-border pt-8">
+          <ProductSearchInput
+            placeholder={`Search ${category.name.toLowerCase()}…`}
+          />
+        </div>
+      </Reveal>
+      <Reveal delay={0.12}>
+        <div className="mt-6 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div className="no-scrollbar -mx-2 flex items-center gap-2 overflow-x-auto px-2 pb-1 md:flex-wrap md:overflow-visible">
             <Link
               href="/shop/all"
