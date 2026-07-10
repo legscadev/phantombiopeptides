@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Check, ArrowRight, ShieldAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -127,14 +126,7 @@ export function AgeGate() {
                   By proceeding you affirm the statements above are true.
                   Products are not for human or veterinary use, not for use in
                   diagnostic procedures, and have not been evaluated by the
-                  U.S. Food and Drug Administration.{" "}
-                  <Link
-                    href="/legal/research-use"
-                    className="text-[color:hsl(var(--brand-500))] underline underline-offset-2 hover:no-underline"
-                  >
-                    Full disclaimer
-                  </Link>
-                  .
+                  U.S. Food and Drug Administration.
                 </p>
               </div>
             </motion.div>
