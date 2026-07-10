@@ -19,7 +19,6 @@ import type { WCCategory } from "@/types";
 export function CategoryShowcase({ categories }: { categories: WCCategory[] }) {
   const items = categories.slice(0, 10);
   const scrollerRef = React.useRef<HTMLUListElement>(null);
-  const [activeIndex, setActiveIndex] = React.useState(0);
   const [canLeft, setCanLeft] = React.useState(false);
   const [canRight, setCanRight] = React.useState(true);
 
@@ -27,33 +26,8 @@ export function CategoryShowcase({ categories }: { categories: WCCategory[] }) {
     const el = scrollerRef.current;
     if (!el) return;
     const { scrollLeft, scrollWidth, clientWidth } = el;
-    const atEnd = scrollLeft >= scrollWidth - clientWidth - 4;
     setCanLeft(scrollLeft > 4);
-    setCanRight(!atEnd);
-    const children = Array.from(el.children) as HTMLElement[];
-    if (children.length === 0) return;
-    // At the right edge, the last card's left edge is further from
-    // scrollLeft than earlier cards, so "closest to scrollLeft" picks
-    // the wrong dot. Snap to the last index in that case.
-    if (atEnd) {
-      setActiveIndex(children.length - 1);
-      return;
-    }
-    // Otherwise pick whichever card's centre is nearest the viewport
-    // centre — that tracks well through the middle of the rail.
-    const viewportCentre = scrollLeft + clientWidth / 2;
-    let closest = 0;
-    let best = Infinity;
-    for (let i = 0; i < children.length; i++) {
-      const c = children[i];
-      const centre = c.offsetLeft + c.offsetWidth / 2;
-      const diff = Math.abs(centre - viewportCentre);
-      if (diff < best) {
-        best = diff;
-        closest = i;
-      }
-    }
-    setActiveIndex(closest);
+    setCanRight(scrollLeft < scrollWidth - clientWidth - 4);
   }, []);
 
   React.useEffect(() => {
@@ -77,13 +51,6 @@ export function CategoryShowcase({ categories }: { categories: WCCategory[] }) {
       ? first.offsetWidth + gap
       : el.clientWidth * 0.6;
     el.scrollBy({ left: dir * step, behavior: "smooth" });
-  }
-
-  function jumpTo(index: number) {
-    const el = scrollerRef.current;
-    const child = el?.children[index] as HTMLElement | undefined;
-    if (!el || !child) return;
-    el.scrollTo({ left: child.offsetLeft, behavior: "smooth" });
   }
 
   if (items.length === 0) return null;
@@ -195,25 +162,6 @@ export function CategoryShowcase({ categories }: { categories: WCCategory[] }) {
             </li>
           ))}
         </ul>
-
-        {/* Dots */}
-        <div className="mt-8 flex items-center justify-center gap-2">
-          {items.map((_, idx) => (
-            <button
-              key={idx}
-              type="button"
-              onClick={() => jumpTo(idx)}
-              aria-label={`Go to category ${idx + 1}`}
-              aria-current={idx === activeIndex}
-              className={cn(
-                "h-1.5 rounded-full transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:hsl(var(--brand-300))] focus-visible:ring-offset-2 focus-visible:ring-offset-[#060606]",
-                idx === activeIndex
-                  ? "w-8 bg-white"
-                  : "w-1.5 bg-white/25 hover:bg-white/50",
-              )}
-            />
-          ))}
-        </div>
       </div>
     </DarkSection>
   );
