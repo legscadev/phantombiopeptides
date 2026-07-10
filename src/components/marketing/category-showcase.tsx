@@ -27,14 +27,27 @@ export function CategoryShowcase({ categories }: { categories: WCCategory[] }) {
     const el = scrollerRef.current;
     if (!el) return;
     const { scrollLeft, scrollWidth, clientWidth } = el;
+    const atEnd = scrollLeft >= scrollWidth - clientWidth - 4;
     setCanLeft(scrollLeft > 4);
-    setCanRight(scrollLeft < scrollWidth - clientWidth - 4);
-    // Whichever card's left edge is closest to the scroll position wins.
+    setCanRight(!atEnd);
     const children = Array.from(el.children) as HTMLElement[];
+    if (children.length === 0) return;
+    // At the right edge, the last card's left edge is further from
+    // scrollLeft than earlier cards, so "closest to scrollLeft" picks
+    // the wrong dot. Snap to the last index in that case.
+    if (atEnd) {
+      setActiveIndex(children.length - 1);
+      return;
+    }
+    // Otherwise pick whichever card's centre is nearest the viewport
+    // centre — that tracks well through the middle of the rail.
+    const viewportCentre = scrollLeft + clientWidth / 2;
     let closest = 0;
     let best = Infinity;
     for (let i = 0; i < children.length; i++) {
-      const diff = Math.abs(children[i].offsetLeft - scrollLeft);
+      const c = children[i];
+      const centre = c.offsetLeft + c.offsetWidth / 2;
+      const diff = Math.abs(centre - viewportCentre);
       if (diff < best) {
         best = diff;
         closest = i;
