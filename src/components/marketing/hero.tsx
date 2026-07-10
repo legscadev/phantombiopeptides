@@ -13,8 +13,8 @@ const HERO_VIALS = [
     alt: "Tirzepatide 10 mg — Phantom Bio Labs",
   },
   {
-    src: "https://i0.wp.com/kickbackai-pkjdo.wpcomstaging.com/wp-content/uploads/2026/06/28.png?w=1600&ssl=1",
-    alt: "GLP-3 (Rt) 20 mg — Phantom Bio Labs",
+    src: "/hero-vial-packaging.png",
+    alt: "Phantom Bio Peptides — packaged research vials",
   },
 ];
 
