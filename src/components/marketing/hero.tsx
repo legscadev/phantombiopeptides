@@ -9,8 +9,8 @@ import { currentPromo } from "@/lib/promo";
 
 const HERO_VIALS = [
   {
-    src: "https://i0.wp.com/kickbackai-pkjdo.wpcomstaging.com/wp-content/uploads/2026/06/27.png?w=1600&ssl=1",
-    alt: "Tirzepatide 10 mg — Phantom Bio Labs",
+    src: "/hero-vial-packaging-back.png",
+    alt: "Phantom Bio Peptides — packaged research vials",
   },
   {
     src: "/hero-vial-packaging.png",
