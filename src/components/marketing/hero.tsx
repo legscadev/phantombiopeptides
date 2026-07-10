@@ -145,15 +145,20 @@ export function Hero() {
               aria-hidden
             />
 
-            {/* Back vial — Tirzepatide */}
+            {/* Back vial — Tirzepatide. Outer motion.div owns the
+                 fade-in + tilt, inner div runs the CSS float. They
+                 must be separate elements because both write to
+                 `transform`; nesting them lets the browser compose. */}
             <motion.div
               initial={{ opacity: 0, y: 30, rotate: 8 }}
               animate={{ opacity: 1, y: 0, rotate: 8 }}
               transition={{ duration: 1, delay: 0.4, ease: EASE }}
-              className="animate-float absolute right-[4%] top-[2%] w-[68%]"
-              style={{ animationDelay: "1.2s", animationDuration: "9s" }}
+              className="absolute right-[4%] top-[2%] w-[68%]"
             >
-              <div className="relative aspect-square">
+              <div
+                className="animate-float relative aspect-square"
+                style={{ animationDelay: "1.2s", animationDuration: "9s" }}
+              >
                 <Image
                   src={HERO_VIALS[0].src}
                   alt={HERO_VIALS[0].alt}
@@ -170,10 +175,12 @@ export function Hero() {
               initial={{ opacity: 0, y: 50, rotate: -14 }}
               animate={{ opacity: 1, y: 0, rotate: -14 }}
               transition={{ duration: 1, delay: 0.55, ease: EASE }}
-              className="animate-float absolute bottom-[2%] left-[2%] w-[78%]"
-              style={{ animationDuration: "8s" }}
+              className="absolute bottom-[2%] left-[2%] w-[78%]"
             >
-              <div className="relative aspect-square">
+              <div
+                className="animate-float relative aspect-square"
+                style={{ animationDuration: "8s" }}
+              >
                 <Image
                   src={HERO_VIALS[1].src}
                   alt={HERO_VIALS[1].alt}

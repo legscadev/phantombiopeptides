@@ -1,20 +1,80 @@
+"use client";
+
+import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { DarkSection } from "@/components/common/dark-section";
 import { Reveal } from "@/components/common/reveal";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import type { WCCategory } from "@/types";
 
 /**
- * Horizontally scrollable category rail on the brand-black surface —
- * matches the "Shop by Category" band from the EVO reference. Each
- * tile is a translucent glass panel with the category vial floated
- * inside a soft brand gradient plinth.
+ * Horizontally scrollable category rail on the brand-black surface.
+ * Carousel controls: chevron buttons (desktop) advance one card at a
+ * time; dot indicators below let the reader jump directly. Native
+ * touch-swipe still works everywhere.
  */
 export function CategoryShowcase({ categories }: { categories: WCCategory[] }) {
   const items = categories.slice(0, 10);
+  const scrollerRef = React.useRef<HTMLUListElement>(null);
+  const [activeIndex, setActiveIndex] = React.useState(0);
+  const [canLeft, setCanLeft] = React.useState(false);
+  const [canRight, setCanRight] = React.useState(true);
+
+  const measure = React.useCallback(() => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    const { scrollLeft, scrollWidth, clientWidth } = el;
+    setCanLeft(scrollLeft > 4);
+    setCanRight(scrollLeft < scrollWidth - clientWidth - 4);
+    // Whichever card's left edge is closest to the scroll position wins.
+    const children = Array.from(el.children) as HTMLElement[];
+    let closest = 0;
+    let best = Infinity;
+    for (let i = 0; i < children.length; i++) {
+      const diff = Math.abs(children[i].offsetLeft - scrollLeft);
+      if (diff < best) {
+        best = diff;
+        closest = i;
+      }
+    }
+    setActiveIndex(closest);
+  }, []);
+
+  React.useEffect(() => {
+    measure();
+    const el = scrollerRef.current;
+    if (!el) return;
+    el.addEventListener("scroll", measure, { passive: true });
+    window.addEventListener("resize", measure);
+    return () => {
+      el.removeEventListener("scroll", measure);
+      window.removeEventListener("resize", measure);
+    };
+  }, [measure]);
+
+  function shift(dir: 1 | -1) {
+    const el = scrollerRef.current;
+    if (!el) return;
+    const first = el.children[0] as HTMLElement | undefined;
+    const gap = 20; // matches gap-5
+    const step = first?.offsetWidth
+      ? first.offsetWidth + gap
+      : el.clientWidth * 0.6;
+    el.scrollBy({ left: dir * step, behavior: "smooth" });
+  }
+
+  function jumpTo(index: number) {
+    const el = scrollerRef.current;
+    const child = el?.children[index] as HTMLElement | undefined;
+    if (!el || !child) return;
+    el.scrollTo({ left: child.offsetLeft, behavior: "smooth" });
+  }
+
   if (items.length === 0) return null;
+
   return (
     <DarkSection
       eyebrow="Explore the catalog"
@@ -32,10 +92,43 @@ export function CategoryShowcase({ categories }: { categories: WCCategory[] }) {
         </Button>
       }
     >
-      <div className="no-scrollbar -mx-4 overflow-x-auto pb-2 sm:mx-0">
-        <ul className="flex gap-5 px-4 sm:px-0">
+      <div className="relative">
+        {/* Left chevron */}
+        <button
+          type="button"
+          onClick={() => shift(-1)}
+          disabled={!canLeft}
+          aria-label="Scroll categories left"
+          className={cn(
+            "absolute left-2 top-[40%] z-10 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/25 bg-white/[0.08] text-white backdrop-blur transition-all hover:border-white/40 hover:bg-white/[0.15] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:hsl(var(--brand-300))] disabled:cursor-not-allowed disabled:opacity-25 md:inline-flex",
+          )}
+        >
+          <ChevronLeft className="h-5 w-5" strokeWidth={2.4} />
+        </button>
+
+        {/* Right chevron */}
+        <button
+          type="button"
+          onClick={() => shift(1)}
+          disabled={!canRight}
+          aria-label="Scroll categories right"
+          className={cn(
+            "absolute right-2 top-[40%] z-10 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/25 bg-white/[0.08] text-white backdrop-blur transition-all hover:border-white/40 hover:bg-white/[0.15] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:hsl(var(--brand-300))] disabled:cursor-not-allowed disabled:opacity-25 md:inline-flex",
+          )}
+        >
+          <ChevronRight className="h-5 w-5" strokeWidth={2.4} />
+        </button>
+
+        {/* Rail */}
+        <ul
+          ref={scrollerRef}
+          className="no-scrollbar -mx-4 flex snap-x snap-mandatory gap-5 overflow-x-auto scroll-smooth px-4 pb-2 sm:mx-0 sm:px-0"
+        >
           {items.map((cat, idx) => (
-            <li key={cat.id} className="w-[280px] shrink-0 sm:w-[320px]">
+            <li
+              key={cat.id}
+              className="w-[280px] shrink-0 snap-start sm:w-[320px]"
+            >
               <Reveal delay={Math.min(idx * 0.08, 0.32)}>
                 <Link
                   href={`/category/${cat.slug}`}
@@ -61,11 +154,9 @@ export function CategoryShowcase({ categories }: { categories: WCCategory[] }) {
                         style={{ animationDuration: "9s" }}
                       />
                     )}
-                    {/* Item count chip */}
                     <div className="glass-dark absolute left-3 top-3 rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white">
                       {cat.count ?? 0} items
                     </div>
-                    {/* Bottom fade so text below reads */}
                     <div
                       className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/40 to-transparent"
                       aria-hidden
@@ -91,6 +182,25 @@ export function CategoryShowcase({ categories }: { categories: WCCategory[] }) {
             </li>
           ))}
         </ul>
+
+        {/* Dots */}
+        <div className="mt-8 flex items-center justify-center gap-2">
+          {items.map((_, idx) => (
+            <button
+              key={idx}
+              type="button"
+              onClick={() => jumpTo(idx)}
+              aria-label={`Go to category ${idx + 1}`}
+              aria-current={idx === activeIndex}
+              className={cn(
+                "h-1.5 rounded-full transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:hsl(var(--brand-300))] focus-visible:ring-offset-2 focus-visible:ring-offset-[#060606]",
+                idx === activeIndex
+                  ? "w-8 bg-white"
+                  : "w-1.5 bg-white/25 hover:bg-white/50",
+              )}
+            />
+          ))}
+        </div>
       </div>
     </DarkSection>
   );
