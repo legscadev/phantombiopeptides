@@ -34,17 +34,29 @@ export default async function HomePage() {
     page: 1,
     perPage: 0,
   };
-  const [featured, popularResult, categories] = await Promise.all([
-    ProductsService.getFeatured(8).catch(() => []),
+  const [featuredResult, popularResult, categories] = await Promise.all([
+    // Featured products, restricted to in-stock. Woo applies the
+    // filter server-side so we get up to 8 shippable results directly.
+    ProductsService.list({
+      featured: true,
+      per_page: 8,
+      stock_status: "instock",
+    }).catch(() => emptyList),
     ProductsService.list({
       orderby: "popularity",
       order: "desc",
       per_page: 8,
+      stock_status: "instock",
     }).catch(() => emptyList),
     CategoriesService.list().catch(() => []),
   ]);
+  const featured = featuredResult.data;
   const popular = popularResult.data;
-  const bestsellers = featured.length > 0 ? featured : popular;
+  // Belt-and-suspenders in case Woo returns an item with stale stock
+  // metadata: filter again on our side before rendering.
+  const bestsellers = (featured.length > 0 ? featured : popular).filter(
+    (p) => p.stock_status === "instock",
+  );
 
   return (
     <>
