@@ -18,8 +18,16 @@ export const metadata = buildMetadata({
 
 export const revalidate = 300;
 
+// Pinned to the top of the /shop grid in this exact order. Anything
+// not on this list falls in after, keeping its original order.
+const PRIORITY_CATEGORY_SLUGS = [
+  "metabolic",
+  "recovery-and-repair",
+  "growth-hormone",
+];
+
 export default async function ShopPage() {
-  const [categories, totalRes] = await Promise.all([
+  const [rawCategories, totalRes] = await Promise.all([
     CategoriesService.list().catch(() => []),
     ProductsService.list({ per_page: 1 }).catch(() => ({
       data: [],
@@ -29,6 +37,15 @@ export default async function ShopPage() {
       perPage: 0,
     })),
   ]);
+
+  const categories = [
+    ...PRIORITY_CATEGORY_SLUGS.map((slug) =>
+      rawCategories.find((c) => c.slug === slug),
+    ).filter((c): c is (typeof rawCategories)[number] => Boolean(c)),
+    ...rawCategories.filter(
+      (c) => !PRIORITY_CATEGORY_SLUGS.includes(c.slug),
+    ),
+  ];
 
   const totalCount = categories.reduce((s, c) => s + (c.count ?? 0), 0) || totalRes.totalItems;
 
