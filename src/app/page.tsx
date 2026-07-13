@@ -17,6 +17,7 @@ import { ProductGrid } from "@/components/product/product-grid";
 import { Button } from "@/components/ui/button";
 import { FAQS } from "@/lib/faqs";
 import { buildMetadata } from "@/lib/seo";
+import { pinPriorityCategories } from "@/lib/category-order";
 
 export const metadata = buildMetadata({
   title: "Research-grade peptides, zero compromise",
@@ -94,7 +95,7 @@ export default async function HomePage() {
       <Guarantee />
 
       {/* 4 — SHOP BY CATEGORY (dark) — horizontal rail */}
-      <CategoryShowcase categories={categories} />
+      <CategoryShowcase categories={pinPriorityCategories(categories)} />
 
       {/* 5 — THE PHANTOM STANDARD (light) — breaks the Category dark
              surface so nothing runs dark-dark. */}

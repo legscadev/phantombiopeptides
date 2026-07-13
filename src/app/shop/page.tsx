@@ -8,6 +8,7 @@ import { Reveal } from "@/components/common/reveal";
 import { ImagePlaceholder } from "@/components/common/image-placeholder";
 import { Button } from "@/components/ui/button";
 import { buildMetadata } from "@/lib/seo";
+import { pinPriorityCategories } from "@/lib/category-order";
 
 export const metadata = buildMetadata({
   title: "Shop research peptides",
@@ -17,14 +18,6 @@ export const metadata = buildMetadata({
 });
 
 export const revalidate = 300;
-
-// Pinned to the top of the /shop grid in this exact order. Anything
-// not on this list falls in after, keeping its original order.
-const PRIORITY_CATEGORY_SLUGS = [
-  "metabolic",
-  "recovery-and-repair",
-  "growth-hormone",
-];
 
 export default async function ShopPage() {
   const [rawCategories, totalRes] = await Promise.all([
@@ -38,14 +31,7 @@ export default async function ShopPage() {
     })),
   ]);
 
-  const categories = [
-    ...PRIORITY_CATEGORY_SLUGS.map((slug) =>
-      rawCategories.find((c) => c.slug === slug),
-    ).filter((c): c is (typeof rawCategories)[number] => Boolean(c)),
-    ...rawCategories.filter(
-      (c) => !PRIORITY_CATEGORY_SLUGS.includes(c.slug),
-    ),
-  ];
+  const categories = pinPriorityCategories(rawCategories);
 
   const totalCount = categories.reduce((s, c) => s + (c.count ?? 0), 0) || totalRes.totalItems;
 
