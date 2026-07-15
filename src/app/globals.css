@@ -169,8 +169,12 @@
   }
 
   ::selection {
-    background: hsl(var(--primary) / 0.15);
-    color: hsl(var(--foreground));
+    background: hsl(var(--brand-500));
+    color: #fff;
+  }
+  ::-moz-selection {
+    background: hsl(var(--brand-500));
+    color: #fff;
   }
 
   ::-webkit-scrollbar { width: 10px; height: 10px; }
