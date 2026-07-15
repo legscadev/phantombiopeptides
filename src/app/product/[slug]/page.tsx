@@ -237,23 +237,55 @@ export default async function ProductPage({ params }: Props) {
               <COAViewer url={coaUrl} productName={product.name} />
             )}
 
-            {product.attributes.length > 0 && (
-              <div className="mt-8 rounded-xl border border-border bg-card p-5">
-                <p className="mb-3 text-xs uppercase tracking-widest text-muted-foreground">
-                  Specifications
-                </p>
-                <dl className="space-y-2 text-sm">
-                  {product.attributes.map((a) => (
-                    <div key={a.name} className="flex justify-between gap-4">
-                      <dt className="text-muted-foreground">{a.name}</dt>
-                      <dd className="text-right text-foreground">
-                        {a.options.join(", ")}
-                      </dd>
-                    </div>
-                  ))}
-                </dl>
-              </div>
-            )}
+            <div className="mt-8 rounded-xl border border-border bg-card p-5">
+              <p className="mb-3 text-xs uppercase tracking-widest text-muted-foreground">
+                Specifications
+              </p>
+              <dl className="space-y-2 text-sm">
+                {(product.sku || product.id) && (
+                  <div className="flex justify-between gap-4">
+                    <dt className="text-muted-foreground">SKU</dt>
+                    <dd className="text-right text-foreground">
+                      {product.sku || String(product.id)}
+                    </dd>
+                  </div>
+                )}
+                {product.attributes.map((a) => (
+                  <div key={a.name} className="flex justify-between gap-4">
+                    <dt className="text-muted-foreground">{a.name}</dt>
+                    <dd className="text-right text-foreground">
+                      {a.options.join(", ")}
+                    </dd>
+                  </div>
+                ))}
+                {product.categories.length > 0 && (
+                  <div className="flex justify-between gap-4">
+                    <dt className="text-muted-foreground">Category</dt>
+                    <dd className="text-right text-foreground">
+                      {product.categories.map((c) => c.name).join(", ")}
+                    </dd>
+                  </div>
+                )}
+                <div className="flex justify-between gap-4">
+                  <dt className="text-muted-foreground">Stock status</dt>
+                  <dd
+                    className={
+                      product.stock_status === "instock"
+                        ? "text-right text-success"
+                        : product.stock_status === "onbackorder"
+                          ? "text-right text-warning"
+                          : "text-right text-destructive"
+                    }
+                  >
+                    {product.stock_status === "instock"
+                      ? "In stock"
+                      : product.stock_status === "onbackorder"
+                        ? "Backorder"
+                        : "Out of stock"}
+                  </dd>
+                </div>
+              </dl>
+            </div>
           </div>
         </div>
         </Reveal>
