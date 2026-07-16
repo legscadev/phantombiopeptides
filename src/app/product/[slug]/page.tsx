@@ -19,6 +19,7 @@ import {
   RecordRecent,
 } from "@/components/product/recently-viewed";
 import { StickyAddToCart } from "@/components/product/sticky-atc";
+import { ViewContentTracker } from "@/components/product/view-content-tracker";
 import { ProductGrid } from "@/components/product/product-grid";
 import { Section } from "@/components/common/section";
 import { Reveal } from "@/components/common/reveal";
@@ -309,6 +310,11 @@ export default async function ProductPage({ params }: Props) {
         <RecentlyViewed excludeId={product.id} />
       </Reveal>
 
+      <ViewContentTracker
+        id={product.id}
+        name={product.name}
+        price={product.price}
+      />
       <StickyAddToCart product={product} />
     </>
   );
