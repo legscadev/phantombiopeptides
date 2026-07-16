@@ -6,6 +6,7 @@ import { ShoppingBag, Loader2, ArrowUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/hooks/use-cart";
 import { formatPrice } from "@/lib/utils";
+import { trackAddToCart } from "@/lib/tiktok";
 import type { WCProduct } from "@/types";
 
 export function StickyAddToCart({ product }: { product: WCProduct }) {
@@ -31,6 +32,12 @@ export function StickyAddToCart({ product }: { product: WCProduct }) {
       window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
+    trackAddToCart({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      quantity: 1,
+    });
     addItem(product.id, 1);
   };
 
