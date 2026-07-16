@@ -7,6 +7,7 @@ import { DoseSelector } from "./dose-selector";
 import { WishlistButton } from "./wishlist-button";
 import { useCart } from "@/hooks/use-cart";
 import { formatPrice } from "@/lib/utils";
+import { trackAddToCart } from "@/lib/tiktok";
 import type { WCProduct, WCVariation } from "@/types";
 
 export function PurchasePanel({
@@ -86,6 +87,12 @@ export function PurchasePanel({
       isVariable && doseAttr && dose
         ? [{ attribute: doseAttr.name, value: dose }]
         : undefined;
+    trackAddToCart({
+      id: selectedVariation?.id ?? product.id,
+      name: product.name,
+      price: displayPrice,
+      quantity: 1,
+    });
     return addItem(product.id, 1, variation, selectedVariation?.id);
   };
 
