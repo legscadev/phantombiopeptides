@@ -27,6 +27,12 @@ import { CouponPanel } from "./coupon-panel";
 import { useCart } from "@/hooks/use-cart";
 import type { WCCart, WCAddress } from "@/types";
 import { formatPrice } from "@/lib/utils";
+import {
+  trackInitiateCheckout,
+  trackCompletePayment,
+  ttqIdentify,
+  type TrackableItem,
+} from "@/lib/tiktok";
 
 const schema = z
   .object({
@@ -168,6 +174,28 @@ function InnerCheckoutForm({ cart }: { cart: WCCart }) {
 
   const currency = cart.totals.currency_code;
 
+  const ttqItems = React.useCallback(
+    (): TrackableItem[] =>
+      cart.items.map((item) => ({
+        id: (item as { id?: number | string }).id ?? item.key,
+        name: item.name,
+        quantity: item.quantity,
+        price:
+          item.quantity > 0
+            ? parseFloat(item.totals.line_total) / item.quantity
+            : undefined,
+      })),
+    [cart],
+  );
+
+  // Report checkout intent to TikTok once per checkout view.
+  const initiateTracked = React.useRef(false);
+  React.useEffect(() => {
+    if (initiateTracked.current) return;
+    initiateTracked.current = true;
+    trackInitiateCheckout(ttqItems(), cart.totals.total_price, currency);
+  }, [ttqItems, cart.totals.total_price, currency]);
+
   async function onSubmit(values: Values) {
     setError(null);
 
@@ -213,6 +241,13 @@ function InnerCheckoutForm({ cart }: { cart: WCCart }) {
             email: values.email,
             phone: values.billing_phone ?? values.phone ?? "",
           };
+
+      // Improve TikTok match quality — the pixel hashes these values
+      // in the browser before they are sent.
+      ttqIdentify({
+        email: values.email,
+        phone_number: values.phone || undefined,
+      });
 
       // 1. Ask the server for a Stripe PaymentIntent for the live cart.
       //    Woo order creation happens AFTER payment succeeds so a WP
@@ -269,6 +304,9 @@ function InnerCheckoutForm({ cart }: { cart: WCCart }) {
         );
         return;
       }
+
+      // Payment captured — report the conversion to TikTok.
+      trackCompletePayment(ttqItems(), cart.totals.total_price, currency);
 
       // 3. Payment is captured. Ask the server to record the Woo order
       //    + clear the cart. Woo failure here does not block the
