@@ -1,14 +1,13 @@
 import Link from "next/link";
 import {
-  Mail,
   MessageCircle,
+  Clock,
   Building,
   ArrowRight,
   Sparkles,
 } from "lucide-react";
 import { Reveal } from "@/components/common/reveal";
 import { CtaSection } from "@/components/marketing/cta-section";
-import { ContactForm } from "./contact-form";
 import { buildMetadata } from "@/lib/seo";
 
 export const metadata = buildMetadata({
@@ -17,16 +16,19 @@ export const metadata = buildMetadata({
   path: "/contact",
 });
 
+const WHATSAPP_NUMBER = "+15593606568";
+const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER.replace(/\D/g, "")}`;
+
 const CHANNELS = [
   {
-    icon: Mail,
-    label: "Email",
-    value: "research@phantomlabs.co",
-    hint: "Fastest response — we reply within one business day.",
-    href: "mailto:research@phantomlabs.co",
+    icon: MessageCircle,
+    label: "WhatsApp",
+    value: "+1 559 360 6568",
+    hint: "Fastest response — message us anytime on WhatsApp.",
+    href: WHATSAPP_URL,
   },
   {
-    icon: MessageCircle,
+    icon: Clock,
     label: "Support hours",
     value: "Mon – Fri · 9am – 6pm ET",
     hint: "Live coverage. After-hours messages queue for morning.",
@@ -94,8 +96,7 @@ export default function ContactPage() {
       {/* 2 — CHANNELS + FORM (light) */}
       <section className="relative py-16 md:py-24">
         <div className="container-page">
-          <div className="grid gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:gap-14">
-            {/* Left — contact channels */}
+          <div className="mx-auto max-w-2xl">
             <Reveal>
               <div className="space-y-5">
                 <div>
@@ -130,6 +131,8 @@ export default function ContactPage() {
                         {c.href ? (
                           <a
                             href={c.href}
+                            target="_blank"
+                            rel="noopener noreferrer"
                             className="mt-1 block font-display text-base font-bold tracking-tight text-foreground transition-colors hover:text-[color:hsl(var(--brand-500))]"
                           >
                             {c.value}
@@ -184,25 +187,6 @@ export default function ContactPage() {
                     </Link>
                   </div>
                 </div>
-              </div>
-            </Reveal>
-
-            {/* Right — form panel */}
-            <Reveal delay={0.1}>
-              <div className="glass ring-glass rounded-3xl p-6 md:p-10">
-                <div className="mb-6">
-                  <p className="text-[10px] uppercase tracking-[0.24em] text-[color:hsl(var(--brand-500))]">
-                    Send a message
-                  </p>
-                  <h2 className="mt-2 font-display text-2xl font-extrabold tracking-tight sm:text-3xl">
-                    Tell us what you need.
-                  </h2>
-                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                    We reply within one business day. Include your affiliation
-                    for institutional pricing.
-                  </p>
-                </div>
-                <ContactForm />
               </div>
             </Reveal>
           </div>
