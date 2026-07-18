@@ -404,10 +404,11 @@ export const CartService = {
     const trimmed = code.trim();
     if (!trimmed) throw new CouponError("Enter a coupon code.", "not_found");
     const existing = await readCoupons();
-    if (
-      existing.some((c) => c.toLowerCase() === trimmed.toLowerCase())
-    ) {
-      throw new CouponError("Coupon is already applied.", "already_applied");
+    if (existing.length > 0) {
+      throw new CouponError(
+        "Only one coupon can be used per order. Remove the current coupon first.",
+        "already_applied",
+      );
     }
     const coupon = await CouponsService.getByCode(trimmed);
     if (!coupon) {

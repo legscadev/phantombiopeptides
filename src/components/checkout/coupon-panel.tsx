@@ -85,31 +85,33 @@ export function CouponPanel() {
             </ul>
           )}
 
-          <div className="flex gap-2">
-            <Input
-              type="text"
-              autoComplete="off"
-              autoCapitalize="characters"
-              placeholder="Enter code"
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              onKeyDown={onKeyDown}
-              disabled={isLoading}
-              className="flex-1"
-            />
-            <Button
-              type="button"
-              onClick={() => void onApply()}
-              disabled={!code.trim() || isLoading}
-              className="shrink-0"
-            >
-              {isLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                "Apply"
-              )}
-            </Button>
-          </div>
+          {applied.length === 0 && (
+            <div className="flex gap-2">
+              <Input
+                type="text"
+                autoComplete="off"
+                autoCapitalize="characters"
+                placeholder="Enter code"
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                onKeyDown={onKeyDown}
+                disabled={isLoading}
+                className="flex-1"
+              />
+              <Button
+                type="button"
+                onClick={() => void onApply()}
+                disabled={!code.trim() || isLoading}
+                className="shrink-0"
+              >
+                {isLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  "Apply"
+                )}
+              </Button>
+            </div>
+          )}
         </div>
       )}
     </fieldset>
