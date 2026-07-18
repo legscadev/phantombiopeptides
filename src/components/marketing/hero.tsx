@@ -9,12 +9,12 @@ import { currentPromo } from "@/lib/promo";
 
 const HERO_VIALS = [
   {
-    src: "/hero-vial-packaging-back.png",
-    alt: "Phantom Bio Peptides — packaged research vials",
+    src: "/hero-vial-back.png",
+    alt: "Phantom Bio Peptides — GLP-3 (Rt) research vial",
   },
   {
-    src: "/hero-vial-packaging.png",
-    alt: "Phantom Bio Peptides — packaged research vials",
+    src: "/hero-vial-front.png",
+    alt: "Phantom Bio Peptides — GHK-Cu research vial",
   },
 ];
 
